@@ -1,7 +1,5 @@
 package teammates.test.cases.util;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +12,6 @@ import org.testng.annotations.Test;
 
 import teammates.common.exception.InvalidParametersException;
 import teammates.common.util.Config;
-import teammates.common.util.FieldValidator;
 import teammates.common.util.StringHelper;
 import teammates.test.cases.BaseTestCase;
 
@@ -48,9 +45,9 @@ public class StringHelperTest extends BaseTestCase {
         assertTrue(StringHelper.isWhiteSpace(System.lineSeparator() + "   "));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testIsWhiteSpaceNull() {
-        StringHelper.isWhiteSpace(null);
+        assertThrows(NullPointerException.class, () -> StringHelper.isWhiteSpace(null));
     }
 
     @Test
@@ -61,74 +58,8 @@ public class StringHelperTest extends BaseTestCase {
     }
 
     @Test
-    public void testIsAnyMatching() {
-        //this method is used in header row processing in StudentAttributesFactory: locateColumnIndexes
-        //so use this to test the various header field regex expressions here
-
-        List<String> regexList = FieldValidator.REGEX_COLUMN_NAME;
-        String[] stringsToMatch = {
-                "names", "name", " name ", " names ", "student name", "students names",
-                "student names", "students name", "full name", "full names", "full   names",
-                "student full names", "students full    names", "Names", "NAMES", "Full Names",
-                "FULL NAMES", "Full Name", "Student Full Name", "Name"
-        };
-        verifyRegexMatch(stringsToMatch, regexList, true);
-
-        stringsToMatch = new String[] {"namess", "nam", "student", "full"};
-        verifyRegexMatch(stringsToMatch, regexList, false);
-
-        regexList = FieldValidator.REGEX_COLUMN_SECTION;
-        stringsToMatch = new String[] {
-                "section", "sections", "sect", "sec", "course sections", "courses sections",
-                "course section", "course sections", "course sec", "courses sec", "Section",
-                "SECTIONS", "Sect", "Sec", "Course Section", "Course Sections"
-        };
-        verifyRegexMatch(stringsToMatch, regexList, true);
-
-        stringsToMatch = new String[] {"secc", "Section 1", "Course 1"};
-        verifyRegexMatch(stringsToMatch, regexList, false);
-
-        regexList = FieldValidator.REGEX_COLUMN_TEAM;
-        stringsToMatch = new String[] {
-                "team", "teams", "Team", "TEAMS", "group", "Group",
-                "Groups", "GROUPS", "student teams", "students teams ", "student team",
-                "students team", "STUDENT TEAM", "Student Teams ", "Student groups",
-                "Student Groups", "student   groups", "student   teams", "Course Teams",
-                "courses teams", "course   team", "courses team", "COURSE TEAM"
-        };
-        verifyRegexMatch(stringsToMatch, regexList, true);
-
-        stringsToMatch = new String[] {"tea", "Team 1", "Group 1"};
-        verifyRegexMatch(stringsToMatch, regexList, false);
-
-        regexList = FieldValidator.REGEX_COLUMN_EMAIL;
-        stringsToMatch = new String[] {
-                "email", "emails", " email ", " Email ", " Emails", "EMAILS", "EMAIL",
-                "mail", "Mail", "MAIL", "MAILS", "E-mail", "E-MAILS", "E-mail", "E-mails",
-                "e mails", "E mails", "E  mail", "E MAIL", "E MAILS", "Email address",
-                "email addresses", "EMAIL addresses", "email   addresses", "E-mail addresses",
-                "E-mail  addresses", "Contact", "CONTACT", "contacts"
-        };
-        verifyRegexMatch(stringsToMatch, regexList, true);
-
-        stringsToMatch = new String[] {"emai", "test@gmail.com", "address1"};
-        verifyRegexMatch(stringsToMatch, regexList, false);
-
-        regexList = FieldValidator.REGEX_COLUMN_COMMENT;
-        stringsToMatch = new String[] {
-                "comment", "Comment", "COMMENT", "comments", "Comments", " COMMENTS ",
-                "note", "Note", "NOTE", "notes", "Notes", "  NOTES  "
-        };
-        verifyRegexMatch(stringsToMatch, regexList, true);
-
-        stringsToMatch = new String[] {"this is a comment", "this is a note", "one comment, one note"};
-        verifyRegexMatch(stringsToMatch, regexList, false);
-
-    }
-
-    @Test
     public void testToString() {
-        ArrayList<String> strings = new ArrayList<>();
+        List<String> strings = new ArrayList<>();
         assertEquals("", StringHelper.toString(strings, ""));
         assertEquals("", StringHelper.toString(strings, "<br>"));
 
@@ -142,7 +73,7 @@ public class StringHelperTest extends BaseTestCase {
         assertEquals("aaa\nbbb", StringHelper.toString(strings, "\n"));
         assertEquals("aaa<br>bbb", StringHelper.toString(strings, "<br>"));
 
-        ArrayList<Integer> ints = new ArrayList<>();
+        List<Integer> ints = new ArrayList<>();
         ints.add(1);
         ints.add(44);
         assertEquals("1\n44", StringHelper.toString(ints, "\n"));
@@ -212,12 +143,7 @@ public class StringHelperTest extends BaseTestCase {
 
         String[] invalidCiphertexts = {invalidHexString, ciphertextLength120, ciphertextLength136};
         for (String invalidCiphertext : invalidCiphertexts) {
-            try {
-                StringHelper.decrypt(invalidCiphertext);
-                signalFailureToDetectException();
-            } catch (InvalidParametersException e) {
-                ignoreExpectedException();
-            }
+            assertThrows(InvalidParametersException.class, () -> StringHelper.decrypt(invalidCiphertext));
         }
     }
 
@@ -369,12 +295,6 @@ public class StringHelperTest extends BaseTestCase {
         assertNull(StringHelper.removeEnclosingSquareBrackets(null));
     }
 
-    private void verifyRegexMatch(String[] stringsToMatch, List<String> regexList, boolean expectedResult) {
-        for (String str : stringsToMatch) {
-            assertEquals(expectedResult, StringHelper.isAnyMatching(str, regexList));
-        }
-    }
-
     @Test
     public void testCsvToHtmlTable() {
         String csvText = "ColHeader1, ColHeader2, ColHeader3, ColHeader4" + System.lineSeparator()
@@ -426,10 +346,10 @@ public class StringHelperTest extends BaseTestCase {
         assertArrayEquals(expected, StringHelper.trim(input));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testTrimWithNullString() {
         String[] input = {"  apple tea", "banana  ", "   carrot cake      ", null};
-        StringHelper.trim(input);
+        assertThrows(NullPointerException.class, () -> StringHelper.trim(input));
     }
 
     @Test
@@ -451,16 +371,16 @@ public class StringHelperTest extends BaseTestCase {
 
     @Test
     public void testJoinWithListOfIntegers() {
-        assertEquals("", StringHelper.join(",", new ArrayList<Integer>()));
+        assertEquals("", StringHelper.join(",", new ArrayList<>()));
         assertEquals("5", StringHelper.join(",", Collections.singletonList(5)));
         assertEquals("5,14", StringHelper.join(",", Arrays.asList(5, 14)));
         assertEquals("5||14", StringHelper.join("||", Arrays.asList(5, 14)));
         assertEquals("5||14||null", StringHelper.join("||", Arrays.asList(5, 14, null)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testJoinWithNullElements() {
-        StringHelper.join(",", (List<Integer>) null);
+        assertThrows(IllegalArgumentException.class, () -> StringHelper.join(",", (List<Integer>) null));
     }
 
     @Test

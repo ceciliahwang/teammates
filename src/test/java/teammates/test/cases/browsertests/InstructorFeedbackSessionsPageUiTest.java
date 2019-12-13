@@ -1,5 +1,6 @@
 package teammates.test.cases.browsertests;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -18,9 +19,10 @@ import teammates.common.util.AppUrl;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.common.util.TimeHelper;
+import teammates.e2e.cases.e2e.BaseE2ETestCase;
+import teammates.e2e.util.Priority;
 import teammates.test.driver.AssertHelper;
 import teammates.test.driver.BackDoor;
-import teammates.test.driver.Priority;
 import teammates.test.driver.StringHelperExtension;
 import teammates.test.pageobjects.FeedbackSubmitPage;
 import teammates.test.pageobjects.InstructorFeedbackEditPage;
@@ -28,10 +30,10 @@ import teammates.test.pageobjects.InstructorFeedbackResultsPage;
 import teammates.test.pageobjects.InstructorFeedbackSessionsPage;
 
 /**
- * SUT: {@link Const.ActionURIs#INSTRUCTOR_FEEDBACK_SESSIONS_PAGE}.
+ * SUT: {@link Const.WebPageURIs#INSTRUCTOR_SESSIONS_PAGE}.
  */
 @Priority(-1)
-public class InstructorFeedbackSessionsPageUiTest extends BaseUiTestCase {
+public class InstructorFeedbackSessionsPageUiTest extends BaseE2ETestCase {
     private InstructorFeedbackSessionsPage feedbackPage;
     private String idOfInstructorWithSessions;
     private CourseAttributes course;
@@ -44,19 +46,17 @@ public class InstructorFeedbackSessionsPageUiTest extends BaseUiTestCase {
         course = testData.courses.get("anotherCourse");
 
         newSession = FeedbackSessionAttributes
-                .builder("New Session ##", course.getId(), "teammates.test1@gmail.tmt")
+                .builder("New Session ##", course.getId())
+                .withCreatorEmail("teammates.test1@gmail.tmt")
                 .withStartTime(TimeHelper.parseInstant("2035-04-01 9:59 PM +0000"))
                 .withEndTime(TimeHelper.parseInstant("2035-04-30 8:00 PM +0000"))
-                .withCreatedTime(TimeHelper.parseInstant("2035-04-01 9:59 PM +0000"))
                 .withSessionVisibleFromTime(Const.TIME_REPRESENTS_FOLLOW_OPENING)
                 .withResultsVisibleFromTime(Const.TIME_REPRESENTS_LATER)
-                .withGracePeriodMinutes(0)
+                .withGracePeriod(Duration.ZERO)
                 .withInstructions("Please fill in the new feedback session.")
-                .withSentOpenEmail(false)
-                .withSentPublishedEmail(false)
                 .withTimeZone(course.getTimeZone())
-                .withClosingEmailEnabled(true)
-                .withPublishedEmailEnabled(true)
+                .withIsClosingEmailEnabled(true)
+                .withIsPublishedEmailEnabled(true)
                 .build();
 
         // the actual test data is refreshed before each test method
@@ -594,13 +594,11 @@ public class InstructorFeedbackSessionsPageUiTest extends BaseUiTestCase {
         // refresh page
         feedbackPage = getFeedbackPageForInstructor(idOfInstructorWithSessions)
                 .moveSessionToRecycleBin(courseId, sessionName);
-        newSession.setDeletedTime();
 
         assertTrue(feedbackPage.getTextsForAllStatusMessagesToUser()
                 .contains(Const.StatusMessages.FEEDBACK_SESSION_MOVED_TO_RECYCLE_BIN));
         assertNotNull("session should be in recycle bin",
                 BackDoor.getFeedbackSessionFromRecycleBin(courseId, sessionName));
-        assertTrue(newSession.isSessionDeleted());
         feedbackPage.verifyHtmlMainContent("/instructorFeedbackMoveToRecycleBinSuccessful.html");
 
     }
@@ -619,7 +617,8 @@ public class InstructorFeedbackSessionsPageUiTest extends BaseUiTestCase {
 
         assertTrue(feedbackPage.getTextsForAllStatusMessagesToUser()
                 .contains(Const.StatusMessages.FEEDBACK_SESSION_RESTORED));
-        assertNotNull(BackDoor.getFeedbackSession(session1OfCS2105.getCourseId(), session1OfCS2105.getSessionName()));
+        assertNotNull(BackDoor.getFeedbackSession(session1OfCS2105.getCourseId(),
+                session1OfCS2105.getFeedbackSessionName()));
         assertFalse(session1OfCS2105.isSessionDeleted());
         feedbackPage.verifyHtmlMainContent("/instructorFeedbackRestoreSuccessful.html");
 
@@ -1120,8 +1119,8 @@ public class InstructorFeedbackSessionsPageUiTest extends BaseUiTestCase {
     }
 
     private InstructorFeedbackSessionsPage getFeedbackPageForInstructor(String instructorId) {
-        AppUrl feedbackPageLink = createUrl(Const.ActionURIs.INSTRUCTOR_FEEDBACK_SESSIONS_PAGE).withUserId(instructorId);
-        InstructorFeedbackSessionsPage page = loginAdminToPage(feedbackPageLink, InstructorFeedbackSessionsPage.class);
+        AppUrl feedbackPageLink = createUrl(Const.WebPageURIs.INSTRUCTOR_SESSIONS_PAGE).withUserId(instructorId);
+        InstructorFeedbackSessionsPage page = loginAdminToPageOld(feedbackPageLink, InstructorFeedbackSessionsPage.class);
         page.waitForElementPresence(By.id("table-sessions"));
         return page;
     }

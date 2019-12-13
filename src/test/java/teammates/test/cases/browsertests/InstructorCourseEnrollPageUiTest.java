@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import teammates.common.util.AppUrl;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
+import teammates.e2e.cases.e2e.BaseE2ETestCase;
 import teammates.test.driver.BackDoor;
 import teammates.test.driver.StringHelperExtension;
 import teammates.test.pageobjects.InstructorCourseEnrollPage;
@@ -12,9 +13,9 @@ import teammates.test.pageobjects.InstructorCourseEnrollResultPage;
 import teammates.test.pageobjects.InstructorCoursesDetailsPage;
 
 /**
- * SUT: {@link Const.ActionURIs#INSTRUCTOR_COURSE_ENROLL_PAGE}.
+ * SUT: {@link Const.WebPageURIs#INSTRUCTOR_COURSE_ENROLL_PAGE}.
  */
-public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
+public class InstructorCourseEnrollPageUiTest extends BaseE2ETestCase {
     private InstructorCourseEnrollPage enrollPage;
 
     @Override
@@ -33,11 +34,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
 
         ______TS("typical enroll page");
 
-        AppUrl enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        AppUrl enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         // This is the full HTML verification for Instructor Course Enroll Page, the rest can all be verifyMainHtml
         enrollPage.verifyHtml("/instructorCourseEnrollPage.html");
@@ -52,11 +53,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
 
         ______TS("enroll action: existent course, modify and add new students");
 
-        AppUrl enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        AppUrl enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         String enrollString =
                 // Modify team for student within section
@@ -98,11 +99,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
         assertEquals(expectedEnrollText, enrollPage.getEnrollText());
 
         // Ensure students were actually enrolled
-        AppUrl coursesPageUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
+        AppUrl coursesPageUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(courseId);
         InstructorCoursesDetailsPage detailsPage =
-                loginAdminToPage(coursesPageUrl, InstructorCoursesDetailsPage.class);
+                loginAdminToPageOld(coursesPageUrl, InstructorCoursesDetailsPage.class);
         assertEquals(6, detailsPage.getStudentCountForCourse());
 
         ______TS("enroll action: delete existing course, create a new course and "
@@ -113,11 +114,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
         BackDoor.createCourse(testData.courses.get("CCEnrollUiT.CS2104"));
         BackDoor.createInstructor(testData.instructors.get("CCEnrollUiT.teammates.test"));
 
-        enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
             .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
             .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         enrollString =
                 "Section 1\tTeam 1\tAlice Betsy\talice.b.tmms@gmail.tmt\t"
@@ -145,19 +146,19 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
         assertEquals(expectedEnrollText, enrollPage.getEnrollText());
 
         // Ensure students were actually enrolled
-        coursesPageUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
+        coursesPageUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
             .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
             .withCourseId(courseId);
-        detailsPage = loginAdminToPage(coursesPageUrl, InstructorCoursesDetailsPage.class);
+        detailsPage = loginAdminToPageOld(coursesPageUrl, InstructorCoursesDetailsPage.class);
         assertEquals(3, detailsPage.getStudentCountForCourse());
 
         ______TS("enroll action: existent course, add new students with no sections");
 
-        enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         enrollString =
                 "\tTeam 10\tNo Section 1\tno.section.one@gmail.tmt\t"
@@ -179,19 +180,19 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
         assertEquals(expectedEnrollText, enrollPage.getEnrollText());
 
         // Ensure students were actually enrolled
-        coursesPageUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
+        coursesPageUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(courseId);
-        detailsPage = loginAdminToPage(coursesPageUrl, InstructorCoursesDetailsPage.class);
+        detailsPage = loginAdminToPageOld(coursesPageUrl, InstructorCoursesDetailsPage.class);
         assertEquals(5, detailsPage.getStudentCountForCourse());
 
         ______TS("enroll action: fail to enroll as a team cannot be in 2 different sections");
 
-        enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
             .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
             .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         enrollString = "Different Section\tTeam 1\tAlice Betsy\talice.b.tmms@gmail.tmt\t\n";
 
@@ -204,11 +205,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
 
         ______TS("enroll action: fail to enroll as there is no input");
 
-        enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
             .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
             .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         enrollString = "";
 
@@ -217,11 +218,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
 
         ______TS("enroll action: fail to enroll as there is an invalid line");
 
-        enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         enrollString =
                 // A new student with no email input
@@ -241,11 +242,11 @@ public class InstructorCourseEnrollPageUiTest extends BaseUiTestCase {
 
         ______TS("enroll action: scripts are successfully sanitized");
 
-        enrollUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
+        enrollUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_ENROLL_PAGE)
                 .withUserId(testData.instructors.get("CCEnrollUiT.teammates.test").googleId)
                 .withCourseId(testData.courses.get("CCEnrollUiT.CS2104").getId());
 
-        enrollPage = loginAdminToPage(enrollUrl, InstructorCourseEnrollPage.class);
+        enrollPage = loginAdminToPageOld(enrollUrl, InstructorCourseEnrollPage.class);
 
         // Enroll a student with a script in the name
         String xssScript = "<script>alert(\"was here\");</script>";

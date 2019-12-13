@@ -19,34 +19,14 @@
       "name": "Alice Betsy",
       "isInstructor": false,
       "email": "alice.b.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1",
-      "studentProfile": {
-        "googleId": "alice.b.tmms",
-        "shortName": "Alice",
-        "email": "",
-        "institute": "TEAMMATES Test Institute 10",
-        "nationality": "",
-        "gender": "female",
-        "moreInfo": "Some info",
-        "pictureKey": ""
-      }
+      "institute": "TEAMMATES Test Institute 1"
     },
     "benny.c.tmms": {
       "googleId": "benny.c.tmms",
       "name": "Benny Charles",
       "isInstructor": false,
       "email": "benny.c.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1",
-      "studentProfile": {
-        "googleId": "benny.c.tmms",
-        "shortName": "Benny",
-        "email": "",
-        "institute": "TEAMMATES Test Institute 4",
-        "nationality": "",
-        "gender": "male",
-        "moreInfo": "This is a lot more info so that the instructor can see the extent of info that can be given",
-        "pictureKey": ""
-      }
+      "institute": "TEAMMATES Test Institute 1"
     },
     "charlie.d.tmms": {
       "googleId": "charlie.d.tmms",
@@ -249,7 +229,8 @@
       "course": "CS1101",
       "name": "Teammates Test",
       "comments": "This student's name is Teammates Test",
-      "team": "Team 1</td></div>'\""
+      "team": "Team 1</td></div>'\"",
+      "section": "None"
     },
     "benny.c.tmms@CS1101": {
       "googleId": "benny.c.tmms",
@@ -257,7 +238,8 @@
       "course": "CS1101",
       "name": "Benny Charles",
       "comments": "This student's name is Benny Charles",
-      "team": "Team 1</td></div>'\""
+      "team": "Team 1</td></div>'\"",
+      "section": "None"
     },
     "charlie.d.tmms@CS1101": {
       "googleId": "charlie.d.tmms",
@@ -265,7 +247,8 @@
       "course": "CS1101",
       "name": "Charlie Davis",
       "comments": "This student's name is Charlie Davis",
-      "team": "Team 2"
+      "team": "Team 2",
+      "section": "None"
     },
     "danny.e.tmms@CS1101": {
       "googleId": "danny.e.tmms",
@@ -273,14 +256,17 @@
       "course": "CS1101",
       "name": "Danny Engrid",
       "comments": "This student's name is Danny Engrid",
-      "team": "Team 2"
+      "team": "Team 2",
+      "section": "None"
     },
     "teammates.test@CS4215": {
+      "googleId": "",
       "email": "teammates.test@gmail.tmt",
       "course": "CS4215",
       "name": "Teammates Test",
       "comments": "This student's name is Teammates Test",
-      "team": "Team 1</td></div>'\""
+      "team": "Team 1</td></div>'\"",
+      "section": "None"
     }
   },
   "feedbackSessions": {
@@ -369,10 +355,11 @@
     "qn1InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "What is the best selling point of your product?",
+      "questionDetails": {
+        "questionType": "TEXT",
+        "questionText": "What is the best selling point of your product?"
+      },
       "questionNumber": 1,
-      "questionType": "TEXT",
       "giverType": "STUDENTS",
       "recipientType": "SELF",
       "numberOfEntitiesToGiveFeedbackTo": 1,
@@ -389,10 +376,11 @@
     "qn2InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "Comment about 5 other students",
+      "questionDetails": {
+        "questionType": "TEXT",
+        "questionText": "Comment about 5 other students"
+      },
       "questionNumber": 2,
-      "questionType": "TEXT",
       "giverType": "STUDENTS",
       "recipientType": "STUDENTS",
       "numberOfEntitiesToGiveFeedbackTo": 5,
@@ -411,10 +399,11 @@
     "qn3InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "My comments on the class",
+      "questionDetails": {
+        "questionType": "TEXT",
+        "questionText": "My comments on the class"
+      },
       "questionNumber": 3,
-      "questionType": "TEXT",
       "giverType": "SELF",
       "recipientType": "NONE",
       "numberOfEntitiesToGiveFeedbackTo": -100,
@@ -440,10 +429,18 @@
     "qn4InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "{\"numOfMcqChoices\":2,\"mcqChoices\":[\"It's good\",\"It's perfect\"],\"questionText\":\"What do you like best about our product?\",\"questionType\":\"MCQ\",\"generateOptionsFor\":\"NONE\",\"otherEnabled\":false}",
+      "questionDetails": {
+        "numOfMcqChoices": 2,
+        "mcqChoices": [
+          "It's good",
+          "It's perfect"
+        ],
+        "questionText": "What do you like best about our product?",
+        "questionType": "MCQ",
+        "generateOptionsFor": "NONE",
+        "otherEnabled": false
+      },
       "questionNumber": 4,
-      "questionType": "MCQ",
       "giverType": "STUDENTS",
       "recipientType": "NONE",
       "numberOfEntitiesToGiveFeedbackTo": -100,
@@ -469,10 +466,15 @@
     "qn5InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "{\"numOfMcqChoices\":0,\"mcqChoices\":[],\"questionText\":\"Who is the best coder?\",\"questionType\":\"MCQ\",\"generateOptionsFor\":\"STUDENTS\",\"otherEnabled\":false}",
+      "questionDetails": {
+        "numOfMcqChoices": 0,
+        "mcqChoices": [],
+        "questionText": "Who is the best coder?",
+        "questionType": "MCQ",
+        "generateOptionsFor": "STUDENTS",
+        "otherEnabled": false
+      },
       "questionNumber": 5,
-      "questionType": "MCQ",
       "giverType": "STUDENTS",
       "recipientType": "NONE",
       "numberOfEntitiesToGiveFeedbackTo": -100,
@@ -498,10 +500,17 @@
     "qn6InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "{\"msqChoices\":[\"It's good\",\"It's perfect\"],\"questionText\":\"What do you like about our product?\",\"questionType\":\"MSQ\",\"generateOptionsFor\":\"NONE\",\"otherEnabled\":false}",
+      "questionDetails": {
+        "msqChoices": [
+          "It's good",
+          "It's perfect"
+        ],
+        "questionText": "What do you like about our product?",
+        "questionType": "MSQ",
+        "generateOptionsFor": "NONE",
+        "otherEnabled": false
+      },
       "questionNumber": 6,
-      "questionType": "MSQ",
       "giverType": "STUDENTS",
       "recipientType": "NONE",
       "numberOfEntitiesToGiveFeedbackTo": -100,
@@ -527,10 +536,14 @@
     "qn7InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "{\"msqChoices\":[],\"questionText\":\"Which team is good?\",\"questionType\":\"MSQ\",\"generateOptionsFor\":\"TEAMS\",\"otherEnabled\":false}",
+      "questionDetails": {
+        "msqChoices": [],
+        "questionText": "Which team is good?",
+        "questionType": "MSQ",
+        "generateOptionsFor": "TEAMS",
+        "otherEnabled": false
+      },
       "questionNumber": 7,
-      "questionType": "MSQ",
       "giverType": "STUDENTS",
       "recipientType": "NONE",
       "numberOfEntitiesToGiveFeedbackTo": -100,
@@ -556,10 +569,14 @@
     "qn8InSession1InCourse1": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "{\"minScale\":1,\"questionText\":\"Rate our product.\",\"questionType\":\"NUMSCALE\",\"maxScale\":5,\"step\":0.5}",
+      "questionDetails": {
+        "minScale": 1,
+        "questionText": "Rate our product.",
+        "questionType": "NUMSCALE",
+        "maxScale": 5,
+        "step": 0.5
+      },
       "questionNumber": 8,
-      "questionType": "NUMSCALE",
       "giverType": "STUDENTS",
       "recipientType": "NONE",
       "numberOfEntitiesToGiveFeedbackTo": -100,
@@ -585,10 +602,11 @@
     "qn1InSession2InCourse1": {
       "feedbackSessionName": "Second feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "Give feedback to 2 other teams.",
+      "questionDetails": {
+        "questionType": "TEXT",
+        "questionText": "Give feedback to 2 other teams."
+      },
       "questionNumber": 1,
-      "questionType": "TEXT",
       "giverType": "TEAMS",
       "recipientType": "TEAMS",
       "numberOfEntitiesToGiveFeedbackTo": 2,
@@ -605,10 +623,11 @@
     "qn2InSession2InCourse1": {
       "feedbackSessionName": "Second feedback session",
       "courseId": "CS2104",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "Give feedback to 1 of your team mates",
+      "questionDetails": {
+        "questionType": "TEXT",
+        "questionText": "Give feedback to 1 of your team mates"
+      },
       "questionNumber": 2,
-      "questionType": "TEXT",
       "giverType": "STUDENTS",
       "recipientType": "OWN_TEAM_MEMBERS",
       "numberOfEntitiesToGiveFeedbackTo": 1,
@@ -625,10 +644,11 @@
     "qn1InSession1InCourse2": {
       "feedbackSessionName": "Instructor feedback session",
       "courseId": "CS1101",
-      "creatorEmail": "teammates.test@gmail.tmt",
-      "questionMetaData": "Please rate the following teams",
+      "questionDetails": {
+        "questionType": "TEXT",
+        "questionText": "Please rate the following teams"
+      },
       "questionNumber": 1,
-      "questionType": "TEXT",
       "giverType": "INSTRUCTORS",
       "recipientType": "TEAMS",
       "numberOfEntitiesToGiveFeedbackTo": 1,
@@ -642,122 +662,152 @@
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "1",
-      "feedbackQuestionType": "TEXT",
       "giver": "alice.b.tmms@gmail.tmt",
       "recipient": "alice.b.tmms@gmail.tmt",
-      "responseMetaData": "My product is light.",
       "giverSection": "Section B",
-      "recipientSection": "Section B"
+      "recipientSection": "Section B",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "My product is light."
+      }
     },
     "response2": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "2",
-      "feedbackQuestionType": "TEXT",
       "giver": "alice.b.tmms@gmail.tmt",
       "recipient": "benny.c.tmms@gmail.tmt",
-      "responseMetaData": "Benny is a good student.",
       "giverSection": "Section B",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Benny is a good student."
+      }
     },
     "response3": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "2",
-      "feedbackQuestionType": "TEXT",
       "giver": "benny.c.tmms@gmail.tmt",
       "recipient": "danny.e.tmms@gmail.tmt",
-      "responseMetaData": "Danny starts with D.",
       "giverSection": "Section A",
-      "recipientSection": "Section B"
+      "recipientSection": "Section B",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Danny starts with D."
+      }
     },
     "response4": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "2",
-      "feedbackQuestionType": "TEXT",
       "giver": "charlie.d.tmms@gmail.tmt",
       "recipient": "alice.b.tmms@gmail.tmt",
-      "responseMetaData": "Alice is a good coder.",
       "giverSection": "Section A",
-      "recipientSection": "Section B"
+      "recipientSection": "Section B",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Alice is a good coder."
+      }
     },
     "response5": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "2",
-      "feedbackQuestionType": "TEXT",
       "giver": "benny.c.tmms@gmail.tmt",
       "recipient": "charlie.d.tmms@gmail.tmt",
-      "responseMetaData": "Charlie did alot of work.",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Charlie did alot of work."
+      }
     },
     "response6": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "1",
-      "feedbackQuestionType": "TEXT",
       "giver": "teammates.test@gmail.tmt",
       "recipient": "teammates.test@gmail.tmt",
-      "responseMetaData": "It's awesome!.",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "It's awesome!."
+      }
     },
     "response7": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "4",
-      "feedbackQuestionType": "MCQ",
       "giver": "teammates.test@gmail.tmt",
       "recipient": "teammates.test@gmail.tmt",
-      "responseMetaData": "{\"answer\":\"It's good\",\"otherFieldContent\":\"\",\"questionType\":\"MCQ\"}",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "answer": "It's good",
+        "otherFieldContent": "",
+        "questionType": "MCQ"
+      }
     },
     "response8": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "5",
-      "feedbackQuestionType": "MCQ",
       "giver": "teammates.test@gmail.tmt",
       "recipient": "teammates.test@gmail.tmt",
-      "responseMetaData": "{\"answer\":\"Alice Betsy (Team 2)\",\"otherFieldContent\":\"\",\"questionType\":\"MCQ\"}",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "answer": "Alice Betsy (Team 2)",
+        "otherFieldContent": "",
+        "questionType": "MCQ"
+      }
     },
     "response9": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "6",
-      "feedbackQuestionType": "MSQ",
       "giver": "teammates.test@gmail.tmt",
       "recipient": "teammates.test@gmail.tmt",
-      "responseMetaData": "{\"answers\":[\"It's good\",\"It's perfect\"],\"questionType\":\"MSQ\"}",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "answers": [
+          "It's good",
+          "It's perfect"
+        ],
+        "questionType": "MSQ"
+      }
     },
     "response10": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "7",
-      "feedbackQuestionType": "MSQ",
       "giver": "teammates.test@gmail.tmt",
       "recipient": "teammates.test@gmail.tmt",
-      "responseMetaData": "{\"answers\":[\"Team 1\",\"Team 2\"],\"questionType\":\"MSQ\"}",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "answers": [
+          "Team 1",
+          "Team 2"
+        ],
+        "questionType": "MSQ"
+      }
     },
     "response11": {
       "feedbackSessionName": "First feedback session",
       "courseId": "CS2104",
       "feedbackQuestionId": "8",
-      "feedbackQuestionType": "NUMSCALE",
       "giver": "teammates.test@gmail.tmt",
       "recipient": "teammates.test@gmail.tmt",
-      "responseMetaData": "{\"answer\":3.5,\"questionType\":\"NUMSCALE\"}",
       "giverSection": "Section A",
-      "recipientSection": "Section A"
+      "recipientSection": "Section A",
+      "responseDetails": {
+        "answer": 3.5,
+        "questionType": "NUMSCALE"
+      }
     }
   },
   "feedbackResponseComments": {
@@ -771,6 +821,7 @@
       "feedbackResponseId": "1%teammates.test@gmail.tmt%teammates.test@gmail.tmt",
       "showCommentTo": [],
       "showGiverNameTo": [],
+      "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
       "createdAt": "2026-03-01T23:59:00Z",
@@ -786,11 +837,33 @@
       "feedbackResponseId": "1%teammates.test@gmail.tmt%teammates.test@gmail.tmt",
       "showCommentTo": [],
       "showGiverNameTo": [],
+      "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
       "createdAt": "2026-03-02T23:59:00Z",
       "commentText": "Other instructor's comment to student self feedback"
     }
   },
-  "profiles": {}
+  "profiles": {
+    "alice.b.tmms": {
+      "googleId": "alice.b.tmms",
+      "shortName": "Alice",
+      "email": "",
+      "institute": "TEAMMATES Test Institute 10",
+      "nationality": "",
+      "gender": "FEMALE",
+      "moreInfo": "Some info",
+      "pictureKey": ""
+    },
+    "benny.c.tmms": {
+      "googleId": "benny.c.tmms",
+      "shortName": "Benny",
+      "email": "",
+      "institute": "TEAMMATES Test Institute 4",
+      "nationality": "",
+      "gender": "MALE",
+      "moreInfo": "This is a lot more info so that the instructor can see the extent of info that can be given",
+      "pictureKey": ""
+    }
+  }
 }

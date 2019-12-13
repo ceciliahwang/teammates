@@ -3,6 +3,7 @@ package teammates.test.cases.automated;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.annotations.Test;
 
@@ -22,7 +23,8 @@ import teammates.ui.automated.FeedbackSessionRemindEmailWorkerAction;
 /**
  * SUT: {@link FeedbackSessionRemindEmailWorkerAction}.
  */
-public class FeedbackSessionRemindEmailWorkerActionTest extends BaseAutomatedActionTest {
+public class FeedbackSessionRemindEmailWorkerActionTest
+        extends BaseAutomatedActionTest<FeedbackSessionRemindEmailWorkerAction> {
 
     private static final CoursesLogic coursesLogic = CoursesLogic.inst();
     private static final FeedbackSessionsLogic fsLogic = FeedbackSessionsLogic.inst();
@@ -48,26 +50,29 @@ public class FeedbackSessionRemindEmailWorkerActionTest extends BaseAutomatedAct
         String[] submissionParams = new String[] {
                 ParamsNames.SUBMISSION_FEEDBACK, session1.getFeedbackSessionName(),
                 ParamsNames.SUBMISSION_COURSE, session1.getCourseId(),
-                ParamsNames.USER_ID, instructor1.getGoogleId()
+                ParamsNames.USER_ID, instructor1.getGoogleId(),
         };
 
         FeedbackSessionRemindEmailWorkerAction action = getAction(submissionParams);
         action.execute();
 
-        // 2 students and 4 instructors sent reminder, 1 instructor notified
-        verifySpecifiedTasksAdded(action, Const.TaskQueue.SEND_EMAIL_QUEUE_NAME, 7);
+        // 1 student and 4 instructors sent reminder, 1 instructor notified
+        verifySpecifiedTasksAdded(action, Const.TaskQueue.SEND_EMAIL_QUEUE_NAME, 6);
+
+        Set<String> giverSet =
+                logic.getGiverSetThatAnswerFeedbackSession(session1.getCourseId(), session1.getFeedbackSessionName());
 
         List<String> studentRecipientList = new ArrayList<>();
         for (StudentAttributes student : studentsLogic.getStudentsForCourse(session1.getCourseId())) {
-            if (!fsLogic.isFeedbackSessionCompletedByStudent(session1, student.email)) {
-                studentRecipientList.add(student.email);
+            if (!giverSet.contains(student.getEmail())) {
+                studentRecipientList.add(student.getEmail());
             }
         }
 
         List<String> instructorRecipientList = new ArrayList<>();
         List<String> instructorNotifiedList = new ArrayList<>();
         for (InstructorAttributes instructor : instructorsLogic.getInstructorsForCourse(session1.getCourseId())) {
-            if (!fsLogic.isFeedbackSessionCompletedByInstructor(session1, instructor.email)) {
+            if (!giverSet.contains(instructor.getEmail())) {
                 instructorRecipientList.add(instructor.email);
             }
         }
@@ -79,7 +84,7 @@ public class FeedbackSessionRemindEmailWorkerActionTest extends BaseAutomatedAct
         for (TaskWrapper task : tasksAdded) {
             Map<String, String[]> paramMap = task.getParamMap();
             assertEquals(String.format(EmailType.FEEDBACK_SESSION_REMINDER.getSubject(), courseName,
-                                       session1.getSessionName()),
+                                       session1.getFeedbackSessionName()),
                          paramMap.get(ParamsNames.EMAIL_SUBJECT)[0]);
 
             String header = "The email below has been sent to students of course: [" + session1.getCourseId() + "]";
@@ -107,11 +112,6 @@ public class FeedbackSessionRemindEmailWorkerActionTest extends BaseAutomatedAct
         assertTrue(String.valueOf(instructorRecipientList.size()), instructorRecipientList.isEmpty());
         assertTrue(instructorNotifiedList.isEmpty());
 
-    }
-
-    @Override
-    protected FeedbackSessionRemindEmailWorkerAction getAction(String... params) {
-        return (FeedbackSessionRemindEmailWorkerAction) gaeSimulation.getAutomatedActionObject(getActionUri(), params);
     }
 
 }

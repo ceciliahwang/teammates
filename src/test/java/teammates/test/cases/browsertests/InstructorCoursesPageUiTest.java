@@ -10,6 +10,7 @@ import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.util.AppUrl;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
+import teammates.e2e.cases.e2e.BaseE2ETestCase;
 import teammates.test.driver.BackDoor;
 import teammates.test.driver.StringHelperExtension;
 import teammates.test.pageobjects.InstructorCourseDetailsPage;
@@ -18,9 +19,9 @@ import teammates.test.pageobjects.InstructorCourseEnrollPage;
 import teammates.test.pageobjects.InstructorCoursesPage;
 
 /**
- * SUT: {@link Const.ActionURIs#INSTRUCTOR_COURSES_PAGE}.
+ * SUT: {@link Const.WebPageURIs#INSTRUCTOR_COURSES_PAGE}.
  */
-public class InstructorCoursesPageUiTest extends BaseUiTestCase {
+public class InstructorCoursesPageUiTest extends BaseE2ETestCase {
     /* Comments given as 'Explanation:' are extra comments added to train
      * developers. They are not meant to be repeated when you write similar
      * classes.
@@ -37,7 +38,9 @@ public class InstructorCoursesPageUiTest extends BaseUiTestCase {
 
     private CourseAttributes validCourse =
             CourseAttributes
-                    .builder(" CCAddUiTest.course1 ", " Software Engineering $^&*() ", ZoneId.of("Asia/Singapore"))
+                    .builder(" CCAddUiTest.course1 ")
+                    .withName(" Software Engineering $^&*() ")
+                    .withTimezone(ZoneId.of("Asia/Singapore"))
                     .build();
 
     @Override
@@ -291,10 +294,8 @@ public class InstructorCoursesPageUiTest extends BaseUiTestCase {
         assertFalse(validCourse.isCourseDeleted());
 
         coursesPage.moveCourseToRecycleBin(courseId);
-        validCourse.setDeletedAt();
 
         assertNotNull(BackDoor.getCourse(courseId));
-        assertTrue(validCourse.isCourseDeleted());
         coursesPage.verifyHtmlMainContent("/instructorCoursesMoveToRecycleBinSuccessful.html");
     }
 
@@ -351,7 +352,7 @@ public class InstructorCoursesPageUiTest extends BaseUiTestCase {
         //after click archive button, new value will be assigned to instructor's isArchive attribute
         //after this, his own archive status for this course will not be affected by other instructors
         //of the same course
-        assertTrue(instructorWithNullArchiveStatus.isArchived.booleanValue());
+        assertTrue(instructorWithNullArchiveStatus.isArchived());
 
         ______TS("archive status of another instructor from same course not affected");
 
@@ -439,9 +440,9 @@ public class InstructorCoursesPageUiTest extends BaseUiTestCase {
     }
 
     private InstructorCoursesPage getCoursesPage() {
-        AppUrl coursesUrl = createUrl(Const.ActionURIs.INSTRUCTOR_COURSES_PAGE)
+        AppUrl coursesUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSES_PAGE)
                 .withUserId(instructorId);
-        InstructorCoursesPage page = loginAdminToPage(coursesUrl, InstructorCoursesPage.class);
+        InstructorCoursesPage page = loginAdminToPageOld(coursesUrl, InstructorCoursesPage.class);
         page.waitForAjaxLoadCoursesSuccess();
         return page;
     }

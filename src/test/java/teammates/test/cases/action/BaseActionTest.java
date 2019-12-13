@@ -13,9 +13,8 @@ import teammates.common.datatransfer.FeedbackParticipantType;
 import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.datatransfer.attributes.StudentAttributes;
-import teammates.common.exception.InvalidPostParametersException;
+import teammates.common.exception.InvalidHttpParameterException;
 import teammates.common.exception.UnauthorizedAccessException;
-import teammates.common.util.Assumption;
 import teammates.common.util.Const;
 import teammates.common.util.EmailWrapper;
 import teammates.common.util.StatusMessage;
@@ -29,7 +28,6 @@ import teammates.ui.controller.Action;
 import teammates.ui.controller.ActionResult;
 import teammates.ui.controller.AjaxResult;
 import teammates.ui.controller.FileDownloadResult;
-import teammates.ui.controller.ImageResult;
 import teammates.ui.controller.RedirectResult;
 import teammates.ui.controller.ShowPageResult;
 
@@ -67,6 +65,16 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
         removeAndRestoreTypicalDataBundle();
     }
 
+    @Deprecated
+    protected void signalFailureToDetectException(String... messages) {
+        throw new RuntimeException("Expected exception not detected." + Arrays.toString(messages));
+    }
+
+    @Deprecated
+    protected void ignoreExpectedException() {
+        assertTrue(true);
+    }
+
     /** Executes the action and returns the result.
      * Assumption: The action returns a ShowPageResult.
      */
@@ -93,13 +101,6 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      */
     protected FileDownloadResult getFileDownloadResult(Action a) {
         return (FileDownloadResult) a.executeAndPostProcess();
-    }
-
-    /** Executes the action and returns the result.
-     * Assumption: The action returns an ImageResult.
-     */
-    protected ImageResult getImageResult(Action a) {
-        return (ImageResult) a.executeAndPostProcess();
     }
 
     /**
@@ -137,7 +138,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
                 Const.ParamsNames.STUDENT_PROFILE_INSTITUTION, " TEAMMATES Test Institute 5   ",
                 Const.ParamsNames.STUDENT_NATIONALITY, "American",
                 Const.ParamsNames.STUDENT_GENDER, "  other   ",
-                Const.ParamsNames.STUDENT_PROFILE_MOREINFO, "   This is more info on me   "
+                Const.ParamsNames.STUDENT_PROFILE_MOREINFO, "   This is more info on me   ",
         };
     }
 
@@ -148,7 +149,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
                 Const.ParamsNames.STUDENT_PROFILE_INSTITUTION, "institute",
                 Const.ParamsNames.STUDENT_NATIONALITY, "USA",
                 Const.ParamsNames.STUDENT_GENDER, "female",
-                Const.ParamsNames.STUDENT_PROFILE_MOREINFO, "This is more info on me"
+                Const.ParamsNames.STUDENT_PROFILE_MOREINFO, "This is more info on me",
         };
     }
 
@@ -186,7 +187,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
             typicalCase[indexOfSessionInstructionsValue] = "";
             break;
         default:
-            Assumption.fail("Incorrect order");
+            fail("Incorrect order");
             break;
         }
 
@@ -215,7 +216,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
                 Const.ParamsNames.FEEDBACK_SESSION_PUBLISHDATE, "",
                 Const.ParamsNames.FEEDBACK_SESSION_PUBLISHTIME, "0",
                 Const.ParamsNames.FEEDBACK_SESSION_GRACEPERIOD, "10",
-                Const.ParamsNames.FEEDBACK_SESSION_INSTRUCTIONS, "instructions"
+                Const.ParamsNames.FEEDBACK_SESSION_INSTRUCTIONS, "instructions",
         };
     }
 
@@ -235,7 +236,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
                 Const.ParamsNames.FEEDBACK_QUESTION_SHOWRESPONSESTO, FeedbackParticipantType.RECEIVER.toString(),
                 Const.ParamsNames.FEEDBACK_QUESTION_SHOWGIVERTO, FeedbackParticipantType.RECEIVER.toString(),
                 Const.ParamsNames.FEEDBACK_QUESTION_SHOWRECIPIENTTO, FeedbackParticipantType.RECEIVER.toString(),
-                Const.ParamsNames.FEEDBACK_QUESTION_EDITTYPE, "edit"
+                Const.ParamsNames.FEEDBACK_QUESTION_EDITTYPE, "edit",
         };
     }
 
@@ -266,10 +267,10 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      */
     protected void verifyAssumptionFailure(String... parameters) {
         try {
-            Action c = gaeSimulation.getActionObject(getActionUri(), parameters);
+            Action c = gaeSimulation.getLegacyActionObject(getActionUri(), parameters);
             c.executeAndPostProcess();
             signalFailureToDetectException();
-        } catch (AssertionError | InvalidPostParametersException e) {
+        } catch (AssertionError | InvalidHttpParameterException e) {
             ignoreExpectedException();
         }
     }
@@ -347,7 +348,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
         InstructorAttributes instructor1OfCourse1 = typicalBundle.instructors.get("instructor1OfCourse1");
         StudentAttributes student1InCourse1 = typicalBundle.students.get("student1InCourse1");
 
-        gaeSimulation.loginUser(unregUserId);
+        gaeSimulation.loginAsUnregistered(unregUserId);
         verifyCanAccess(submissionParams);
         verifyCannotMasquerade(addUserIdToParams(student1InCourse1.googleId, submissionParams));
         verifyCannotMasquerade(addUserIdToParams(instructor1OfCourse1.googleId, submissionParams));
@@ -456,10 +457,10 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
 
     private void verifyRedirectToLoginOrUnauthorisedException(String... params) {
         try {
-            Action c = gaeSimulation.getActionObject(getActionUri(), params);
+            Action c = gaeSimulation.getLegacyActionObject(getActionUri(), params);
             assertFalse(c.isValidUser());
         } catch (UnauthorizedAccessException ue) {
-            ignoreExpectedException();
+            ignorePossibleException();
         }
     }
 
@@ -472,7 +473,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
         InstructorAttributes instructor1OfCourse1 = typicalBundle.instructors.get("instructor1OfCourse1");
         StudentAttributes student1InCourse1 = typicalBundle.students.get("student1InCourse1");
 
-        gaeSimulation.loginUser(unregUserId);
+        gaeSimulation.loginAsUnregistered(unregUserId);
         verifyCannotAccess(submissionParams);
         verifyCannotMasquerade(addUserIdToParams(student1InCourse1.googleId, submissionParams));
         verifyCannotMasquerade(addUserIdToParams(instructor1OfCourse1.googleId, submissionParams));
@@ -634,7 +635,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      * accessible to the logged in user.
      */
     protected void verifyCanAccess(String... params) {
-        Action c = gaeSimulation.getActionObject(getActionUri(), params);
+        Action c = gaeSimulation.getLegacyActionObject(getActionUri(), params);
         assertTrue(c.isValidUser());
         c.executeAndPostProcess();
     }
@@ -644,7 +645,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      * accessible to the logged in user masquerading as another user.
      */
     protected void verifyCanMasquerade(String... params) {
-        Action c = gaeSimulation.getActionObject(getActionUri(), params);
+        Action c = gaeSimulation.getLegacyActionObject(getActionUri(), params);
         assertTrue(c.isValidUser());
         c.executeAndPostProcess();
     }
@@ -658,14 +659,14 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      */
     protected void verifyCannotAccess(String... params) {
         try {
-            Action c = gaeSimulation.getActionObject(getActionUri(), params);
+            Action c = gaeSimulation.getLegacyActionObject(getActionUri(), params);
             ActionResult result = c.executeAndPostProcess();
 
             String classNameOfResult = result.getClass().getName();
             assertEquals(classNameOfResult, result.getClass().getName());
             AssertHelper.assertContains("You are not registered in the course ", result.getStatusMessage());
         } catch (UnauthorizedAccessException e) {
-            ignoreExpectedException();
+            ignorePossibleException();
         }
     }
 
@@ -675,7 +676,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      */
     protected void verifyCannotMasquerade(String... params) {
         try {
-            Action c = gaeSimulation.getActionObject(getActionUri(), params);
+            Action c = gaeSimulation.getLegacyActionObject(getActionUri(), params);
             c.executeAndPostProcess();
             signalFailureToDetectException();
         } catch (UnauthorizedAccessException e) {
@@ -690,7 +691,7 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
      * matches "/page/studentHome?user=abc".
      */
     protected void verifyRedirectTo(String expectedRedirectUrl, String... params) {
-        Action c = gaeSimulation.getActionObject(getActionUri(), params);
+        Action c = gaeSimulation.getLegacyActionObject(getActionUri(), params);
         RedirectResult r = getRedirectResult(c);
         AssertHelper.assertContains(expectedRedirectUrl, r.destination);
     }
@@ -720,12 +721,13 @@ public abstract class BaseActionTest extends BaseComponentTestCase {
     protected static void addUnregStudentToCourse1() throws Exception {
         StudentsLogic.inst().deleteStudentCascade("idOfTypicalCourse1", "student6InCourse1@gmail.tmt");
         StudentAttributes student = StudentAttributes
-                .builder("idOfTypicalCourse1", "unregistered student6 In Course1", "student6InCourse1@gmail.tmt")
-                .withTeam("Team Unregistered")
-                .withSection("Section 3")
-                .withComments("")
+                .builder("idOfTypicalCourse1", "student6InCourse1@gmail.tmt")
+                .withName("unregistered student6 In Course1")
+                .withTeamName("Team Unregistered")
+                .withSectionName("Section 3")
+                .withComment("")
                 .build();
-        StudentsLogic.inst().createStudentCascade(student);
+        StudentsLogic.inst().createStudent(student);
     }
 
     protected String getPageResultDestination(String parentUri, boolean isError, String userId) {

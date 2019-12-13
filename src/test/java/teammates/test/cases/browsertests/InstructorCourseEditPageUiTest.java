@@ -10,6 +10,7 @@ import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.util.AppUrl;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
+import teammates.e2e.cases.e2e.BaseE2ETestCase;
 import teammates.test.driver.BackDoor;
 import teammates.test.driver.StringHelperExtension;
 import teammates.test.pageobjects.AppPage;
@@ -18,9 +19,9 @@ import teammates.test.pageobjects.InstructorCourseEditPage;
 import teammates.test.pageobjects.InstructorCoursesPage;
 
 /**
- * SUT: {@link Const.ActionURIs#INSTRUCTOR_COURSE_EDIT_PAGE}.
+ * SUT: {@link Const.WebPageURIs#INSTRUCTOR_COURSE_EDIT_PAGE}.
  */
-public class InstructorCourseEditPageUiTest extends BaseUiTestCase {
+public class InstructorCourseEditPageUiTest extends BaseE2ETestCase {
     private InstructorCourseEditPage courseEditPage;
 
     private String instructorId;
@@ -228,7 +229,7 @@ public class InstructorCourseEditPageUiTest extends BaseUiTestCase {
                 String.format(Const.StatusMessages.COURSE_INSTRUCTOR_ADDED,
                         "Teammates Instructor", "InsCrsEdit.instructor@gmail.tmt"));
 
-        AppUrl courseDetailsLink = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
+        AppUrl courseDetailsLink = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_DETAILS_PAGE)
                                     .withCourseId(courseId)
                                     .withUserId(testData.instructors.get("InsCrsEdit.test").googleId);
 
@@ -250,13 +251,13 @@ public class InstructorCourseEditPageUiTest extends BaseUiTestCase {
 
         courseEditPage.addNewInstructor("Teammates Instructor", invalidEmail);
         courseEditPage.waitForTextsForAllStatusMessagesToUserEquals(
-                new FieldValidator().getInvalidityInfoForEmail(invalidEmail));
+                FieldValidator.getInvalidityInfoForEmail(invalidEmail));
 
         String invalidName = "";
 
         courseEditPage.addNewInstructor(invalidName, "teammates@email.tmt");
         courseEditPage.waitForTextsForAllStatusMessagesToUserEquals(
-                new FieldValidator().getInvalidityInfoForPersonName(invalidName));
+                FieldValidator.getInvalidityInfoForPersonName(invalidName));
     }
 
     private void testEditInstructorAction() throws Exception {
@@ -446,14 +447,14 @@ public class InstructorCourseEditPageUiTest extends BaseUiTestCase {
         courseEditPage.editInstructor(editInstructorIndex, "New name", invalidEmail, true, "New display name",
                                       Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_COOWNER);
         courseEditPage.waitForTextsForAllStatusMessagesToUserEquals(
-                new FieldValidator().getInvalidityInfoForEmail(invalidEmail));
+                FieldValidator.getInvalidityInfoForEmail(invalidEmail));
 
         String invalidName = "";
 
         courseEditPage.editInstructor(editInstructorIndex, invalidName, "teammates@email.tmt", true, "New display name",
                                       Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_COOWNER);
         courseEditPage.waitForTextsForAllStatusMessagesToUserEquals(
-                new FieldValidator().getInvalidityInfoForPersonName(invalidName));
+                FieldValidator.getInvalidityInfoForPersonName(invalidName));
 
         ______TS("success: test Custom radio button getting other privileges' default values when selected");
         editInstructorIndex = 2;
@@ -729,7 +730,9 @@ public class InstructorCourseEditPageUiTest extends BaseUiTestCase {
                 new InstructorPrivileges(Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_COOWNER);
         privilege.updatePrivilege(Const.ParamsNames.INSTRUCTOR_PERMISSION_MODIFY_INSTRUCTOR, false);
         InstructorAttributes instructor = InstructorAttributes
-                .builder("InsCrsEdit.reg", courseId, "Teammates Reg", "InsCrsEdit.reg@gmail.tmt")
+                .builder(courseId, "InsCrsEdit.reg@gmail.tmt")
+                .withGoogleId("InsCrsEdit.reg")
+                .withName("Teammates Reg")
                 .withDisplayedName("Teammates Reg")
                 .withRole(Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_CUSTOM)
                 .withPrivileges(privilege)
@@ -835,11 +838,11 @@ public class InstructorCourseEditPageUiTest extends BaseUiTestCase {
     }
 
     private InstructorCourseEditPage getCourseEditPage() {
-        AppUrl courseEditPageLink = createUrl(Const.ActionURIs.INSTRUCTOR_COURSE_EDIT_PAGE)
+        AppUrl courseEditPageLink = createUrl(Const.WebPageURIs.INSTRUCTOR_COURSE_EDIT_PAGE)
                                     .withUserId(instructorId)
                                     .withCourseId(courseId);
 
-        return loginAdminToPage(courseEditPageLink, InstructorCourseEditPage.class);
+        return loginAdminToPageOld(courseEditPageLink, InstructorCourseEditPage.class);
     }
 
 }

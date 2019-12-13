@@ -3,11 +3,11 @@ package teammates.test.pageobjects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
-import static org.testng.AssertJUnit.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,11 +46,9 @@ import teammates.common.util.Url;
 import teammates.common.util.retry.MaximumRetriesExceededException;
 import teammates.common.util.retry.RetryManager;
 import teammates.common.util.retry.RetryableTask;
-import teammates.common.util.retry.RetryableTaskReturnsThrows;
+import teammates.e2e.pageobjects.Browser;
+import teammates.e2e.util.TestProperties;
 import teammates.test.driver.AssertHelper;
-import teammates.test.driver.FileHelper;
-import teammates.test.driver.HtmlHelper;
-import teammates.test.driver.TestProperties;
 
 /**
  * An abstract class that represents a browser-loaded page of the app and
@@ -62,9 +60,6 @@ import teammates.test.driver.TestProperties;
  * @see <a href="https://code.google.com/p/selenium/wiki/PageObjects">https://code.google.com/p/selenium/wiki/PageObjects</a>
  */
 public abstract class AppPage {
-    private static final By MAIN_CONTENT = By.id("mainContent");
-    private static final int VERIFICATION_RETRY_COUNT = 5;
-    private static final int VERIFICATION_RETRY_DELAY_IN_MS = 1000;
 
     /** Browser instance the page is loaded into. */
     protected Browser browser;
@@ -102,9 +97,6 @@ public abstract class AppPage {
 
     @FindBy(id = "studentProfileNavLink")
     private WebElement studentProfileTab;
-
-    @FindBy(id = "studentHelpLink")
-    private WebElement studentHelpTab;
 
     @FindBy(id = "btnLogout")
     private WebElement logoutButton;
@@ -284,7 +276,7 @@ public abstract class AppPage {
      * @param element the WebElement
      * @throws org.openqa.selenium.TimeoutException if the timeout defined in
      * {@link TestProperties#TEST_TIMEOUT} expires
-     * @see org.openqa.selenium.support.ui.FluentWait#until(com.google.common.base.Function)
+     * @see org.openqa.selenium.support.ui.FluentWait#until(java.util.function.Function)
      */
     public void waitForElementStaleness(WebElement element) {
         waitFor(ExpectedConditions.stalenessOf(element));
@@ -296,7 +288,7 @@ public abstract class AppPage {
      * @param elementClass the class that the element must belong to
      * @throws org.openqa.selenium.TimeoutException if the timeout defined in
      * {@link TestProperties#TEST_TIMEOUT} expires
-     * @see org.openqa.selenium.support.ui.FluentWait#until(com.google.common.base.Function)
+     * @see org.openqa.selenium.support.ui.FluentWait#until(java.util.function.Function)
      */
     void waitForElementToBeMemberOfClass(WebElement element, String elementClass) {
         waitFor(driver -> {
@@ -554,17 +546,6 @@ public abstract class AppPage {
     }
 
     /**
-     * Equivalent of clicking the 'Help' tab on the top menu of the page.
-     * @return the loaded page
-     */
-    public StudentHelpPage loadStudentHelpTab() {
-        click(studentHelpTab);
-        waitForPageToLoad();
-        switchToNewWindow();
-        return changePageType(StudentHelpPage.class);
-    }
-
-    /**
      * Click the 'logout' link in the top menu of the page.
      */
     public AppPage logout() {
@@ -813,12 +794,13 @@ public abstract class AppPage {
     }
 
     /**
-     * Selects the option by visible text and waits for the associated AJAX request to complete.
+     * Waits for all ongoing AJAX requests to complete if any before selecting the option by visible text, then
+     * waits for the associated AJAX request to complete.
      *
      * @see AppPage#selectDropdownByVisibleValue(WebElement, String)
      */
-    void selectDropdownByVisibleValueAndWaitForAjaxRequestComplete(WebElement element, String text) {
-        jQueryAjaxHandler.registerHandlers();
+    void selectDropdownByVisibleValueAndHandleAjaxRequests(WebElement element, String text) {
+        jQueryAjaxHandler.waitForAjaxIfPresentThenRegisterHandlers();
 
         if (selectDropdownByVisibleValue(element, text)) {
             jQueryAjaxHandler.waitForRequestComplete();
@@ -850,12 +832,13 @@ public abstract class AppPage {
     }
 
     /**
-     * Selects the option by value and waits for the associated AJAX request to complete.
+     * Waits for all ongoing AJAX requests to complete if any before selecting the option by actual value, then
+     * waits for the associated AJAX request to complete.
      *
      * @see AppPage#selectDropdownByActualValue(WebElement, String)
      */
-    void selectDropdownByActualValueAndWaitForAjaxRequestComplete(WebElement element, String value) {
-        jQueryAjaxHandler.registerHandlers();
+    void selectDropdownByActualValueAndHandleAjaxRequests(WebElement element, String value) {
+        jQueryAjaxHandler.waitForAjaxIfPresentThenRegisterHandlers();
 
         if (selectDropdownByActualValue(element, value)) {
             jQueryAjaxHandler.waitForRequestComplete();
@@ -876,19 +859,11 @@ public abstract class AppPage {
      */
     public List<String> getTextsForAllStatusMessagesToUser() {
         List<WebElement> statusMessagesToUser = statusMessage.findElements(By.tagName("div"));
-        List<String> statusMessageTexts = new ArrayList<String>();
+        List<String> statusMessageTexts = new ArrayList<>();
         for (WebElement statusMessage : statusMessagesToUser) {
             statusMessageTexts.add(statusMessage.getText());
         }
         return statusMessageTexts;
-    }
-
-    /**
-     * Returns the value of the cell located at {@code (row, column)}
-     *         from the first table (which is of type {@code class=table}) in the page.
-     */
-    public String getCellValueFromDataTable(int row, int column) {
-        return getCellValueFromDataTable(0, row, column);
     }
 
     /**
@@ -1148,6 +1123,7 @@ public abstract class AppPage {
      *         folder is assumed to be {@link TestProperties#TEST_PAGES_FOLDER}.
      * @return The page (for chaining method calls).
      */
+    @Deprecated
     public AppPage verifyHtml(String filePath) throws IOException {
         return verifyHtmlPart(null, filePath);
     }
@@ -1161,59 +1137,9 @@ public abstract class AppPage {
      *         folder is assumed to be {@link TestProperties#TEST_PAGES_FOLDER}.
      * @return The page (for chaining method calls).
      */
+    @Deprecated
     public AppPage verifyHtmlPart(By by, String filePathParam) throws IOException {
-        String filePath = (filePathParam.charAt(0) == '/' ? TestProperties.TEST_PAGES_FOLDER : "") + filePathParam;
-        boolean isPart = by != null;
-        String actual = getPageSource(by);
-        try {
-            String expected = FileHelper.readFile(filePath);
-            expected = HtmlHelper.injectTestProperties(expected);
-
-            // The check is done multiple times with waiting times in between to account for
-            // certain elements to finish loading (e.g ajax load, panel collapsing/expanding).
-            for (int i = 0; i < VERIFICATION_RETRY_COUNT; i++) {
-                if (i == VERIFICATION_RETRY_COUNT - 1) {
-                    // Last retry count: do one last attempt and if it still fails,
-                    // throw assertion error and show the differences
-                    HtmlHelper.assertSameHtml(expected, actual, isPart);
-                    break;
-                }
-                if (HtmlHelper.areSameHtml(expected, actual, isPart)) {
-                    break;
-                }
-                ThreadHelper.waitFor(VERIFICATION_RETRY_DELAY_IN_MS);
-                actual = getPageSource(by);
-            }
-
-        } catch (IOException | AssertionError e) {
-            if (!testAndRunGodMode(filePath, actual, isPart)) {
-                throw e;
-            }
-        }
-
         return this;
-    }
-
-    private String getPageSource(By by) {
-        waitForAjaxLoaderGifToDisappear();
-        String actual = by == null ? browser.driver.findElement(By.tagName("html")).getAttribute("innerHTML")
-                                   : browser.driver.findElement(by).getAttribute("outerHTML");
-        return HtmlHelper.processPageSourceForHtmlComparison(actual);
-    }
-
-    private boolean testAndRunGodMode(String filePath, String content, boolean isPart) throws IOException {
-        return TestProperties.IS_GODMODE_ENABLED && regenerateHtmlFile(filePath, content, isPart);
-    }
-
-    private boolean regenerateHtmlFile(String filePath, String content, boolean isPart) throws IOException {
-        if (content == null || content.isEmpty()) {
-            return false;
-        }
-
-        TestProperties.verifyReadyForGodMode();
-        String processedPageSource = HtmlHelper.processPageSourceForExpectedHtmlRegeneration(content, isPart);
-        FileHelper.saveFile(filePath, processedPageSource);
-        return true;
     }
 
     /**
@@ -1226,24 +1152,9 @@ public abstract class AppPage {
      *         folder is assumed to be {@link TestProperties#TEST_PAGES_FOLDER}.
      * @return The page (for chaining method calls).
      */
+    @Deprecated
     public AppPage verifyHtmlMainContent(String filePath) throws IOException {
-        return verifyHtmlPart(MAIN_CONTENT, filePath);
-    }
-
-    public AppPage verifyHtmlMainContentWithReloadRetry(String filePath)
-            throws IOException, MaximumRetriesExceededException {
-        return persistenceRetryManager.runUntilNoRecognizedException(new RetryableTaskReturnsThrows<AppPage, IOException>(
-                "HTML verification") {
-            @Override
-            public AppPage run() throws IOException {
-                return verifyHtmlPart(MAIN_CONTENT, filePath);
-            }
-
-            @Override
-            public void beforeRetry() {
-                reloadPage();
-            }
-        }, AssertionError.class);
+        return verifyHtmlPart(By.id("mainContent"), filePath);
     }
 
     /**
@@ -1438,6 +1349,31 @@ public abstract class AppPage {
     }
 
     /**
+     * Verifies that comment row doesn't exist for given rowIdSuffix.
+     *
+     * @param rowIdSuffix suffix id of comment row
+     */
+    public void verifyCommentRowMissing(String rowIdSuffix) {
+        try {
+            waitForAjaxLoaderGifToDisappear();
+            browser.driver.findElement(By.id("responseCommentRow" + rowIdSuffix));
+            fail("Row expected to be missing found.");
+        } catch (NoSuchElementException expected) {
+            // row expected to be missing
+        }
+    }
+
+    /**
+     * Verifies the comment text.
+     *
+     * @param commentRowIdSuffix suffix id of comment delete button
+     * @param commentText comment text to be verified
+     */
+    public void verifyCommentRowContent(String commentRowIdSuffix, String commentText) {
+        waitForTextContainedInElementPresence(By.id("plainCommentText" + commentRowIdSuffix), commentText);
+    }
+
+    /**
      * Helper methods for detecting the state of a single JQuery AJAX request in the page. If more than one AJAX request is
      * made at the same time, the behavior is undefined.
      *
@@ -1463,12 +1399,25 @@ public abstract class AppPage {
         private static final String START_OCCURRED_ATTRIBUTE = "__ajaxStartOccurred__";
 
         /**
-         * Registers `ajaxStart` and `ajaxStop` handlers to track the state of an AJAX request.
+         * Waits until there is no ongoing jQuery AJAX requests.
+         */
+        void waitForNoActiveAjaxRequests() {
+            // `$.active` is a counter for holding the number of active AJAX requests
+            // but is not documented because it is used by JQuery internally.
+            // see https://stackoverflow.com/questions/3148225/jquery-active-function/3148506#3148506
+            waitFor(driver -> (Boolean) ((JavascriptExecutor) driver).executeScript("return $.active === 0"));
+        }
+
+        /**
+         * Waits for all AJAX requests to complete if any is present and registers `ajaxStart` and `ajaxStop` handlers to
+         * track the state of an AJAX request.
          *
          * @throws IllegalStateException if the handlers are already registered in the document
          */
-        void registerHandlers() {
+        void waitForAjaxIfPresentThenRegisterHandlers() {
             checkState(!hasHandlers(), "`ajaxStart` and `ajaxStop` handlers need only be added once to the document.");
+
+            waitForNoActiveAjaxRequests();
 
             executeScript("const seleniumArguments = arguments;"
                             + "$(document).ajaxStart(function() {"
@@ -1592,11 +1541,11 @@ public abstract class AppPage {
 
             executeScript(
                     "const seleniumArguments = arguments;"
-                    + "seleniumArguments[0].addEventListener(seleniumArguments[1], function onchange() {"
-                    + "    this.removeEventListener(seleniumArguments[1], onchange);"
-                    + "    document.body.setAttribute(seleniumArguments[2], true);"
-                    + "});"
-                    + "document.body.setAttribute(seleniumArguments[2], false);",
+                            + "seleniumArguments[0].addEventListener(seleniumArguments[1], function onchange() {"
+                            + "    this.removeEventListener(seleniumArguments[1], onchange);"
+                            + "    document.body.setAttribute(seleniumArguments[2], true);"
+                            + "});"
+                            + "document.body.setAttribute(seleniumArguments[2], false);",
                     element, CHANGE_EVENT, HOOK_ATTRIBUTE);
         }
 
@@ -1665,30 +1614,5 @@ public abstract class AppPage {
             executeScript("const event = new Event(arguments[1], {bubbles: true});"
                     + "arguments[0].dispatchEvent(event);", element, CHANGE_EVENT);
         }
-    }
-
-    /**
-     * Verifies that comment row doesn't exist for given rowIdSuffix.
-     *
-     * @param rowIdSuffix suffix id of comment row
-     */
-    public void verifyCommentRowMissing(String rowIdSuffix) {
-        try {
-            waitForAjaxLoaderGifToDisappear();
-            browser.driver.findElement(By.id("responseCommentRow" + rowIdSuffix));
-            fail("Row expected to be missing found.");
-        } catch (NoSuchElementException expected) {
-            // row expected to be missing
-        }
-    }
-
-    /**
-     * Verifies the comment text.
-     *
-     * @param commentRowIdSuffix suffix id of comment delete button
-     * @param commentText comment text to be verified
-     */
-    public void verifyCommentRowContent(String commentRowIdSuffix, String commentText) {
-        waitForTextContainedInElementPresence(By.id("plainCommentText" + commentRowIdSuffix), commentText);
     }
 }

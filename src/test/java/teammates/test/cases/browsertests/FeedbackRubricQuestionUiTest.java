@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 import teammates.common.datatransfer.attributes.FeedbackQuestionAttributes;
 import teammates.common.datatransfer.questions.FeedbackRubricQuestionDetails;
 import teammates.common.util.AppUrl;
-import teammates.common.util.Assumption;
 import teammates.common.util.Const;
 import teammates.test.driver.BackDoor;
 import teammates.test.pageobjects.FeedbackSubmitPage;
@@ -17,10 +16,10 @@ import teammates.test.pageobjects.InstructorFeedbackResultsPage;
 import teammates.test.pageobjects.StudentFeedbackResultsPage;
 
 /**
- * SUT: {@link Const.ActionURIs#INSTRUCTOR_FEEDBACK_EDIT_PAGE},
+ * SUT: {@link Const.WebPageURIs#INSTRUCTOR_SESSION_EDIT_PAGE},
  *      specifically for rubric questions.
  */
-public class FeedbackRubricQuestionUiTest extends FeedbackQuestionUiTest {
+public class FeedbackRubricQuestionUiTest extends BaseFeedbackQuestionUiTest {
 
     private static final int NEW_QUESTION_INDEX = -1;
 
@@ -470,9 +469,9 @@ public class FeedbackRubricQuestionUiTest extends FeedbackQuestionUiTest {
      *         of a rubric column. Column values must be given in the order displayed in the UI.
      */
     private void moveRubricColumn(int qnNumber, int[] colIndexes, int from, int to, String[]... columns) {
-        Assumption.assertEquals(colIndexes.length, columns.length);
-        Assumption.assertTrue(from >= 0 && from < colIndexes.length);
-        Assumption.assertTrue(to >= 0 && to < colIndexes.length);
+        assertEquals(colIndexes.length, columns.length);
+        assertTrue(from >= 0 && from < colIndexes.length);
+        assertTrue(to >= 0 && to < colIndexes.length);
 
         // This determines which column needs to be swapped and compared with the current column.
         // Value 1 indicates column needs to be moved right. Swaps and comparisons happen accordingly.
@@ -742,36 +741,36 @@ public class FeedbackRubricQuestionUiTest extends FeedbackQuestionUiTest {
     }
 
     private InstructorFeedbackEditPage getFeedbackEditPage() {
-        AppUrl feedbackPageLink = createUrl(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE).withUserId(instructorId)
+        AppUrl feedbackPageLink = createUrl(Const.WebPageURIs.INSTRUCTOR_SESSION_EDIT_PAGE).withUserId(instructorId)
                 .withCourseId(courseId).withSessionName(feedbackSessionName).withEnableSessionEditDetails(true);
-        return loginAdminToPage(feedbackPageLink, InstructorFeedbackEditPage.class);
+        return loginAdminToPageOld(feedbackPageLink, InstructorFeedbackEditPage.class);
     }
 
     private FeedbackSubmitPage loginToInstructorFeedbackSubmitPage(
             String instructorName, String fsName) {
-        AppUrl editUrl = createUrl(Const.ActionURIs.INSTRUCTOR_FEEDBACK_SUBMISSION_EDIT_PAGE)
+        AppUrl editUrl = createUrl(Const.WebPageURIs.INSTRUCTOR_SESSION_SUBMISSION_PAGE)
                 .withUserId(testData.instructors.get(instructorName).googleId)
                 .withCourseId(testData.feedbackSessions.get(fsName).getCourseId())
                 .withSessionName(testData.feedbackSessions.get(fsName).getFeedbackSessionName());
-        return loginAdminToPage(editUrl, FeedbackSubmitPage.class);
+        return loginAdminToPageOld(editUrl, FeedbackSubmitPage.class);
     }
 
     private FeedbackSubmitPage loginToStudentFeedbackSubmitPage(
             String studentName, String fsName) {
-        AppUrl editUrl = createUrl(Const.ActionURIs.STUDENT_FEEDBACK_SUBMISSION_EDIT_PAGE)
+        AppUrl editUrl = createUrl(Const.WebPageURIs.SESSION_SUBMISSION_PAGE)
                 .withUserId(testData.students.get(studentName).googleId)
                 .withCourseId(testData.feedbackSessions.get(fsName).getCourseId())
                 .withSessionName(testData.feedbackSessions.get(fsName).getFeedbackSessionName());
-        return loginAdminToPage(editUrl, FeedbackSubmitPage.class);
+        return loginAdminToPageOld(editUrl, FeedbackSubmitPage.class);
     }
 
     private StudentFeedbackResultsPage loginToStudentFeedbackResultsPage(
             String studentName, String fsName) {
-        AppUrl editUrl = createUrl(Const.ActionURIs.STUDENT_FEEDBACK_RESULTS_PAGE)
+        AppUrl editUrl = createUrl(Const.WebPageURIs.STUDENT_SESSION_RESULTS_PAGE)
                 .withUserId(testData.students.get(studentName).googleId)
                 .withCourseId(testData.feedbackSessions.get(fsName).getCourseId())
                 .withSessionName(testData.feedbackSessions.get(fsName).getFeedbackSessionName());
-        return loginAdminToPage(editUrl, StudentFeedbackResultsPage.class);
+        return loginAdminToPageOld(editUrl, StudentFeedbackResultsPage.class);
     }
 
     private InstructorFeedbackResultsPage loginToInstructorFeedbackResultsPageWithViewType(
@@ -789,7 +788,7 @@ public class FeedbackRubricQuestionUiTest extends FeedbackQuestionUiTest {
             editUrl = editUrl.withParam(Const.ParamsNames.FEEDBACK_RESULTS_SORTTYPE, viewType);
         }
 
-        return loginAdminToPage(editUrl, InstructorFeedbackResultsPage.class);
+        return loginAdminToPageOld(editUrl, InstructorFeedbackResultsPage.class);
     }
 
 }

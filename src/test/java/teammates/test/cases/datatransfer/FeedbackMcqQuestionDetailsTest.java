@@ -1,7 +1,9 @@
 package teammates.test.cases.datatransfer;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.Test;
 
@@ -28,7 +30,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqWeights_allChoicesNull_weightsListShouldBeEmpty() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_MCQ_GENERATED_OPTIONS, new String[] { "NONE" });
@@ -50,7 +52,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqWeights_emptyChoice_weightForInValidChoiceShouldNotBeParsed() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -73,7 +75,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqWeights_allWeightsNull_weightsListShouldBeEmpty() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -92,7 +94,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqWeights_invalidWeights_weightNotParsed() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -115,7 +117,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqWeights_weightsDisabledValidWeights_weightListShouldBeEmpty() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -136,7 +138,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqWeights_weightsEnabledValidChoicesAndWeights_weightsShouldHaveCorrectValues() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -163,7 +165,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqOtherWeight_weightsEnabledOtherDisabledValidWeights_otherWeightShouldHaveDefaultValue() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -187,7 +189,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqOtherWeight_weightAndOtherEnabledValidWeights_fieldShouldHaveCorrectValue() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -210,7 +212,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqOtherWeight_weightsDisabledOtherEnabled_otherWeightShouldHaveDefaultValue() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -232,7 +234,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testGetMcqOtherWeight_invalidOtherWeight_otherWeightNotParsed() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -255,10 +257,10 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
         assertEquals(0.0, mcqDetails.getMcqOtherWeight());
     }
 
-    @Test(expectedExceptions = AssertionError.class)
+    @Test
     public void testGetMcqOtherWeight_nullOtherWeight_exceptionThrown() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -273,13 +275,13 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
         // Removed to send null as otherWeight parameter
         // requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_MCQ_OTHER_WEIGHT, new String[] { "" });
 
-        mcqDetails.extractQuestionDetails(requestParams, FeedbackQuestionType.MCQ);
+        assertThrows(AssertionError.class, () -> mcqDetails.extractQuestionDetails(requestParams, FeedbackQuestionType.MCQ));
     }
 
     @Test
     public void testValidateQuestionDetails_choicesLessThanMinRequirement_errorReturned() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -297,7 +299,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testValidateQuestionDetails_numberOfChoicesGreaterThanWeights_errorReturned() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -320,7 +322,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testValidateQuestionDetails_noValidationError_errorListShouldBeEmpty() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -341,7 +343,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testValidateQuestionDetails_negativeWeights_errorsReturned() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -363,7 +365,7 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     @Test
     public void testValidateQuestionDetails_negativeOtherWeight_errorsReturned() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
@@ -385,9 +387,27 @@ public class FeedbackMcqQuestionDetailsTest extends BaseTestCase {
     }
 
     @Test
+    public void testValidateQuestionDetails_duplicateMcqOptions_errorReturned() {
+        FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
+
+        mcqDetails.setNumOfMcqChoices(2);
+        mcqDetails.setMcqChoices(Arrays.asList("choice 1", "choice 1"));
+
+        List<String> errors = mcqDetails.validateQuestionDetails(dummySessionToken);
+        assertEquals(1, errors.size());
+        assertEquals(Const.FeedbackQuestion.MCQ_ERROR_DUPLICATE_MCQ_OPTION, errors.get(0));
+
+        //duplicate cases that has trailing and leading spaces
+        mcqDetails.setMcqChoices(Arrays.asList("choice 1", " choice 1 "));
+        errors = mcqDetails.validateQuestionDetails(dummySessionToken);
+        assertEquals(1, errors.size());
+        assertEquals(Const.FeedbackQuestion.MCQ_ERROR_DUPLICATE_MCQ_OPTION, errors.get(0));
+    }
+
+    @Test
     public void testExtractQuestionDetails_weightsEnabledForGenerateOptions_weightShouldRemainDisabled() {
         FeedbackMcqQuestionDetails mcqDetails = new FeedbackMcqQuestionDetails();
-        HashMap<String, String[]> requestParams = new HashMap<>();
+        Map<String, String[]> requestParams = new HashMap<>();
 
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TYPE, new String[] { "MCQ" });
         requestParams.put(Const.ParamsNames.FEEDBACK_QUESTION_TEXT, new String[] { "mcq question text" });
