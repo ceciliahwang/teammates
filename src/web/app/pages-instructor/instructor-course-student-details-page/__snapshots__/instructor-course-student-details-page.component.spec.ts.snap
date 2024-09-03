@@ -2,34 +2,61 @@
 
 exports[`InstructorCourseStudentDetailsPageComponent should snap with default fields 1`] = `
 <tm-instructor-course-student-details-page
-  httpRequestService={[Function HttpRequestService]}
-  photoUrl={[Function String]}
+  courseId="undefined"
+  hasStudentLoadingFailed="false"
+  isStudentLoading={[Function Boolean]}
   route={[Function ActivatedRoute]}
   statusMessageService={[Function StatusMessageService]}
+  studentEmail="undefined"
+  studentService={[Function StudentService]}
 >
-  
+  <tm-loading-retry>
+    <tm-loading-spinner>
+      <div
+        class="loading-container"
+      >
+        <div
+          class="row spinner-border text-primary"
+          role="status"
+        />
+        <div
+          class="row text-secondary"
+        >
+          Loading...
+        </div>
+      </div>
+    </tm-loading-spinner>
+  </tm-loading-retry>
 </tm-instructor-course-student-details-page>
 `;
 
 exports[`InstructorCourseStudentDetailsPageComponent should snap with populated student 1`] = `
 <tm-instructor-course-student-details-page
-  httpRequestService={[Function HttpRequestService]}
-  photoUrl={[Function String]}
+  courseId="undefined"
+  hasStudentLoadingFailed="false"
+  isStudentLoading={[Function Boolean]}
   route={[Function ActivatedRoute]}
   statusMessageService={[Function StatusMessageService]}
   student={[Function Object]}
-  studentProfile={[Function Object]}
+  studentEmail="undefined"
+  studentService={[Function StudentService]}
 >
-  <h1>
-    firstName
-  </h1><tm-student-profile
-    ng-reflect-photo-url="http://localhost:8080/webapi/s"
-    ng-reflect-student-profile="[object Object]"
-  /><tm-course-related-info
-    ng-reflect-student="[object Object]"
-  /><tm-more-info
-    ng-reflect-more-info-text="I have more info here"
-    ng-reflect-student-name="firstName"
-  />
+  <tm-loading-retry>
+    <tm-loading-spinner>
+      <div
+        class="loading-container"
+      >
+        <div
+          class="row spinner-border text-primary"
+          role="status"
+        />
+        <div
+          class="row text-secondary"
+        >
+          Loading...
+        </div>
+      </div>
+    </tm-loading-spinner>
+  </tm-loading-retry>
 </tm-instructor-course-student-details-page>
 `;

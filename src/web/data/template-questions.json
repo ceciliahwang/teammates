@@ -4,11 +4,12 @@
         "question": {
             "feedbackQuestionId": "",
             "questionNumber": 1,
-            "questionBrief": "Your estimate of how much each team member has contributed.",
+            "questionBrief": "How much work did each team member contribute? (response will be shown anonymously to each team member).",
             "questionDescription": "",
 
             "questionType": "CONTRIB",
             "questionDetails": {
+                "isZeroSum": true,
                 "isNotSureAllowed": false
             },
 
@@ -28,13 +29,11 @@
         "question": {
             "feedbackQuestionId": "",
             "questionNumber": 2,
-            "questionBrief": "Comments about your contribution (shown to other teammates).",
+            "questionBrief": "What contributions did you make to the team? (response will be shown to each team member).",
             "questionDescription": "",
 
             "questionType": "TEXT",
-            "questionDetails": {
-                "recommendedLength": 0
-            },
+            "questionDetails": {},
 
             "giverType": "STUDENTS",
             "recipientType": "SELF",
@@ -52,13 +51,11 @@
         "question": {
             "feedbackQuestionId": "",
             "questionNumber": 3,
-            "questionBrief": "Your comments about this teammate (confidential and only shown to instructor).",
+            "questionBrief": "What comments do you have regarding each of your team members? (response is confidential and will only be shown to the instructor).",
             "questionDescription": "",
 
             "questionType": "TEXT",
-            "questionDetails": {
-                "recommendedLength": 0
-            },
+            "questionDetails": {},
 
             "giverType": "STUDENTS",
             "recipientType": "OWN_TEAM_MEMBERS",
@@ -76,13 +73,11 @@
         "question": {
             "feedbackQuestionId": "",
             "questionNumber": 4,
-            "questionBrief": "Your comments about this teammate (confidential and only shown to instructor).",
+            "questionBrief": "How are the team dynamics thus far? (response is confidential and will only be to the instructor).",
             "questionDescription": "",
 
             "questionType": "TEXT",
-            "questionDetails": {
-                "recommendedLength": 0
-            },
+            "questionDetails": {},
 
             "giverType": "STUDENTS",
             "recipientType": "OWN_TEAM",
@@ -100,13 +95,11 @@
         "question": {
             "feedbackQuestionId": "",
             "questionNumber": 5,
-            "questionBrief": "Your feedback to this teammate (shown anonymously to the teammate).",
+            "questionBrief": "What feedback do you have for each of your team members? (response will be shown anonymously to each team member).",
             "questionDescription": "",
 
             "questionType": "TEXT",
-            "questionDetails": {
-                "recommendedLength": 0
-            },
+            "questionDetails": {},
 
             "giverType": "STUDENTS",
             "recipientType": "OWN_TEAM_MEMBERS",

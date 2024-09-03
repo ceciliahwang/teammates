@@ -1,15 +1,40 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { QuestionEditFormMode, QuestionEditFormModel } from './question-edit-form-model';
 import { CommonVisibilitySetting, FeedbackQuestionsService } from '../../../services/feedback-questions.service';
+import { SimpleModalService } from '../../../services/simple-modal.service';
 import { VisibilityStateMachine } from '../../../services/visibility-state-machine';
 import {
   FeedbackParticipantType,
-  FeedbackQuestionType, FeedbackTextQuestionDetails,
+  FeedbackQuestionType,
+  FeedbackTextQuestionDetails,
   FeedbackVisibilityType,
   NumberOfEntitiesToGiveFeedbackToSetting,
 } from '../../../types/api-output';
 import { VisibilityControl } from '../../../types/visibility-control';
-import { QuestionEditFormMode, QuestionEditFormModel } from './question-edit-form-model';
+import { SimpleModalType } from '../simple-modal/simple-modal-type';
+import { collapseAnim } from '../teammates-common/collapse-anim';
+
+const FEEDBACK_PATH_PROPERTIES: Set<string> = new Set<string>([
+  'giverType',
+  'recipientType',
+  'isUsingOtherFeedbackPath',
+  'numberOfEntitiesToGiveFeedbackToSetting',
+  'customNumberOfEntitiesToGiveFeedbackTo',
+]);
+const VISIBILITY_PROPERTIES: Set<string> = new Set<string>([
+  'isUsingOtherVisibilitySetting',
+  'showResponsesTo',
+  'showGiverNameTo',
+  'showRecipientNameTo',
+  'commonVisibilitySettingName',
+]);
+const QUESTION_DETAIL_PROPERTIES: Set<string> = new Set<string>([
+  'questionBrief',
+  'questionDescription',
+  'questionDetails',
+  'questionNumber',
+]);
 
 /**
  * The question edit form component.
@@ -18,8 +43,9 @@ import { QuestionEditFormMode, QuestionEditFormModel } from './question-edit-for
   selector: 'tm-question-edit-form',
   templateUrl: './question-edit-form.component.html',
   styleUrls: ['./question-edit-form.component.scss'],
+  animations: [collapseAnim],
 })
-export class QuestionEditFormComponent implements OnInit {
+export class QuestionEditFormComponent {
 
   // enum
   FeedbackQuestionType: typeof FeedbackQuestionType = FeedbackQuestionType;
@@ -42,7 +68,7 @@ export class QuestionEditFormComponent implements OnInit {
         this.feedbackQuestionsService.getCommonFeedbackVisibilitySettings(
             this.visibilityStateMachine, model.questionType);
 
-    const visibilitySetting: {[TKey in VisibilityControl]: FeedbackVisibilityType[]} = {
+    const visibilitySetting: { [TKey in VisibilityControl]: FeedbackVisibilityType[] } = {
       SHOW_RESPONSE: model.showResponsesTo,
       SHOW_GIVER_NAME: model.showGiverNameTo,
       SHOW_RECIPIENT_NAME: model.showRecipientNameTo,
@@ -52,9 +78,9 @@ export class QuestionEditFormComponent implements OnInit {
     if (!model.isUsingOtherFeedbackPath) {
       // find if the feedback path is in the common feedback paths
       this.model.isUsingOtherFeedbackPath = true;
-      if (this.commonFeedbackPaths.has(model.giverType) &&
-          // tslint:disable-next-line:no-non-null-assertion
-          this.commonFeedbackPaths.get(model.giverType)!.includes(model.recipientType)) {
+      if (this.commonFeedbackPaths.has(model.giverType)
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          && this.commonFeedbackPaths.get(model.giverType)!.includes(model.recipientType)) {
         this.model.isUsingOtherFeedbackPath = false;
       }
     }
@@ -93,6 +119,9 @@ export class QuestionEditFormComponent implements OnInit {
   @Input()
   isDisplayOnly: boolean = false;
 
+  @Input()
+  isQuestionPublished: boolean = false;
+
   model: QuestionEditFormModel = {
     feedbackQuestionId: '',
 
@@ -104,13 +133,12 @@ export class QuestionEditFormComponent implements OnInit {
 
     questionType: FeedbackQuestionType.TEXT,
     questionDetails: {
-      recommendedLength: 0,
       questionType: FeedbackQuestionType.TEXT,
       questionText: '',
     } as FeedbackTextQuestionDetails,
 
     giverType: FeedbackParticipantType.STUDENTS,
-    recipientType: FeedbackParticipantType.STUDENTS,
+    recipientType: FeedbackParticipantType.STUDENTS_EXCLUDING_SELF,
 
     numberOfEntitiesToGiveFeedbackToSetting: NumberOfEntitiesToGiveFeedbackToSetting.UNLIMITED,
     customNumberOfEntitiesToGiveFeedbackTo: 1,
@@ -123,8 +151,14 @@ export class QuestionEditFormComponent implements OnInit {
 
     isUsingOtherFeedbackPath: false,
     isUsingOtherVisibilitySetting: false,
+    isDeleting: false,
+    isDuplicating: false,
     isEditable: false,
     isSaving: false,
+    isCollapsed: false,
+    isVisibilityChanged: false,
+    isFeedbackPathChanged: false,
+    isQuestionDetailsChanged: false,
   };
 
   @Output()
@@ -156,7 +190,8 @@ export class QuestionEditFormComponent implements OnInit {
 
   visibilityStateMachine: VisibilityStateMachine;
 
-  constructor(private feedbackQuestionsService: FeedbackQuestionsService, private modalService: NgbModal) {
+  constructor(private feedbackQuestionsService: FeedbackQuestionsService,
+              private simpleModalService: SimpleModalService) {
     this.visibilityStateMachine =
         this.feedbackQuestionsService.getNewVisibilityStateMachine(
             this.model.giverType, this.model.recipientType);
@@ -166,81 +201,39 @@ export class QuestionEditFormComponent implements OnInit {
     return setA.length === setB.length && setA.every((ele: FeedbackVisibilityType) => setB.includes(ele));
   }
 
-  ngOnInit(): void {}
-
   /**
    * Triggers the change of the model for the form.
    */
-  triggerModelChange(field: string, data: any): void {
+  triggerModelChange(field: keyof QuestionEditFormModel,
+                     data: QuestionEditFormModel[keyof QuestionEditFormModel]): void {
     this.formModelChange.emit({
       ...this.model,
       [field]: data,
+      ...(!this.model.isVisibilityChanged && VISIBILITY_PROPERTIES.has(field)
+        && { isVisibilityChanged: true }),
+      ...(!this.model.isFeedbackPathChanged && FEEDBACK_PATH_PROPERTIES.has(field)
+        && { isFeedbackPathChanged: true }),
+      ...(!this.model.isQuestionDetailsChanged && QUESTION_DETAIL_PROPERTIES.has(field)
+        && { isQuestionDetailsChanged: true }),
     });
   }
 
   /**
    * Triggers the change of the model for the form.
    */
-  triggerModelChangeBatch(obj: {[key: string]: any}): void {
+  triggerModelChangeBatch(obj: Partial<QuestionEditFormModel>): void {
     this.formModelChange.emit({
       ...this.model,
       ...obj,
-    });
-  }
-
-  /**
-   * Change the {@code giverType} and {@code recipientType} and reset the visibility settings.
-   */
-  changeGiverRecipientType(giverType: FeedbackParticipantType, recipientType: FeedbackParticipantType): void {
-    // check if current recipientType is allowed for giverType,
-    // if not, set default recipientType to the first allowed type as default.
-    /* tslint:disable-next-line: no-non-null-assertion */
-    const allowedRecipientTypes: FeedbackParticipantType[] = this.allowedFeedbackPaths.get(giverType)!;
-    let newRecipientType: FeedbackParticipantType = recipientType;
-    if (allowedRecipientTypes.indexOf(recipientType) === -1) {
-      newRecipientType = allowedRecipientTypes[0];
-    }
-    this.triggerModelChangeBatch({
-      giverType,
-      recipientType: newRecipientType,
-      commonVisibilitySettingName: 'Please select a visibility option',
-      isUsingOtherVisibilitySetting: false,
-      showResponsesTo: [],
-      showGiverNameTo: [],
-      showRecipientNameTo: [],
-    });
-  }
-
-  /**
-   * Applies the common visibility setting.
-   */
-  applyCommonVisibilitySettings(commonSettings: CommonVisibilitySetting): void {
-    this.triggerModelChangeBatch({
-      showResponsesTo: commonSettings.visibilitySettings.SHOW_RESPONSE,
-      showGiverNameTo: commonSettings.visibilitySettings.SHOW_GIVER_NAME,
-      showRecipientNameTo: commonSettings.visibilitySettings.SHOW_RECIPIENT_NAME,
-      commonVisibilitySettingName: commonSettings.name,
-      isUsingOtherVisibilitySetting: false,
-    });
-  }
-
-  /**
-   * Modifies visibility control of visibility type based on {@code isAllowed}.
-   */
-  modifyVisibilityControl(
-      isAllowed: boolean, visibilityType: FeedbackVisibilityType, visibilityControl: VisibilityControl): void {
-    if (isAllowed) {
-      this.visibilityStateMachine.allowToSee(visibilityType, visibilityControl);
-    } else {
-      this.visibilityStateMachine.disallowToSee(visibilityType, visibilityControl);
-    }
-    this.triggerModelChangeBatch({
-      showResponsesTo:
-          this.visibilityStateMachine.getVisibilityTypesUnderVisibilityControl(VisibilityControl.SHOW_RESPONSE),
-      showGiverNameTo:
-          this.visibilityStateMachine.getVisibilityTypesUnderVisibilityControl(VisibilityControl.SHOW_GIVER_NAME),
-      showRecipientNameTo:
-          this.visibilityStateMachine.getVisibilityTypesUnderVisibilityControl(VisibilityControl.SHOW_RECIPIENT_NAME),
+      ...(!this.model.isVisibilityChanged
+          && Object.keys(obj).some((key: string) => VISIBILITY_PROPERTIES.has(key))
+          && { isVisibilityChanged: true }),
+      ...(!this.model.isFeedbackPathChanged
+          && Object.keys(obj).some((key: string) => FEEDBACK_PATH_PROPERTIES.has(key))
+          && { isFeedbackPathChanged: true }),
+      ...(!this.model.isQuestionDetailsChanged
+          && Object.keys(obj).some((key: string) => QUESTION_DETAIL_PROPERTIES.has(key))
+          && { isQuestionDetailsChanged: true }),
     });
   }
 
@@ -258,29 +251,75 @@ export class QuestionEditFormComponent implements OnInit {
   /**
    * Handle event to discard changes users made.
    */
-  discardChangesHandler(modal: any): void {
-    this.modalService.open(modal).result.then(() => {
-      if (this.formMode === QuestionEditFormMode.EDIT) {
-        this.discardExistingQuestionChangesEvent.emit();
-      }
-      if (this.formMode === QuestionEditFormMode.ADD) {
-        this.discardNewQuestionEvent.emit();
-      }
+  discardChangesHandler(isNewQuestion: boolean): void {
+    if (!this.model.isVisibilityChanged
+      && !this.model.isFeedbackPathChanged
+      && !this.model.isQuestionDetailsChanged) {
+      this.discardChanges();
+      return;
+    }
+    const modalRef: NgbModalRef = this.simpleModalService.openConfirmationModal(
+        `Discard unsaved ${isNewQuestion ? 'question' : 'edits'}?`, SimpleModalType.WARNING,
+        'Warning: Any unsaved changes will be lost',
+        { cancelMessage: 'No, go back to editing' });
+    modalRef.result.then(() => {
+      this.discardChanges();
     }, () => {});
+  }
+
+  private discardChanges(): void {
+    if (this.formMode === QuestionEditFormMode.EDIT) {
+      this.discardExistingQuestionChangesEvent.emit();
+    }
+    if (this.formMode === QuestionEditFormMode.ADD) {
+      this.discardNewQuestionEvent.emit();
+    }
   }
 
   /**
    * Saves the question.
    */
-  saveQuestionHandler(modal: any): void {
+  saveQuestionHandler(): void {
     if (this.formMode === QuestionEditFormMode.EDIT) {
-      // alert user that editing question may result in deletion of responses
-      if (this.model.isQuestionHasResponses) {
-        this.modalService.open(modal).result.then(() => {
+      const doChangesNeedWarning: boolean = this.model.isQuestionDetailsChanged
+        || this.model.isVisibilityChanged
+        || this.model.isFeedbackPathChanged;
+      if (!this.isQuestionPublished && (!this.model.isQuestionHasResponses || !doChangesNeedWarning)) {
+        this.saveExistingQuestionEvent.emit();
+      } else if (this.model.isFeedbackPathChanged) {
+        // warn user that editing feedback path will delete all messages
+        const modalContent: string = `
+            <p>You seem to have changed the feedback path settings of this question. Please note that changing the
+            feedback path will cause <b>all existing responses to be deleted.</b> Proceed?</p>
+        `;
+        const modalRef: NgbModalRef = this.simpleModalService.openConfirmationModal(
+            'Save the question?', SimpleModalType.DANGER, modalContent);
+        modalRef.result.then(() => {
           this.saveExistingQuestionEvent.emit();
         }, () => {});
-      } else {
-        this.saveExistingQuestionEvent.emit();
+      } else if (this.model.isQuestionDetailsChanged) {
+        // alert user that editing question may result in deletion of responses
+        const modalContent: string = `
+            <p>Editing question settings in a way that potentially affects the validity of existing responses <b> may
+            cause all the existing responses for this question to be deleted.</b> Proceed?</p>
+        `;
+        const modalRef: NgbModalRef = this.simpleModalService.openConfirmationModal(
+            'Save the question?', SimpleModalType.DANGER, modalContent);
+        modalRef.result.then(() => {
+          this.saveExistingQuestionEvent.emit();
+        }, () => {});
+      } else if (this.model.isVisibilityChanged) {
+        // alert user that editing visibility options will not delete responses
+        const modalContent: string = `
+            <p>You seem to have changed the visibility settings of this question. Please note that <b>the existing
+            responses will remain but their visibility will be changed as per the new visibility settings.</b>
+            Proceed?</p>
+        `;
+        const modalRef: NgbModalRef = this.simpleModalService.openConfirmationModal(
+            'Save the question?', SimpleModalType.WARNING, modalContent);
+        modalRef.result.then(() => {
+          this.saveExistingQuestionEvent.emit();
+        }, () => {});
       }
     }
     if (this.formMode === QuestionEditFormMode.ADD) {
@@ -298,9 +337,7 @@ export class QuestionEditFormComponent implements OnInit {
   /**
    * Handles event for deleting the current question.
    */
-  deleteCurrentQuestionHandler(modal: any): void {
-    this.modalService.open(modal).result.then(() => {
-      this.deleteCurrentQuestionEvent.emit();
-    }, () => {});
+  deleteCurrentQuestionHandler(): void {
+    this.deleteCurrentQuestionEvent.emit();
   }
 }

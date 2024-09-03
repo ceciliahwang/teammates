@@ -1,11 +1,22 @@
 package teammates.e2e.pageobjects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.openqa.selenium.By;
@@ -13,43 +24,49 @@ import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.remote.UselessFileDetector;
-import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import teammates.common.util.ThreadHelper;
-import teammates.common.util.Url;
+import teammates.common.datatransfer.FeedbackParticipantType;
+import teammates.common.datatransfer.attributes.NotificationAttributes;
+import teammates.common.util.TimeHelper;
+import teammates.e2e.util.MaximumRetriesExceededException;
+import teammates.e2e.util.RetryManager;
+import teammates.e2e.util.Retryable;
 import teammates.e2e.util.TestProperties;
-import teammates.test.driver.FileHelper;
+import teammates.test.FileHelper;
+import teammates.test.ThreadHelper;
 
 /**
  * An abstract class that represents a browser-loaded page of the app and
  * provides ways to interact with it. Also contains methods to validate some
- * aspects of the page. .e.g, html page source. <br>
+ * aspects of the page, e.g. HTML page source.
  *
- * <p>Note: We are using the PageObjects pattern here.
+ * <p>Note: We are using the Page Object pattern here.
  *
- * @see <a href="https://code.google.com/p/selenium/wiki/PageObjects">https://code.google.com/p/selenium/wiki/PageObjects</a>
+ * @see <a href="https://martinfowler.com/bliki/PageObject.html">https://martinfowler.com/bliki/PageObject.html</a>
  */
 public abstract class AppPage {
 
     private static final String CLEAR_ELEMENT_SCRIPT;
     private static final String SCROLL_ELEMENT_TO_CENTER_AND_CLICK_SCRIPT;
-    private static final String ADD_CHANGE_EVENT_HOOK;
+    private static final String READ_TINYMCE_CONTENT_SCRIPT;
+    private static final String WRITE_TO_TINYMCE_SCRIPT;
 
     static {
         try {
-            ADD_CHANGE_EVENT_HOOK = FileHelper.readFile("src/e2e/resources/scripts/addChangeEventHook.js");
             CLEAR_ELEMENT_SCRIPT = FileHelper.readFile("src/e2e/resources/scripts/clearElementWithoutEvents.js");
             SCROLL_ELEMENT_TO_CENTER_AND_CLICK_SCRIPT = FileHelper
                     .readFile("src/e2e/resources/scripts/scrollElementToCenterAndClick.js");
+            READ_TINYMCE_CONTENT_SCRIPT = FileHelper.readFile("src/e2e/resources/scripts/readTinyMCEContent.js");
+            WRITE_TO_TINYMCE_SCRIPT = FileHelper.readFile("src/e2e/resources/scripts/writeToTinyMCE.js");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,11 +75,8 @@ public abstract class AppPage {
     /** Browser instance the page is loaded into. */
     protected Browser browser;
 
-    /** Firefox change handler for handling when `change` events are not fired in Firefox. */
-    private final FirefoxChangeHandler firefoxChangeHandler;
-
-    @FindBy(linkText = "Profile")
-    private WebElement studentProfileTab;
+    /** Use for retrying due to transient UI issues. */
+    protected RetryManager uiRetryManager = new RetryManager((TestProperties.TEST_TIMEOUT + 1) / 2);
 
     /**
      * Used by subclasses to create a {@code AppPage} object to wrap around the
@@ -71,14 +85,17 @@ public abstract class AppPage {
      */
     public AppPage(Browser browser) {
         this.browser = browser;
-        this.firefoxChangeHandler = new FirefoxChangeHandler(); //legit firefox
 
-        waitForPageToLoad();
+        boolean isCorrectPageType;
 
-        boolean isCorrectPageType = containsExpectedPageContents();
+        try {
+            isCorrectPageType = containsExpectedPageContents();
 
-        if (isCorrectPageType) {
-            return;
+            if (isCorrectPageType) {
+                return;
+            }
+        } catch (Exception e) {
+            // ignore and try again
         }
 
         // To minimize test failures due to eventual consistency, we try to
@@ -99,35 +116,32 @@ public abstract class AppPage {
         throw new IllegalStateException("Not in the correct page!");
     }
 
-    /**
-     * Fails if the new page content does not match content expected in a page of
-     * the type indicated by the parameter {@code typeOfPage}.
-     */
-    public static <T extends AppPage> T getNewPageInstance(Browser currentBrowser, Url url, Class<T> typeOfPage) {
-        currentBrowser.driver.get(url.toAbsoluteString());
-        return getNewPageInstance(currentBrowser, typeOfPage);
+    public Browser getBrowser() {
+        return browser;
     }
 
     /**
-     * Fails if the new page content does not match content expected in a page of
+     * Gets a new page object representation of the currently open web page in the browser.
+     *
+     * <p>Fails if the new page content does not match content expected in a page of
      * the type indicated by the parameter {@code typeOfPage}.
      */
     public static <T extends AppPage> T getNewPageInstance(Browser currentBrowser, Class<T> typeOfPage) {
+        waitUntilAnimationFinish(currentBrowser);
         try {
             Constructor<T> constructor = typeOfPage.getConstructor(Browser.class);
             T page = constructor.newInstance(currentBrowser);
             PageFactory.initElements(currentBrowser.driver, page);
+            page.waitForPageToLoad();
             return page;
-        } catch (Exception e) {
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof IllegalStateException) {
+                throw (IllegalStateException) e.getCause();
+            }
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Gives an AppPage instance based on the given Browser.
-     */
-    public static AppPage getNewPageInstance(Browser currentBrowser) {
-        return getNewPageInstance(currentBrowser, GenericAppPage.class);
     }
 
     /**
@@ -138,18 +152,8 @@ public abstract class AppPage {
         return getNewPageInstance(browser, newPageType);
     }
 
-    /**
-     * Gives a {@link LoginPage} instance based on the given {@link Browser} and test configuration.
-     * Fails if the page content does not match the content of the expected login page.
-     */
-    public static LoginPage createCorrectLoginPageType(Browser browser) {
-        Class<? extends LoginPage> cls =
-                TestProperties.isDevServer() ? DevServerLoginPage.class : GoogleLoginPage.class;
-        return getNewPageInstance(browser, cls);
-    }
-
     public <E> E waitFor(ExpectedCondition<E> expectedCondition) {
-        WebDriverWait wait = new WebDriverWait(browser.driver, TestProperties.TEST_TIMEOUT);
+        WebDriverWait wait = new WebDriverWait(browser.driver, Duration.ofSeconds(TestProperties.TEST_TIMEOUT));
         return wait.until(expectedCondition);
     }
 
@@ -157,7 +161,17 @@ public abstract class AppPage {
      * Waits until the page is fully loaded.
      */
     public void waitForPageToLoad() {
-        browser.waitForPageLoad();
+        waitForPageToLoad(false);
+    }
+
+    /**
+     * Waits until the page is fully loaded.
+     *
+     * @param excludeToast Set this to true if toast message's disappearance should not be counted
+     *         as criteria for page load's completion.
+     */
+    public void waitForPageToLoad(boolean excludeToast) {
+        browser.waitForPageLoad(excludeToast);
     }
 
     public void waitForElementVisibility(WebElement element) {
@@ -172,15 +186,31 @@ public abstract class AppPage {
         waitFor(ExpectedConditions.elementToBeClickable(element));
     }
 
+    public static void waitUntilAnimationFinish(Browser browser) {
+        WebDriverWait wait = new WebDriverWait(browser.driver, Duration.ofSeconds(TestProperties.TEST_TIMEOUT));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("ng-animating")));
+        ThreadHelper.waitFor(1000);
+    }
+
+    public void waitUntilAnimationFinish() {
+        waitUntilAnimationFinish(browser);
+    }
+
     /**
      * Waits until an element is no longer attached to the DOM or the timeout expires.
-     * @param element the WebElement
-     * @throws TimeoutException if the timeout defined in
-     * {@link TestProperties#TEST_TIMEOUT} expires
+     * @param element the WebElement that expires after {@link TestProperties#TEST_TIMEOUT}
      * @see org.openqa.selenium.support.ui.FluentWait#until(java.util.function.Function)
      */
     public void waitForElementStaleness(WebElement element) {
         waitFor(ExpectedConditions.stalenessOf(element));
+    }
+
+    public void verifyUnclickable(WebElement element) {
+        if ("a".equals(element.getTagName())) {
+            assertTrue(element.getAttribute("class").contains("disabled"));
+        } else {
+            assertNotNull(element.getAttribute("disabled"));
+        }
     }
 
     /**
@@ -188,19 +218,10 @@ public abstract class AppPage {
      */
     public void waitForConfirmationModalAndClickOk() {
         waitForModalShown();
+        waitForElementVisibility(By.className("modal-btn-ok"));
         WebElement okayButton = browser.driver.findElement(By.className("modal-btn-ok"));
         waitForElementToBeClickable(okayButton);
         clickDismissModalButtonAndWaitForModalHidden(okayButton);
-    }
-
-    /**
-     * Waits for a confirmation modal to appear and click the cancel button.
-     */
-    public void waitForConfirmationModalAndClickCancel() {
-        waitForModalShown();
-        WebElement cancelButton = browser.driver.findElement(By.className("modal-btn-cancel"));
-        waitForElementToBeClickable(cancelButton);
-        clickDismissModalButtonAndWaitForModalHidden(cancelButton);
     }
 
     private void waitForModalShown() {
@@ -223,7 +244,7 @@ public abstract class AppPage {
     }
 
     public void reloadPage() {
-        browser.driver.get(browser.driver.getCurrentUrl());
+        browser.goToUrl(browser.driver.getCurrentUrl());
         waitForPageToLoad();
     }
 
@@ -234,7 +255,6 @@ public abstract class AppPage {
 
     /**
      * Returns the HTML source of the currently loaded page.
-     * TODO: remove this method as it does not return necessary html anymore since frontend is generated by angular
      */
     public String getPageSource() {
         return browser.driver.getPageSource();
@@ -245,7 +265,7 @@ public abstract class AppPage {
     }
 
     public String getPageTitle() {
-        return browser.driver.findElement(By.tagName("h1")).getText();
+        return waitForElementPresence(By.tagName("h1")).getText();
     }
 
     public void click(By by) {
@@ -324,21 +344,26 @@ public abstract class AppPage {
         // See documentation for `clearAndSendKeys` for more details.
         clearAndSendKeys(textBoxElement, value);
 
-        // Add event hook before blurring the text box element so we can detect the event.
-        firefoxChangeHandler.addChangeEventHook(textBoxElement);
-
         textBoxElement.sendKeys(Keys.TAB); // blur the element to receive events
+    }
 
-        // Although events should not be manually fired, the `change` event does not fire when text input is changed if
-        // Firefox is not in focus. Setting profile option `focusmanager.testmode = true` does not help as well.
-        // A temporary solution is to fire the `change` event until the buggy behavior is fixed.
-        // More details can be found in the umbrella issue of related bugs in the following link:
-        // https://github.com/mozilla/geckodriver/issues/906
-        // The firing of `change` event is also imperfect because no check for the type of the elements is done before firing
-        // the event, for instance a `change` event will be wrongly fired on any content editable element. The firing time of
-        // `change` events is also incorrect for several `input` types such as `checkbox` and `date`.
-        // See: https://developer.mozilla.org/en-US/docs/Web/Events/change
-        firefoxChangeHandler.fireChangeEventIfNotFired(textBoxElement);
+    protected void fillDatePicker(WebElement dateBox, Instant startInstant, String timeZone) {
+        WebElement buttonToOpenPicker = dateBox.findElement(By.tagName("button"));
+        click(buttonToOpenPicker);
+
+        WebElement datePicker = dateBox.findElement(By.tagName("ngb-datepicker"));
+        WebElement monthAndYearPicker = datePicker.findElement(By.tagName("ngb-datepicker-navigation-select"));
+        WebElement monthPicker = monthAndYearPicker.findElement(By.cssSelector("[title='Select month']"));
+        WebElement yearPicker = monthAndYearPicker.findElement(By.cssSelector("[title='Select year']"));
+        WebElement dayPicker = datePicker.findElement(By.cssSelector("ngb-datepicker-month"));
+
+        String year = getYearString(startInstant, timeZone);
+        String month = getMonthString(startInstant, timeZone);
+        String date = getFullDateString(startInstant, timeZone);
+
+        selectDropdownOptionByText(yearPicker, year);
+        selectDropdownOptionByText(monthPicker, month);
+        click(dayPicker.findElement(By.cssSelector(String.format("[aria-label='%s']", date))));
     }
 
     protected void fillFileBox(RemoteWebElement fileBoxElement, String fileName) {
@@ -352,33 +377,155 @@ public abstract class AppPage {
     }
 
     /**
-     * 'check' the check box, if it is not already 'checked'.
-     * No action taken if it is already 'checked'.
+     * Get rich text from editor.
      */
-    protected void markCheckBoxAsChecked(WebElement checkBox) {
-        waitForElementVisibility(checkBox);
-        if (!checkBox.isSelected()) {
-            click(checkBox);
+    protected String getEditorRichText(WebElement editor) {
+        waitForElementPresence(By.tagName("iframe"));
+        String id = editor.findElement(By.tagName("textarea")).getAttribute("id");
+        return (String) ((JavascriptExecutor) browser.driver)
+                .executeAsyncScript(READ_TINYMCE_CONTENT_SCRIPT, id);
+    }
+
+    /**
+     * Write rich text to editor.
+     */
+    protected void writeToRichTextEditor(WebElement editor, String text) {
+        waitForElementPresence(By.tagName("iframe"));
+        String id = editor.findElement(By.tagName("textarea")).getAttribute("id");
+        ((JavascriptExecutor) browser.driver).executeAsyncScript(WRITE_TO_TINYMCE_SCRIPT, id, text);
+    }
+
+    /**
+     * Clear existing text in the editor.
+     */
+    protected void clearRichTextEditor(WebElement editor) {
+        writeToRichTextEditor(editor, "");
+    }
+
+    /**
+     * Select the option, if it is not already selected.
+     * No action taken if it is already selected.
+     */
+    protected void markOptionAsSelected(WebElement option) {
+        waitForElementVisibility(option);
+        if (!option.isSelected()) {
+            click(option);
         }
     }
 
     /**
-     * Returns the value of the cell located at {@code (row, column)}
-     *         from the first table (which is of type {@code class=table}) in the page.
+     * Unselect the option, if it is not already unselected.
+     * No action taken if it is already unselected'.
      */
-    public String getCellValueFromDataTable(int row, int column) {
-        return getCellValueFromDataTable(0, row, column);
+    protected void markOptionAsUnselected(WebElement option) {
+        waitForElementVisibility(option);
+        if (option.isSelected()) {
+            click(option);
+        }
     }
 
     /**
-     * Returns the value of the cell located at {@code (row, column)}
-     *         from the nth(0-index-based) table (which is of type {@code class=table}) in the page.
+     * Returns the text of the option selected in the dropdown.
      */
-    public String getCellValueFromDataTable(int tableNum, int row, int column) {
-        WebElement tableElement = browser.driver.findElements(By.className("table")).get(tableNum);
-        WebElement trElement = tableElement.findElements(By.tagName("tr")).get(row);
-        WebElement tdElement = trElement.findElements(By.tagName("td")).get(column);
-        return tdElement.getText();
+    protected String getSelectedDropdownOptionText(WebElement dropdown) {
+        Select select = new Select(dropdown);
+        try {
+            uiRetryManager.runUntilNoRecognizedException(new Retryable("Wait for dropdown text to load") {
+                @Override
+                public void run() {
+                    String txt = select.getFirstSelectedOption().getText();
+                    assertNotEquals("", txt);
+                }
+            }, WebDriverException.class, AssertionError.class);
+            return select.getFirstSelectedOption().getText();
+        } catch (MaximumRetriesExceededException e) {
+            return select.getFirstSelectedOption().getText();
+        }
+    }
+
+    /**
+     * Selects option in dropdown based on visible text.
+     */
+    protected void selectDropdownOptionByText(WebElement dropdown, String text) {
+        scrollElementToCenter(dropdown);
+        Select select = new Select(dropdown);
+        select.selectByVisibleText(text);
+    }
+
+    /**
+     * Selects option in dropdown based on value.
+     */
+    protected void selectDropdownOptionByValue(WebElement dropdown, String value) {
+        scrollElementToCenter(dropdown);
+        Select select = new Select(dropdown);
+        select.selectByValue(value);
+    }
+
+    /**
+     * Asserts that all values in the body of the given table are equal to the expectedTableBodyValues.
+     */
+    protected void verifyTableBodyValues(WebElement table, String[][] expectedTableBodyValues) {
+        List<WebElement> rows = table.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
+        assertTrue(expectedTableBodyValues.length <= rows.size());
+        for (int rowIndex = 0; rowIndex < expectedTableBodyValues.length; rowIndex++) {
+            verifyTableRowValues(rows.get(rowIndex), expectedTableBodyValues[rowIndex]);
+        }
+    }
+
+    /**
+     * Asserts that all values in the row header of the given table are equal to the expectedRowHeaderValues.
+     */
+    protected void verifyTableRowHeaderValues(WebElement table, String[][] expectedTableRowHeaderValues) {
+        List<WebElement> rows = table.findElement(By.tagName("thead")).findElements(By.tagName("tr"));
+        assertTrue(expectedTableRowHeaderValues.length <= rows.size());
+        for (int rowIndex = 0; rowIndex < expectedTableRowHeaderValues.length; rowIndex++) {
+            verifyTableHeaderValues(rows.get(rowIndex), expectedTableRowHeaderValues[rowIndex]);
+        }
+    }
+
+    /**
+     * Asserts that all values in the column header of the given table are equal to the expectedTablColumnHeaderValues.
+     */
+    protected void verifyTableColumnHeaderValues(WebElement table, String[][] expectedTablColumnHeaderValues) {
+        List<WebElement> rows = table.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
+        assertTrue(expectedTablColumnHeaderValues.length <= rows.size());
+        for (int rowIndex = 0; rowIndex < expectedTablColumnHeaderValues.length; rowIndex++) {
+            verifyTableHeaderValues(rows.get(rowIndex), expectedTablColumnHeaderValues[rowIndex]);
+        }
+    }
+
+    /**
+     * Asserts that all data values in the given table row are equal to the expectedRowValues.
+     */
+    protected void verifyTableRowValues(WebElement row, String[] expectedRowValues) {
+        List<WebElement> cells = row.findElements(By.tagName("td"));
+        assertTrue(expectedRowValues.length <= cells.size());
+        for (int cellIndex = 0; cellIndex < expectedRowValues.length; cellIndex++) {
+            assertEquals(expectedRowValues[cellIndex], cells.get(cellIndex).getText());
+        }
+    }
+
+    /**
+     * Asserts that all header values in the given table row are equal to the expectedRowHeaderValues.
+     */
+    protected void verifyTableHeaderValues(WebElement row, String[] expectedRowHeaderValues) {
+        List<WebElement> cells = row.findElements(By.tagName("th"));
+        assertTrue(expectedRowHeaderValues.length <= cells.size());
+        for (int cellIndex = 0; cellIndex < expectedRowHeaderValues.length; cellIndex++) {
+            assertEquals(expectedRowHeaderValues[cellIndex], cells.get(cellIndex).getText());
+        }
+    }
+
+    public void verifyBannerContent(NotificationAttributes expected) {
+        WebElement banner = browser.driver.findElement(By.className("banner"));
+        String title = banner.findElement(By.tagName("h5")).getText();
+        String message = banner.findElement(By.className("banner-text")).getAttribute("innerHTML");
+        assertEquals(expected.getTitle(), title);
+        assertEquals(expected.getMessage(), message);
+    }
+
+    public boolean isBannerVisible() {
+        return isElementVisible(By.className("banner"));
     }
 
     /**
@@ -389,18 +536,7 @@ public abstract class AppPage {
     public AppPage clickAndConfirm(WebElement elementToClick) {
         click(elementToClick);
         waitForConfirmationModalAndClickOk();
-        waitForPageToLoad();
         return this;
-    }
-
-    /**
-     * Equivalent of clicking the 'Profile' tab on the top menu of the page.
-     * @return the loaded page
-     */
-    public StudentProfilePage loadProfileTab() {
-        click(studentProfileTab);
-        waitForPageToLoad();
-        return changePageType(StudentProfilePage.class);
     }
 
     /**
@@ -413,7 +549,7 @@ public abstract class AppPage {
      * Returns True if there is a corresponding element for the given locator.
      */
     public boolean isElementPresent(By by) {
-        return browser.driver.findElements(by).size() != 0;
+        return !browser.driver.findElements(by).isEmpty();
     }
 
     /**
@@ -423,14 +559,6 @@ public abstract class AppPage {
         try {
             browser.driver.findElement(By.id(elementId));
             return true;
-        } catch (NoSuchElementException e) {
-            return false;
-        }
-    }
-
-    public boolean isElementVisible(String elementId) {
-        try {
-            return browser.driver.findElement(By.id(elementId)).isDisplayed();
         } catch (NoSuchElementException e) {
             return false;
         }
@@ -502,125 +630,135 @@ public abstract class AppPage {
      */
     void scrollElementToCenterAndClick(WebElement element) {
         // TODO: migrate to `scrollIntoView` when Geckodriver is adopted
-        executeScript(SCROLL_ELEMENT_TO_CENTER_AND_CLICK_SCRIPT, element);
+        scrollElementToCenter(element);
         element.click();
     }
 
     /**
-     * Encapsulates methods for handling Firefox {@code change} events. The methods can only handle one {@value CHANGE_EVENT}
-     * event at a time and will only do something useful if test browser is Firefox. Note that the class does not check if
-     * the {@value CHANGE_EVENT} event should be fired on the element.
+     * Scrolls element to center.
      */
-    private class FirefoxChangeHandler {
+    void scrollElementToCenter(WebElement element) {
+        executeScript(SCROLL_ELEMENT_TO_CENTER_AND_CLICK_SCRIPT, element);
+        ThreadHelper.waitFor(1000);
+    }
 
-        private static final String CHANGE_EVENT = "change";
-        /**
-         * The attribute that the hook will modify to indicate if the {@value CHANGE_EVENT} event is detected.
-         */
-        private static final String HOOK_ATTRIBUTE = "__change__";
-        /**
-         * The maximum number of seconds required for all hardware (including slow ones) to fire the event.
-         */
-        private static final int MAXIMUM_SECONDS_REQUIRED_FOR_ALL_CPUS_TO_FIRE_EVENT = 1;
+    /**
+     * Asserts message in toast is equal to the expected message.
+     */
+    public void verifyStatusMessage(String expectedMessage) {
+        verifyStatusMessageWithLinks(expectedMessage, new String[] {});
+        closeToast();
+    }
 
-        private final boolean isFirefox;
-
-        FirefoxChangeHandler() {
-            isFirefox = TestProperties.BROWSER_FIREFOX.equals(TestProperties.BROWSER);
-        }
-
-        /**
-         * Returns true if the {@value CHANGE_EVENT} event hook has already been added.
-         * Note that there can only be one hook (linked to a particular element) at a time for each page.
-         */
-        private boolean isChangeEventHookAdded() {
-            WebElement bodyElement = browser.driver.findElement(By.tagName("body"));
-            return isExpectedCondition(ExpectedConditions.attributeToBeNotEmpty(bodyElement, HOOK_ATTRIBUTE));
-        }
-
-        /**
-         * Adds a {@value CHANGE_EVENT} event hook for the element.
-         * The hook allows detection of the event required for {@link FirefoxChangeHandler#fireChangeEventIfNotFired}.
-         *
-         * @param element the element for which the hook will track whether the event is fired on the element
-         *
-         * @throws IllegalStateException if there is already a hook in the document
-         */
-        private void addChangeEventHook(WebElement element) {
-            if (!isFirefox) {
-                return;
-            }
-
-            checkState(!isChangeEventHookAdded(),
-                    "The `%1$s` event hook can only be added once in the document.", CHANGE_EVENT);
-
-            executeScript(ADD_CHANGE_EVENT_HOOK, element, CHANGE_EVENT, HOOK_ATTRIBUTE);
-        }
-
-        /**
-         * Fires a {@value CHANGE_EVENT} event on the element if not already fired.
-         * Requires a hook ({@link FirefoxChangeHandler#addChangeEventHook(WebElement)}) to be added before to detect
-         * events.
-         * Note that sometimes the {@value CHANGE_EVENT} event may need to be fired multiple times but this method only fires
-         * one {@value CHANGE_EVENT} event in place of multiple {@value CHANGE_EVENT} events. This reinforces the notion that
-         * events should not be fired manually so this method is to be avoided if possible.
-         *
-         * @param element the element for which the change event will be fired if it is not fired.
-         *
-         * @throws IllegalStateException if `change` event hook is not added
-         *
-         * @see FirefoxChangeHandler#isChangeEventNotFired()
-         */
-        private void fireChangeEventIfNotFired(WebElement element) {
-            if (!isFirefox) {
-                return;
-            }
-
-            checkState(isChangeEventHookAdded(),
-                    "A `%s` hook has to be added previously to detect event firing.", CHANGE_EVENT);
-
-            if (isChangeEventNotFired()) {
-                fireChangeEvent(element);
-            }
-
-            removeHookAttribute();
-        }
-
-        /**
-         * Removes the attribute associated with a hook.
-         */
-        private void removeHookAttribute() {
-            executeScript(String.format("document.body.removeAttribute('%s');", HOOK_ATTRIBUTE));
-        }
-
-        /**
-         * Returns if a {@value CHANGE_EVENT} event has not been fired for the element to which the hook is associated.
-         * Note that this only detects the presence of firing of {@value CHANGE_EVENT} events and not does not keep track of
-         * how many {@value CHANGE_EVENT} events are fired.
-         */
-        private boolean isChangeEventNotFired() {
-            WebDriverWait wait = new WebDriverWait(browser.driver, MAXIMUM_SECONDS_REQUIRED_FOR_ALL_CPUS_TO_FIRE_EVENT);
-            try {
-                wait.until(ExpectedConditions.attributeContains(By.tagName("body"), HOOK_ATTRIBUTE, "true"));
-                return false;
-            } catch (TimeoutException e) {
-                return true;
+    /**
+     * Asserts message in toast is equal to the expected message and contains the expected links.
+     */
+    public void verifyStatusMessageWithLinks(String expectedMessage, String[] expectedLinks) {
+        WebElement[] statusMessage = new WebElement[1];
+        try {
+            uiRetryManager.runUntilNoRecognizedException(new Retryable("Verify status to user") {
+                @Override
+                public void run() {
+                    statusMessage[0] = waitForElementPresence(By.className("toast-body"));
+                    assertEquals(expectedMessage, statusMessage[0].getText());
+                }
+            }, WebDriverException.class, AssertionError.class);
+        } catch (MaximumRetriesExceededException e) {
+            statusMessage[0] = waitForElementPresence(By.className("toast-body"));
+            assertEquals(expectedMessage, statusMessage[0].getText());
+        } finally {
+            if (expectedLinks.length > 0) {
+                List<WebElement> actualLinks = statusMessage[0].findElements(By.tagName("a"));
+                for (int i = 0; i < expectedLinks.length; i++) {
+                    assertTrue(actualLinks.get(i).getAttribute("href").contains(expectedLinks[i]));
+                }
             }
         }
+    }
 
-        /**
-         * Fires the {@value CHANGE_EVENT} event on the element.
-         * Note that this method should not usually be called because events should not be fired manually,
-         * and may also result in unexpected <strong>multiple firings</strong> of the event.
-         */
-        private void fireChangeEvent(WebElement element) {
-            if (!isFirefox) {
-                return;
-            }
-            // The `change` event is fired with bubbling enabled to simulate how browsers fire them.
-            // See: https://developer.mozilla.org/en-US/docs/Web/Events/change
-            executeScript("const event = new Event(arguments[1], {bubbles: true});"
-                    + "arguments[0].dispatchEvent(event);", element, CHANGE_EVENT);
+    /**
+     * Closes toast message.
+     */
+    public void closeToast() {
+        WebElement toastCloseButton = waitForElementPresence(By.className("btn-close"));
+        click(toastCloseButton);
+    }
+
+    /**
+     * Switches to the new browser window just opened.
+     */
+    protected void switchToNewWindow() {
+        browser.switchToNewWindow();
+    }
+
+    /**
+     * Closes current window and switches back to parent window.
+     */
+    public void closeCurrentWindowAndSwitchToParentWindow() {
+        browser.closeCurrentWindowAndSwitchToParentWindow();
+    }
+
+    String getDisplayGiverName(FeedbackParticipantType type) {
+        switch (type) {
+        case SELF:
+            return "Feedback session creator (i.e., me)";
+        case STUDENTS:
+            return "Students in this course";
+        case INSTRUCTORS:
+            return "Instructors in this course";
+        case TEAMS:
+            return "Teams in this course";
+        default:
+            throw new IllegalArgumentException("Unknown FeedbackParticipantType: " + type);
         }
+    }
+
+    String getDisplayRecipientName(FeedbackParticipantType type) {
+        switch (type) {
+        case SELF:
+            return "Giver (Self feedback)";
+        case STUDENTS_IN_SAME_SECTION:
+            return "Other students in the same section";
+        case STUDENTS:
+            return "Students in the course";
+        case STUDENTS_EXCLUDING_SELF:
+            return "Other students in the course";
+        case INSTRUCTORS:
+            return "Instructors in the course";
+        case TEAMS_IN_SAME_SECTION:
+            return "Other teams in the same section";
+        case TEAMS:
+            return "Teams in the course";
+        case TEAMS_EXCLUDING_SELF:
+            return "Other teams in the course";
+        case OWN_TEAM:
+            return "Giver's team";
+        case OWN_TEAM_MEMBERS:
+            return "Giver's team members";
+        case OWN_TEAM_MEMBERS_INCLUDING_SELF:
+            return "Giver's team members and Giver";
+        case NONE:
+            return "Nobody specific (For general class feedback)";
+        default:
+            throw new IllegalArgumentException("Unknown FeedbackParticipantType: " + type);
+        }
+    }
+
+    String getDisplayedDateTime(Instant instant, String timeZone, String pattern) {
+        ZonedDateTime zonedDateTime = TimeHelper.getMidnightAdjustedInstantBasedOnZone(instant, timeZone, false)
+                .atZone(ZoneId.of(timeZone));
+        return DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH).format(zonedDateTime);
+    }
+
+    private String getFullDateString(Instant instant, String timeZone) {
+        return getDisplayedDateTime(instant, timeZone, "EEEE, MMMM d, yyyy");
+    }
+
+    private String getYearString(Instant instant, String timeZone) {
+        return getDisplayedDateTime(instant, timeZone, "yyyy");
+    }
+
+    private String getMonthString(Instant instant, String timeZone) {
+        return getDisplayedDateTime(instant, timeZone, "MMM");
     }
 }

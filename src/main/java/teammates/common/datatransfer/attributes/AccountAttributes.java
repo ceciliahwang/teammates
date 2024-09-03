@@ -2,41 +2,44 @@ package teammates.common.datatransfer.attributes;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import teammates.common.util.Assumption;
-import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.common.util.JsonUtils;
 import teammates.common.util.SanitizationHelper;
-import teammates.common.util.StringHelper;
 import teammates.storage.entity.Account;
 
 /**
- * A data transfer object for Account entities.
+ * The data transfer object for {@link Account} entities.
  */
-public class AccountAttributes extends EntityAttributes<Account> {
+public final class AccountAttributes extends EntityAttributes<Account> {
 
-    public String googleId;
+    private String googleId;
+    private String name;
+    private String email;
+    private Map<String, Instant> readNotifications;
+    private Instant createdAt;
+    private boolean isMigrated;
 
-    public String name;
-    public boolean isInstructor;
-    public String email;
-    public String institute;
-    public Instant createdAt;
-
-    AccountAttributes(String googleId) {
+    private AccountAttributes(String googleId) {
         this.googleId = googleId;
+        this.readNotifications = new HashMap<>();
     }
 
+    /**
+     * Gets the {@link AccountAttributes} instance of the given {@link Account}.
+     */
     public static AccountAttributes valueOf(Account a) {
         AccountAttributes accountAttributes = new AccountAttributes(a.getGoogleId());
 
         accountAttributes.name = a.getName();
-        accountAttributes.isInstructor = a.isInstructor();
         accountAttributes.email = a.getEmail();
-        accountAttributes.institute = a.getInstitute();
+        accountAttributes.readNotifications = a.getReadNotifications();
         accountAttributes.createdAt = a.getCreatedAt();
+        accountAttributes.isMigrated = a.isMigrated();
 
         return accountAttributes;
     }
@@ -55,40 +58,60 @@ public class AccountAttributes extends EntityAttributes<Account> {
         AccountAttributes accountAttributes = new AccountAttributes(this.googleId);
 
         accountAttributes.name = this.name;
-        accountAttributes.isInstructor = this.isInstructor;
         accountAttributes.email = this.email;
-        accountAttributes.institute = this.institute;
+        accountAttributes.readNotifications = this.readNotifications;
         accountAttributes.createdAt = this.createdAt;
+        accountAttributes.isMigrated = this.isMigrated;
 
         return accountAttributes;
-    }
-
-    public boolean isInstructor() {
-        return isInstructor;
     }
 
     public String getGoogleId() {
         return googleId;
     }
 
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public String getTruncatedGoogleId() {
-        return StringHelper.truncateLongId(googleId);
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getInstitute() {
-        return institute;
+    public Map<String, Instant> getReadNotifications() {
+        return readNotifications;
+    }
+
+    public void setReadNotifications(Map<String, Instant> readNotifications) {
+        this.readNotifications = readNotifications;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public boolean isMigrated() {
+        return isMigrated;
+    }
+
+    public void setMigrated(boolean migrated) {
+        isMigrated = migrated;
     }
 
     @Override
@@ -101,21 +124,41 @@ public class AccountAttributes extends EntityAttributes<Account> {
 
         addNonEmptyError(FieldValidator.getInvalidityInfoForEmail(email), errors);
 
-        addNonEmptyError(FieldValidator.getInvalidityInfoForInstituteName(institute), errors);
-
-        // No validation for isInstructor and createdAt fields.
+        // No validation necessary for createdAt and readNotifications fields.
 
         return errors;
     }
 
     @Override
     public Account toEntity() {
-        return new Account(googleId, name, isInstructor, email, institute);
+        return new Account(googleId, name, email, readNotifications, isMigrated);
     }
 
     @Override
     public String toString() {
-        return JsonUtils.toJson(this, AccountAttributes.class);
+        return "AccountAttributes [googleId=" + googleId + ", name=" + name
+               + ", email=" + email + "]" + ", isMigrated=" + isMigrated + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return (this.email + this.name + this.googleId).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        } else if (this == other) {
+            return true;
+        } else if (this.getClass() == other.getClass()) {
+            AccountAttributes otherAccount = (AccountAttributes) other;
+            return Objects.equals(this.email, otherAccount.email)
+                    && Objects.equals(this.name, otherAccount.name)
+                    && Objects.equals(this.googleId, otherAccount.googleId);
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -123,18 +166,13 @@ public class AccountAttributes extends EntityAttributes<Account> {
         this.googleId = SanitizationHelper.sanitizeGoogleId(googleId);
         this.name = SanitizationHelper.sanitizeName(name);
         this.email = SanitizationHelper.sanitizeEmail(email);
-        this.institute = SanitizationHelper.sanitizeTitle(institute);
-    }
-
-    public boolean isUserRegistered() {
-        return googleId != null && !googleId.isEmpty();
     }
 
     /**
      * Updates with {@link UpdateOptions}.
      */
     public void update(UpdateOptions updateOptions) {
-        updateOptions.isInstructorOption.ifPresent(s -> isInstructor = s);
+        updateOptions.readNotificationsOption.ifPresent(s -> readNotifications = s);
     }
 
     /**
@@ -147,7 +185,7 @@ public class AccountAttributes extends EntityAttributes<Account> {
     /**
      * A builder class for {@link AccountAttributes}.
      */
-    public static class Builder extends BasicBuilder<AccountAttributes, Builder> {
+    public static final class Builder extends BasicBuilder<AccountAttributes, Builder> {
 
         private AccountAttributes accountAttributes;
 
@@ -159,23 +197,16 @@ public class AccountAttributes extends EntityAttributes<Account> {
         }
 
         public Builder withName(String name) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, name);
+            assert name != null;
 
             accountAttributes.name = name;
             return this;
         }
 
         public Builder withEmail(String email) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, email);
+            assert email != null;
 
             accountAttributes.email = email;
-            return this;
-        }
-
-        public Builder withInstitute(String institute) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, institute);
-
-            accountAttributes.institute = institute;
             return this;
         }
 
@@ -188,15 +219,16 @@ public class AccountAttributes extends EntityAttributes<Account> {
     }
 
     /**
-     * Helper class to specific the fields to update in {@link AccountAttributes}.
+     * Helper class to specify the fields to update in {@link AccountAttributes}.
      */
-    public static class UpdateOptions {
+    public static final class UpdateOptions {
         private String googleId;
 
-        private UpdateOption<Boolean> isInstructorOption = UpdateOption.empty();
+        private UpdateOption<Map<String, Instant>> readNotificationsOption = UpdateOption.empty();
+        private UpdateOption<Boolean> migratedOption = UpdateOption.empty();
 
         private UpdateOptions(String googleId) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, googleId);
+            assert googleId != null;
 
             this.googleId = googleId;
         }
@@ -209,14 +241,15 @@ public class AccountAttributes extends EntityAttributes<Account> {
         public String toString() {
             return "AccountAttributes.UpdateOptions ["
                     + "googleId = " + googleId
-                    + ", isInstructor = " + isInstructorOption
+                    + ", readNotifications = " + JsonUtils.toJson(readNotificationsOption)
+                    + ", isMigrated = " + migratedOption
                     + "]";
         }
 
         /**
          * Builder class to build {@link UpdateOptions}.
          */
-        public static class Builder extends BasicBuilder<UpdateOptions, Builder> {
+        public static final class Builder extends BasicBuilder<UpdateOptions, Builder> {
 
             private Builder(String googleId) {
                 super(new UpdateOptions(googleId));
@@ -240,15 +273,20 @@ public class AccountAttributes extends EntityAttributes<Account> {
      */
     private abstract static class BasicBuilder<T, B extends BasicBuilder<T, B>> {
 
-        protected UpdateOptions updateOptions;
-        protected B thisBuilder;
+        UpdateOptions updateOptions;
+        B thisBuilder;
 
-        protected BasicBuilder(UpdateOptions updateOptions) {
+        BasicBuilder(UpdateOptions updateOptions) {
             this.updateOptions = updateOptions;
         }
 
-        public B withIsInstructor(boolean isInstructor) {
-            updateOptions.isInstructorOption = UpdateOption.of(isInstructor);
+        public B withReadNotifications(Map<String, Instant> readNotifications) {
+            updateOptions.readNotificationsOption = UpdateOption.of(readNotifications);
+            return thisBuilder;
+        }
+
+        public B withMigrated(boolean isMigrated) {
+            updateOptions.migratedOption = UpdateOption.of(isMigrated);
             return thisBuilder;
         }
 

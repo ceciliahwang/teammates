@@ -1,4 +1,4 @@
-<tr>
+<tr [attr.aria-label]="getAriaLabel()">
   <td>
     <div class="check-box" *ngFor="let num of questionDetails.msqChoices; let i = index;">
       <label class="margin-right-15px">
@@ -7,7 +7,7 @@
         <strong>{{ questionDetails.msqChoices[i] }}</strong>
       </label>
     </div>
-    <div class="check-box" *ngIf="questionDetails.otherEnabled">
+    <div id="other-option" class="check-box" *ngIf="questionDetails.otherEnabled">
       <label class="margin-right-15px">
         <input type="checkbox" class="margin-right-15px" [checked]="responseDetails.isOther"
                (click)="updateIsOtherOption()" [disabled]="isDisabled">
@@ -15,7 +15,7 @@
       </label>
       <input #inputTextBoxOther class="form-control" style="display: inline; width: 60%;" type="text" [disabled]="!responseDetails.isOther || isDisabled"
              [ngModel]="responseDetails.otherFieldContent"
-             (ngModelChange)="triggerResponseDetailsChange('otherFieldContent', $event)">
+             (ngModelChange)="updateOtherAnswerField($event)">
     </div>
     <div class="check-box" *ngIf="questionDetails.minSelectableChoices === NO_VALUE">
       <label class="margin-right-15px">

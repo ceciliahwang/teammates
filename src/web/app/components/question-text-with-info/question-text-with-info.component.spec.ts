@@ -1,7 +1,8 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
+import { QuestionTextWithInfoComponent } from './question-text-with-info.component';
 import {
   FeedbackMcqQuestionDetails,
   FeedbackParticipantType,
@@ -11,18 +12,19 @@ import {
 import {
   QuestionAdditionalInfoModule,
 } from '../question-types/question-additional-info/question-additional-info.module';
-import { QuestionTextWithInfoComponent } from './question-text-with-info.component';
+import { TeammatesRouterModule } from '../teammates-router/teammates-router.module';
 
 describe('QuestionTextWithInfoComponent', () => {
   let component: QuestionTextWithInfoComponent;
   let fixture: ComponentFixture<QuestionTextWithInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [QuestionTextWithInfoComponent],
       imports: [
         RouterTestingModule,
         QuestionAdditionalInfoModule,
+        TeammatesRouterModule,
       ],
     })
     .compileComponents();
@@ -35,6 +37,7 @@ describe('QuestionTextWithInfoComponent', () => {
   });
 
   const textQuestionDetails: FeedbackTextQuestionDetails = {
+    shouldAllowRichText: true,
     questionType: FeedbackQuestionType.TEXT,
     questionText: 'Text question details',
     recommendedLength: 100,
@@ -46,9 +49,9 @@ describe('QuestionTextWithInfoComponent', () => {
     hasAssignedWeights: false,
     mcqWeights: [],
     mcqOtherWeight: 0,
-    numOfMcqChoices: 2,
     mcqChoices: ['a', 'b'],
     otherEnabled: false,
+    questionDropdownEnabled: false,
     generateOptionsFor: FeedbackParticipantType.NONE,
 
   };
@@ -80,7 +83,7 @@ describe('QuestionTextWithInfoComponent', () => {
     component.questionDetails = mcqQuestionDetails;
     fixture.detectChanges();
 
-    const questionDetailControlLink: any = fixture.debugElement.query(By.css('a'));
+    const questionDetailControlLink: any = fixture.debugElement.query(By.css('button'));
 
     questionDetailControlLink.nativeElement.click();
     fixture.detectChanges();

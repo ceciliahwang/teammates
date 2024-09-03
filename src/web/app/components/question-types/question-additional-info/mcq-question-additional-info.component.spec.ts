@@ -1,19 +1,23 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
+import { McqQuestionAdditionalInfoComponent } from './mcq-question-additional-info.component';
 import {
   FeedbackMcqQuestionDetails,
   FeedbackParticipantType,
   FeedbackQuestionType,
 } from '../../../../types/api-output';
-import { McqQuestionAdditionalInfoComponent } from './mcq-question-additional-info.component';
+import { TeammatesCommonModule } from '../../teammates-common/teammates-common.module';
 
 describe('McqQuestionAdditionalInfoComponent', () => {
   let component: McqQuestionAdditionalInfoComponent;
   let fixture: ComponentFixture<McqQuestionAdditionalInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [McqQuestionAdditionalInfoComponent],
+      imports: [
+        TeammatesCommonModule,
+      ],
     })
     .compileComponents();
   }));
@@ -36,9 +40,9 @@ describe('McqQuestionAdditionalInfoComponent', () => {
     hasAssignedWeights: false,
     mcqWeights: [],
     mcqOtherWeight: 0,
-    numOfMcqChoices: 3,
     mcqChoices: ['1', '2', '3'],
     otherEnabled: false,
+    questionDropdownEnabled: false,
     generateOptionsFor: FeedbackParticipantType.NONE,
     questionType: FeedbackQuestionType.MCQ,
     questionText: 'MCQ question detail',
@@ -48,9 +52,9 @@ describe('McqQuestionAdditionalInfoComponent', () => {
     hasAssignedWeights: false,
     mcqWeights: [],
     mcqOtherWeight: 0,
-    numOfMcqChoices: 3,
     mcqChoices: ['1', '2', '3'],
     otherEnabled: true,
+    questionDropdownEnabled: false,
     generateOptionsFor: FeedbackParticipantType.NONE,
     questionType: FeedbackQuestionType.MCQ,
     questionText: 'MCQ question detail',
@@ -60,9 +64,9 @@ describe('McqQuestionAdditionalInfoComponent', () => {
     hasAssignedWeights: false,
     mcqWeights: [],
     mcqOtherWeight: 0,
-    numOfMcqChoices: 3,
     mcqChoices: ['1', '2', '3'],
     otherEnabled: false,
+    questionDropdownEnabled: false,
     generateOptionsFor: FeedbackParticipantType.STUDENTS,
     questionType: FeedbackQuestionType.MCQ,
     questionText: 'MCQ with generate options question detail',

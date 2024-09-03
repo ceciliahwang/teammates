@@ -3,107 +3,92 @@
     "instructor1OfCourse1": {
       "googleId": "idOfInstructor1OfCourse1",
       "name": "Instructor 1 of Course 1",
-      "isInstructor": true,
       "email": "instr1@course1.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor2OfCourse1": {
       "googleId": "idOfInstructor2OfCourse1",
       "name": "Instructor 2 of Course 1",
-      "isInstructor": true,
       "email": "instr2@course1.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "helperOfCourse1": {
       "googleId": "idOfHelperOfCourse1",
       "name": "Helper of Course 1",
-      "isInstructor": true,
       "email": "helper@course1.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor1OfCourse2": {
       "googleId": "idOfInstructor1OfCourse2",
       "name": "Instructor 1 of Course 2",
-      "isInstructor": true,
       "email": "instr1@course2.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor2OfCourse2": {
       "googleId": "idOfInstructor2OfCourse2",
       "name": "Instructor 2 of Course 2",
-      "isInstructor": true,
       "email": "instr2@course2.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor1OfCourse3": {
       "googleId": "idOfInstructor1OfCourse3",
       "name": "Instructor 1 of Course 3",
-      "isInstructor": true,
       "email": "instr1@course3.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor3": {
       "googleId": "idOfInstructor3",
       "name": "Instructor 3 of Course 1 and 2",
-      "isInstructor": true,
       "email": "instr3@course1n2.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor4": {
       "googleId": "idOfInstructor4",
       "name": "Instructor 4 of CourseNoEvals",
-      "isInstructor": true,
       "email": "instr4@coursenoevals.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructor5": {
       "googleId": "idOfInstructor5",
       "name": "Instructor 5 of CourseNoRegister",
-      "isInstructor": true,
       "email": "instructor5@courseNoRegister.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "instructorWithoutCourses": {
       "googleId": "instructorWithoutCourses",
       "name": "Instructor Without Courses",
-      "isInstructor": true,
       "email": "iwc@yahoo.tmt",
-      "institute": "TEAMMATES Test Institute 7"
+      "readNotifications": {}
     },
     "instructorWithOnlyOneSampleCourse": {
       "googleId": "idOfInstructorWithOnlyOneSampleCourse",
       "name": "Instructor With Only One Sample Course",
-      "isInstructor": true,
       "email": "iwosc@yahoo.tmt",
-      "institute": "TEAMMATES Test Institute 7"
+      "readNotifications": {}
     },
     "instructorOfArchivedCourse": {
       "googleId": "idOfInstructorOfArchivedCourse",
       "name": "InstructorOfArchiveCourse name",
-      "isInstructor": true,
       "email": "instructorOfArchiveCourse@archiveCourse.tmt",
-      "institute": "TEAMMATES Test Institute 5"
+      "readNotifications": {}
     },
     "student1InCourse1": {
       "googleId": "student1InCourse1",
       "name": "Student 1 in course 1",
-      "isInstructor": false,
       "email": "student1InCourse1@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "student2InCourse1": {
       "googleId": "student2InCourse1",
       "name": "Student in two courses",
-      "isInstructor": false,
       "email": "student2InCourse1@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "student1InArchivedCourse": {
       "googleId": "student1InArchivedCourse",
       "name": "Student in Archived Course",
-      "isInstructor": false,
       "email": "student1InCourse1@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     }
   },
   "courses": {
@@ -111,38 +96,45 @@
       "createdAt": "2012-04-01T23:58:00Z",
       "id": "idOfTypicalCourse1",
       "name": "Typical Course 1 with 2 Evals",
-      "timeZone": "UTC"
+      "institute": "TEAMMATES Test Institute 1",
+      "timeZone": "Africa/Johannesburg"
     },
     "typicalCourse2": {
       "createdAt": "2012-04-01T23:59:00Z",
       "id": "idOfTypicalCourse2",
       "name": "Typical Course 2 with 1 Evals",
-      "timeZone": "UTC"
+      "institute": "TEAMMATES Test Institute 1",
+      "timeZone": "Asia/Singapore"
     },
     "typicalCourse3": {
       "createdAt": "2012-04-01T23:59:00Z",
       "id": "idOfTypicalCourse3",
       "name": "Typical Course 3 with 1 Evals",
-      "timeZone": "UTC"
+      "institute": "TEAMMATES Test Institute 1",
+      "timeZone": "Africa/Johannesburg"
     },
     "courseNoEvals": {
       "id": "idOfCourseNoEvals",
       "name": "Typical Course 3 with 0 Evals",
+      "institute": "TEAMMATES Test Institute 1",
       "timeZone": "UTC"
     },
     "sampleCourse": {
       "id": "idOfSampleCourse-demo",
       "name": "Sample Course",
+      "institute": "TEAMMATES Test Institute 7",
       "timeZone": "UTC"
     },
     "archivedCourse": {
       "id": "idOfArchivedCourse",
       "name": "Archived Course",
+      "institute": "TEAMMATES Test Institute 5",
       "timeZone": "UTC"
     },
     "unregisteredCourse": {
       "id": "idOfUnregisteredCourse",
       "name": "Unregistered Course",
+      "institute": "TEAMMATES Test Institute 1",
       "timeZone": "UTC"
     }
   },
@@ -157,14 +149,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -180,14 +172,14 @@
       "displayedName": "Manager",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": false,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": false,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -204,14 +196,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -227,14 +219,14 @@
       "displayedName": "Helper",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": false,
-          "cansubmitsessioninsection": false,
-          "canmodifysessioncommentinsection": false,
-          "canmodifycourse": false,
-          "canviewsessioninsection": false,
-          "canmodifysession": false,
-          "canmodifystudent": false,
-          "canmodifyinstructor": false
+          "canViewStudentInSections": false,
+          "canSubmitSessionInSections": false,
+          "canModifySessionCommentsInSections": false,
+          "canModifyCourse": false,
+          "canViewSessionInSections": false,
+          "canModifySession": false,
+          "canModifyStudent": false,
+          "canModifyInstructor": false
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -244,20 +236,19 @@
       "courseId": "idOfTypicalCourse1",
       "name": "Instructor Not Yet Joined Course 1",
       "email": "instructorNotYetJoinedCourse1@email.tmt",
-      "key": "regKeyForInstrNotYetJoinCourse1",
       "role": "Co-owner",
       "isDisplayedToStudents": true,
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -273,14 +264,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -296,14 +287,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -319,14 +310,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -342,14 +333,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -366,14 +357,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -389,14 +380,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -412,14 +403,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -436,14 +427,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -453,20 +444,19 @@
       "courseId": "idOfSampleCourse-demo",
       "name": "Instructor Not Yet Joined Course",
       "email": "instructorNotYetJoined@email.tmt",
-      "key": "regKeyForInstrNotYetJoinCourse",
       "role": "Co-owner",
       "isDisplayedToStudents": true,
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -519,6 +509,15 @@
       "team": "Team 1.2",
       "section": "Section 2"
     },
+    "student6InCourse1": {
+      "googleId": "student6InCourse1",
+      "email": "student6InCourse1@gmail.tmt",
+      "course": "idOfTypicalCourse1",
+      "name": "student6 In Course1",
+      "comments": "",
+      "team": "Team 1.2",
+      "section": "Section 2"
+    },
     "student1InCourse2": {
       "googleId": "student1InCourse2",
       "email": "student1InCourse2@gmail.tmt",
@@ -553,8 +552,7 @@
       "name": "student1 In unregisteredCourse",
       "comments": "",
       "team": "Team 1",
-      "section": "Section 1",
-      "key": "regKeyForStuNotYetJoinCourse"
+      "section": "Section 1"
     },
     "student2InUnregisteredCourse": {
       "googleId": "",
@@ -563,8 +561,7 @@
       "name": "student2 In unregisteredCourse",
       "comments": "",
       "team": "Team 2",
-      "section": "Section 2",
-      "key": "regKey2ForStuNotYetJoinCourse"
+      "section": "Section 2"
     },
     "student1InArchivedCourse": {
       "googleId": "student1InArchivedCourse",
@@ -583,19 +580,26 @@
       "creatorEmail": "instructor1@course1.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2012-03-20T23:59:00Z",
-      "startTime": "2012-04-01T21:59:00Z",
-      "endTime": "2037-04-30T21:59:00Z",
-      "sessionVisibleFromTime": "2012-03-28T21:59:00Z",
-      "resultsVisibleFromTime": "2037-05-01T21:59:00Z",
+      "startTime": "2012-04-01T22:00:00Z",
+      "endTime": "2037-04-30T22:00:00Z",
+      "sessionVisibleFromTime": "2012-03-28T22:00:00Z",
+      "resultsVisibleFromTime": "2037-05-01T22:00:00Z",
       "timeZone": "Africa/Johannesburg",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {
+        "student4InCourse1@gmail.tmt": "2037-04-30T23:00:00Z"
+      },
+      "instructorDeadlines": {
+        "instructor1@course1.tmt": "2037-04-30T23:00:00Z"
+      }
     },
     "session2InCourse1": {
       "feedbackSessionName": "Second feedback session",
@@ -603,19 +607,26 @@
       "creatorEmail": "instructor1@course1.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2013-03-20T23:59:00Z",
-      "startTime": "2013-06-01T21:59:00Z",
-      "endTime": "2030-04-28T21:59:00Z",
-      "sessionVisibleFromTime": "2013-03-20T21:59:00Z",
-      "resultsVisibleFromTime": "2030-04-29T21:59:00Z",
+      "startTime": "2013-06-01T22:00:00Z",
+      "endTime": "2030-04-28T22:00:00Z",
+      "sessionVisibleFromTime": "2013-03-20T22:00:00Z",
+      "resultsVisibleFromTime": "2030-04-29T22:00:00Z",
       "timeZone": "Africa/Johannesburg",
       "gracePeriod": 5,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {
+        "student4InCourse1@gmail.tmt": "2030-04-28T23:00:00Z"
+      },
+      "instructorDeadlines": {
+        "instructor1@course1.tmt": "2030-04-28T23:00:00Z"
+      }
     },
     "gracePeriodSession": {
       "feedbackSessionName": "Grace Period Session",
@@ -623,19 +634,22 @@
       "creatorEmail": "instructor1@course1.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2013-03-20T23:59:00Z",
-      "startTime": "2013-06-01T21:59:00Z",
-      "endTime": "2030-04-28T21:59:00Z",
-      "sessionVisibleFromTime": "2013-03-20T21:59:00Z",
-      "resultsVisibleFromTime": "2030-04-29T21:59:00Z",
+      "startTime": "2013-06-01T22:00:00Z",
+      "endTime": "2030-04-28T22:00:00Z",
+      "sessionVisibleFromTime": "2013-03-20T22:00:00Z",
+      "resultsVisibleFromTime": "2030-04-29T22:00:00Z",
       "timeZone": "Africa/Johannesburg",
       "gracePeriod": 1440,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "closedSession": {
       "feedbackSessionName": "Closed Session",
@@ -643,19 +657,22 @@
       "creatorEmail": "instructor1@course1.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2013-03-20T23:59:00Z",
-      "startTime": "2013-06-01T21:58:00Z",
-      "endTime": "2013-06-01T21:59:00Z",
-      "sessionVisibleFromTime": "2013-03-20T21:59:00Z",
-      "resultsVisibleFromTime": "2030-04-29T21:59:00Z",
+      "startTime": "2013-06-01T22:00:00Z",
+      "endTime": "2013-06-01T22:00:00Z",
+      "sessionVisibleFromTime": "2013-03-20T22:00:00Z",
+      "resultsVisibleFromTime": "2030-04-29T22:00:00Z",
       "timeZone": "Africa/Johannesburg",
       "gracePeriod": 5,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "empty.session": {
       "feedbackSessionName": "Empty session",
@@ -663,19 +680,22 @@
       "creatorEmail": "instructor2@course1.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2013-01-20T23:57:00Z",
-      "startTime": "2013-02-01T23:57:00Z",
-      "endTime": "2013-04-28T23:57:00Z",
-      "sessionVisibleFromTime": "2013-01-20T23:57:00Z",
-      "resultsVisibleFromTime": "2013-04-29T23:57:00Z",
-      "timeZone": "UTC",
+      "startTime": "2013-02-01T22:00:00Z",
+      "endTime": "2013-04-28T22:00:00Z",
+      "sessionVisibleFromTime": "2013-01-20T22:00:00Z",
+      "resultsVisibleFromTime": "2013-04-29T22:00:00Z",
+      "timeZone": "Africa/Johannesburg",
       "gracePeriod": 5,
+      "sentOpeningSoonEmail": false,
       "sentOpenEmail": false,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "awaiting.session": {
       "feedbackSessionName": "non visible session",
@@ -683,19 +703,22 @@
       "creatorEmail": "instructor2@course1.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2013-01-20T23:00:00Z",
-      "startTime": "2030-04-01T23:00:00Z",
-      "endTime": "2030-04-28T23:00:00Z",
-      "sessionVisibleFromTime": "2030-04-01T23:00:00Z",
-      "resultsVisibleFromTime": "2030-04-29T23:00:00Z",
-      "timeZone": "UTC",
+      "startTime": "2030-04-01T21:00:00Z",
+      "endTime": "2030-04-28T21:00:00Z",
+      "sessionVisibleFromTime": "2030-04-01T21:00:00Z",
+      "resultsVisibleFromTime": "2030-04-29T21:00:00Z",
+      "timeZone": "Africa/Johannesburg",
       "gracePeriod": 5,
+      "sentOpeningSoonEmail": false,
       "sentOpenEmail": false,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "archiveCourse.session1": {
       "feedbackSessionName": "session without student questions",
@@ -709,13 +732,16 @@
       "resultsVisibleFromTime": "2030-04-29T23:00:00Z",
       "timeZone": "UTC",
       "gracePeriod": 5,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "session1InCourse2": {
       "feedbackSessionName": "Instructor feedback session",
@@ -723,19 +749,22 @@
       "creatorEmail": "instructor1@course2.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2012-03-20T23:59:00Z",
-      "startTime": "2012-04-01T15:59:00Z",
-      "endTime": "2030-04-30T15:59:00Z",
-      "sessionVisibleFromTime": "2012-03-28T15:59:00Z",
-      "resultsVisibleFromTime": "2030-05-01T15:59:00Z",
+      "startTime": "2012-04-01T16:00:00Z",
+      "endTime": "2030-04-30T16:00:00Z",
+      "sessionVisibleFromTime": "2012-03-28T16:00:00Z",
+      "resultsVisibleFromTime": "2030-05-01T16:00:00Z",
       "timeZone": "Asia/Singapore",
       "gracePeriod": 0,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "session1InCourse3": {
       "feedbackSessionName": "First feedback session",
@@ -744,19 +773,22 @@
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2012-03-20T23:59:00Z",
       "deletedTime": "2012-05-20T23:59:00Z",
-      "startTime": "2012-04-01T21:59:00Z",
-      "endTime": "2037-04-30T21:59:00Z",
-      "sessionVisibleFromTime": "2012-03-28T21:59:00Z",
-      "resultsVisibleFromTime": "2037-05-01T21:59:00Z",
+      "startTime": "2012-04-01T22:00:00Z",
+      "endTime": "2037-04-30T22:00:00Z",
+      "sessionVisibleFromTime": "2012-03-28T22:00:00Z",
+      "resultsVisibleFromTime": "2037-05-01T22:00:00Z",
       "timeZone": "Africa/Johannesburg",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "session2InCourse3": {
       "feedbackSessionName": "Second feedback session",
@@ -764,19 +796,22 @@
       "creatorEmail": "instructor1@course3.tmt",
       "instructions": "Please please fill in the following questions.",
       "createdTime": "2012-03-20T23:59:00Z",
-      "startTime": "2012-04-01T21:59:00Z",
-      "endTime": "2037-04-30T21:59:00Z",
-      "sessionVisibleFromTime": "2012-03-28T21:59:00Z",
-      "resultsVisibleFromTime": "2037-05-01T21:59:00Z",
+      "startTime": "2012-04-01T22:00:00Z",
+      "endTime": "2037-04-30T22:00:00Z",
+      "sessionVisibleFromTime": "2012-03-28T22:00:00Z",
+      "resultsVisibleFromTime": "2037-05-01T22:00:00Z",
       "timeZone": "Africa/Johannesburg",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     }
   },
   "feedbackQuestions": {
@@ -917,13 +952,16 @@
       "recipientType": "TEAMS",
       "numberOfEntitiesToGiveFeedbackTo": 2,
       "showResponsesTo": [
-        "RECEIVER"
+        "RECEIVER",
+        "INSTRUCTORS"
       ],
       "showGiverNameTo": [
-        "RECEIVER"
+        "RECEIVER",
+        "INSTRUCTORS"
       ],
       "showRecipientNameTo": [
-        "RECEIVER"
+        "RECEIVER",
+        "INSTRUCTORS"
       ]
     },
     "team.members.feedback": {
@@ -1228,7 +1266,7 @@
       "feedbackSessionName": "Second feedback session",
       "courseId": "idOfTypicalCourse1",
       "feedbackQuestionId": "1",
-      "giver": "student4InCourse1@gmail.tmt",
+      "giver": "Team 1.1</td></div>'\"",
       "recipient": "Team 1.2",
       "giverSection": "Section 1",
       "recipientSection": "Section 2",
@@ -1240,8 +1278,8 @@
     "response1GracePeriodFeedback": {
       "feedbackSessionName": "Grace Period Session",
       "courseId": "idOfTypicalCourse1",
-      "feedbackQuestionId": "2",
-      "giver": "student4InCourse1@gmail.tmt",
+      "feedbackQuestionId": "1",
+      "giver": "Team 1.1</td></div>'\"",
       "recipient": "Team 1.2",
       "giverSection": "Section 1",
       "recipientSection": "Section 2",
@@ -1300,6 +1338,19 @@
       "responseDetails": {
         "questionType": "TEXT",
         "answer": "Response from student 1 to team member (student 4)."
+      }
+    },
+    "response3ForQ2S2C1": {
+      "feedbackSessionName": "Second feedback session",
+      "courseId": "idOfTypicalCourse1",
+      "feedbackQuestionId": "2",
+      "giver": "student6InCourse1@gmail.tmt",
+      "recipient": "student5InCourse1@gmail.tmt",
+      "giverSection": "Section 2",
+      "recipientSection": "Section 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Response from student 6 to team member (student 5)."
       }
     },
     "response1ForQ1S1C2": {
@@ -1395,16 +1446,46 @@
       "commentText": "Instructor 1 comment to Team 2.1"
     }
   },
-  "profiles": {
-    "student1InCourse1": {
-      "googleId": "student1InCourse1",
-      "shortName": "Stud1",
-      "email": "i.m.stud1@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 3",
-      "nationality": "American",
-      "gender": "MALE",
-      "moreInfo": "I am just a student :P",
-      "pictureKey": "asdf34&hfn3!@"
+  "deadlineExtensions": {
+    "student4InCourse1Session1": {
+      "courseId": "idOfTypicalCourse1",
+      "feedbackSessionName": "First feedback session",
+      "userEmail": "student4InCourse1@gmail.tmt",
+      "isInstructor": false,
+      "endTime": "2037-04-30T23:00:00Z",
+      "sentClosingEmail": false,
+      "createdAt": "2037-04-30T20:00:00Z",
+      "updatedAt": "2037-04-30T20:00:00Z"
+    },
+    "instructor1InCourse1Session1": {
+      "courseId": "idOfTypicalCourse1",
+      "feedbackSessionName": "First feedback session",
+      "userEmail": "instructor1@course1.tmt",
+      "isInstructor": true,
+      "endTime": "2037-04-30T23:00:00Z",
+      "sentClosingEmail": false,
+      "createdAt": "2037-04-30T20:00:00Z",
+      "updatedAt": "2037-04-30T20:00:00Z"
+    },
+    "student4InCourse1Session2": {
+      "courseId": "idOfTypicalCourse1",
+      "feedbackSessionName": "Second feedback session",
+      "userEmail": "student4InCourse1@gmail.tmt",
+      "isInstructor": false,
+      "endTime": "2030-04-28T23:00:00Z",
+      "sentClosingEmail": false,
+      "createdAt": "2030-04-28T20:00:00Z",
+      "updatedAt": "2030-04-28T20:00:00Z"
+    },
+    "instructor1InCourse1Session2": {
+      "courseId": "idOfTypicalCourse1",
+      "feedbackSessionName": "Second feedback session",
+      "userEmail": "instructor1@course1.tmt",
+      "isInstructor": true,
+      "endTime": "2030-04-28T23:00:00Z",
+      "sentClosingEmail": false,
+      "createdAt": "2030-04-28T20:00:00Z",
+      "updatedAt": "2030-04-28T20:00:00Z"
     }
   }
 }

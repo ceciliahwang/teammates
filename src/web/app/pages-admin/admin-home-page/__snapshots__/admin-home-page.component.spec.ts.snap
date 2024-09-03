@@ -2,13 +2,22 @@
 
 exports[`AdminHomePageComponent should snap with default view 1`] = `
 <tm-admin-home-page
+  accountReqs={[Function Array]}
   accountService={[Function AccountService]}
   activeRequests="0"
+  currentPage={[Function Number]}
+  formatDateDetailPipe={[Function FormatDateDetailPipe]}
   instructorDetails=""
   instructorEmail=""
   instructorInstitution=""
   instructorName=""
   instructorsConsolidated={[Function Array]}
+  isAddingInstructors="false"
+  items$={[Function Observable]}
+  linkService={[Function LinkService]}
+  pageSize={[Function Number]}
+  statusMessageService={[Function StatusMessageService]}
+  timezoneService={[Function TimezoneService]}
 >
   <div
     class="card bg-light top-padded"
@@ -29,9 +38,9 @@ exports[`AdminHomePageComponent should snap with default view 1`] = `
            Add Instructor Details in the format: Name | Email | Institution 
         </p>
         <textarea
+          aria-label="Add multiple instructors"
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-details-single-line"
-          ng-reflect-model=""
         />
       </div>
       <div
@@ -59,39 +68,48 @@ exports[`AdminHomePageComponent should snap with default view 1`] = `
       <div
         class="top-padded"
       >
-        <strong>
-          Name:
-        </strong>
+        <label
+          for="instructor-name"
+        >
+          <strong>
+            Name:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-name"
-          ng-reflect-model=""
           type="text"
         />
       </div>
       <div
         class="top-padded"
       >
-        <strong>
-          Email: 
-        </strong>
+        <label
+          for="instructor-email"
+        >
+          <strong>
+            Email:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-email"
-          ng-reflect-model=""
           type="text"
         />
       </div>
       <div
         class="top-padded"
       >
-        <strong>
-          Institution: 
-        </strong>
+        <label
+          for="instructor-institution"
+        >
+          <strong>
+            Institution:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-institution"
-          ng-reflect-model=""
           type="text"
         />
       </div>
@@ -112,13 +130,22 @@ exports[`AdminHomePageComponent should snap with default view 1`] = `
 
 exports[`AdminHomePageComponent should snap with disabled adding instructor button if there are active requests 1`] = `
 <tm-admin-home-page
+  accountReqs={[Function Array]}
   accountService={[Function AccountService]}
   activeRequests={[Function Number]}
+  currentPage={[Function Number]}
+  formatDateDetailPipe={[Function FormatDateDetailPipe]}
   instructorDetails=""
   instructorEmail=""
   instructorInstitution=""
   instructorName=""
   instructorsConsolidated={[Function Array]}
+  isAddingInstructors={[Function Boolean]}
+  items$={[Function Observable]}
+  linkService={[Function LinkService]}
+  pageSize={[Function Number]}
+  statusMessageService={[Function StatusMessageService]}
+  timezoneService={[Function TimezoneService]}
 >
   <div
     class="card bg-light top-padded"
@@ -139,9 +166,9 @@ exports[`AdminHomePageComponent should snap with disabled adding instructor butt
            Add Instructor Details in the format: Name | Email | Institution 
         </p>
         <textarea
+          aria-label="Add multiple instructors"
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-details-single-line"
-          ng-reflect-model=""
         />
       </div>
       <div
@@ -169,39 +196,48 @@ exports[`AdminHomePageComponent should snap with disabled adding instructor butt
       <div
         class="top-padded"
       >
-        <strong>
-          Name:
-        </strong>
+        <label
+          for="instructor-name"
+        >
+          <strong>
+            Name:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-name"
-          ng-reflect-model=""
           type="text"
         />
       </div>
       <div
         class="top-padded"
       >
-        <strong>
-          Email: 
-        </strong>
+        <label
+          for="instructor-email"
+        >
+          <strong>
+            Email:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-email"
-          ng-reflect-model=""
           type="text"
         />
       </div>
       <div
         class="top-padded"
       >
-        <strong>
-          Institution: 
-        </strong>
+        <label
+          for="instructor-institution"
+        >
+          <strong>
+            Institution:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-institution"
-          ng-reflect-model=""
           type="text"
         />
       </div>
@@ -258,77 +294,125 @@ exports[`AdminHomePageComponent should snap with disabled adding instructor butt
             </tr>
           </thead>
           <tbody>
-            
-            <tr>
+            <tr
+              tm-new-instructor-data-row=""
+            >
               <td>
-                Instructor A
+                <span
+                  id="instructor-0-name"
+                >
+                  Instructor A
+                </span>
               </td>
               <td>
-                instructora@example.com
+                <span
+                  id="instructor-0-email"
+                >
+                  instructora@example.com
+                </span>
               </td>
               <td>
-                Sample Institution A
+                <span
+                  id="instructor-0-institution"
+                >
+                  Sample Institution A
+                </span>
               </td>
-              <td>
-                
+              <td
+                style="width: 17%;"
+              >
               </td>
-              <td>
+              <td
+                style="width: 8%;"
+              >
                 ADDING
               </td>
               <td
-                style="width: 500px;"
+                style="width: 40%;"
               >
-                
-                
               </td>
             </tr>
-            <tr>
+            <tr
+              tm-new-instructor-data-row=""
+            >
               <td>
-                Instructor B
+                <span
+                  id="instructor-1-name"
+                >
+                  Instructor B
+                </span>
               </td>
               <td>
-                instructorb@example.com
+                <span
+                  id="instructor-1-email"
+                >
+                  instructorb@example.com
+                </span>
               </td>
               <td>
-                Sample Institution B
+                <span
+                  id="instructor-1-institution"
+                >
+                  Sample Institution B
+                </span>
               </td>
-              <td>
-                
-                <div>
+              <td
+                style="width: 17%;"
+              >
+                <div
+                  class="button-group"
+                >
                   <button
-                    class="btn btn-sm btn-primary text-nowrap"
+                    class="action-btn btn btn-sm btn-primary text-nowrap"
                     disabled=""
                     id="add-instructor-1"
                     style="margin-right: 10px;"
                   >
-                    Add Instructor
+                    Add
                   </button>
                   <button
-                    class="btn btn-sm btn-danger"
-                    id="cancel-instructor-1"
+                    class="action-btn btn btn-sm btn-info text-nowrap"
+                    id="edit-instructor-1"
+                    style="margin-right: 10px;"
                   >
-                    Cancel
+                    Edit
+                  </button>
+                  <button
+                    class="action-btn btn btn-sm btn-danger"
+                    id="remove-instructor-1"
+                  >
+                    Remove
                   </button>
                 </div>
               </td>
-              <td>
+              <td
+                style="width: 8%;"
+              >
                 PENDING
               </td>
               <td
-                style="width: 500px;"
+                style="width: 40%;"
               >
-                
-                
               </td>
             </tr>
           </tbody>
         </table>
         <button
-          class="btn btn-primary"
+          class="btn btn-primary top-padded"
           disabled=""
           id="add-all-instructors"
         >
-          Add All Instructors
+          <tm-ajax-loading>
+            <div
+              class="loading-container"
+            >
+              <div
+                class="spinner-border spinner-border-sm text-white"
+                role="status"
+              />
+            </div>
+          </tm-ajax-loading>
+           Add All Instructors 
         </button>
       </div>
     </div>
@@ -338,13 +422,22 @@ exports[`AdminHomePageComponent should snap with disabled adding instructor butt
 
 exports[`AdminHomePageComponent should snap with some instructors details 1`] = `
 <tm-admin-home-page
+  accountReqs={[Function Array]}
   accountService={[Function AccountService]}
   activeRequests="0"
+  currentPage={[Function Number]}
+  formatDateDetailPipe={[Function FormatDateDetailPipe]}
   instructorDetails=""
   instructorEmail=""
   instructorInstitution=""
   instructorName=""
   instructorsConsolidated={[Function Array]}
+  isAddingInstructors="false"
+  items$={[Function Observable]}
+  linkService={[Function LinkService]}
+  pageSize={[Function Number]}
+  statusMessageService={[Function StatusMessageService]}
+  timezoneService={[Function TimezoneService]}
 >
   <div
     class="card bg-light top-padded"
@@ -365,9 +458,9 @@ exports[`AdminHomePageComponent should snap with some instructors details 1`] = 
            Add Instructor Details in the format: Name | Email | Institution 
         </p>
         <textarea
+          aria-label="Add multiple instructors"
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-details-single-line"
-          ng-reflect-model=""
         />
       </div>
       <div
@@ -395,39 +488,48 @@ exports[`AdminHomePageComponent should snap with some instructors details 1`] = 
       <div
         class="top-padded"
       >
-        <strong>
-          Name:
-        </strong>
+        <label
+          for="instructor-name"
+        >
+          <strong>
+            Name:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-name"
-          ng-reflect-model=""
           type="text"
         />
       </div>
       <div
         class="top-padded"
       >
-        <strong>
-          Email: 
-        </strong>
+        <label
+          for="instructor-email"
+        >
+          <strong>
+            Email:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-email"
-          ng-reflect-model=""
           type="text"
         />
       </div>
       <div
         class="top-padded"
       >
-        <strong>
-          Institution: 
-        </strong>
+        <label
+          for="instructor-institution"
+        >
+          <strong>
+            Institution:
+          </strong>
+        </label>
         <input
           class="form-control ng-untouched ng-pristine ng-valid"
           id="instructor-institution"
-          ng-reflect-model=""
           type="text"
         />
       </div>
@@ -484,65 +586,104 @@ exports[`AdminHomePageComponent should snap with some instructors details 1`] = 
             </tr>
           </thead>
           <tbody>
-            
-            <tr>
+            <tr
+              tm-new-instructor-data-row=""
+            >
               <td>
-                Instructor A
+                <span
+                  id="instructor-0-name"
+                >
+                  Instructor A
+                </span>
               </td>
               <td>
-                instructora@example.com
+                <span
+                  id="instructor-0-email"
+                >
+                  instructora@example.com
+                </span>
               </td>
               <td>
-                Sample Institution A
+                <span
+                  id="instructor-0-institution"
+                >
+                  Sample Institution A
+                </span>
               </td>
-              <td>
-                
-                <div>
+              <td
+                style="width: 17%;"
+              >
+                <div
+                  class="button-group"
+                >
                   <button
-                    class="btn btn-sm btn-primary text-nowrap"
+                    class="action-btn btn btn-sm btn-primary text-nowrap"
                     id="add-instructor-0"
                     style="margin-right: 10px;"
                   >
-                    Add Instructor
+                    Add
                   </button>
                   <button
-                    class="btn btn-sm btn-danger"
-                    id="cancel-instructor-0"
+                    class="action-btn btn btn-sm btn-info text-nowrap"
+                    id="edit-instructor-0"
+                    style="margin-right: 10px;"
                   >
-                    Cancel
+                    Edit
+                  </button>
+                  <button
+                    class="action-btn btn btn-sm btn-danger"
+                    id="remove-instructor-0"
+                  >
+                    Remove
                   </button>
                 </div>
               </td>
-              <td>
+              <td
+                style="width: 8%;"
+              >
                 PENDING
               </td>
               <td
-                style="width: 500px;"
+                style="width: 40%;"
               >
-                
-                
               </td>
             </tr>
-            <tr>
+            <tr
+              tm-new-instructor-data-row=""
+            >
               <td>
-                Instructor B
+                <span
+                  id="instructor-1-name"
+                >
+                  Instructor B
+                </span>
               </td>
               <td>
-                instructorb@example.com
+                <span
+                  id="instructor-1-email"
+                >
+                  instructorb@example.com
+                </span>
               </td>
               <td>
-                Sample Institution B
+                <span
+                  id="instructor-1-institution"
+                >
+                  Sample Institution B
+                </span>
               </td>
-              <td>
-                
+              <td
+                style="width: 17%;"
+              >
               </td>
-              <td>
+              <td
+                style="width: 8%;"
+              >
                 SUCCESS
               </td>
               <td
-                style="width: 500px;"
+                style="width: 40%;"
               >
-                
                 <span
                   id="message-instructor-1"
                 >
@@ -554,46 +695,70 @@ exports[`AdminHomePageComponent should snap with some instructors details 1`] = 
                   </a>
                   ] 
                 </span>
-                
               </td>
             </tr>
-            <tr>
+            <tr
+              tm-new-instructor-data-row=""
+            >
               <td>
-                Instructor C
+                <span
+                  id="instructor-2-name"
+                >
+                  Instructor C
+                </span>
               </td>
               <td>
-                instructorc@example.com
+                <span
+                  id="instructor-2-email"
+                >
+                  instructorc@example.com
+                </span>
               </td>
               <td>
-                Sample Institution C
+                <span
+                  id="instructor-2-institution"
+                >
+                  Sample Institution C
+                </span>
               </td>
-              <td>
-                
-                <div>
+              <td
+                style="width: 17%;"
+              >
+                <div
+                  class="button-group"
+                >
                   <button
-                    class="btn btn-sm btn-primary text-nowrap"
+                    class="action-btn btn btn-sm btn-primary text-nowrap"
                     id="add-instructor-2"
                     style="margin-right: 10px;"
                   >
-                    Add Instructor
+                    Add
                   </button>
                   <button
-                    class="btn btn-sm btn-danger"
-                    id="cancel-instructor-2"
+                    class="action-btn btn btn-sm btn-info text-nowrap"
+                    id="edit-instructor-2"
+                    style="margin-right: 10px;"
                   >
-                    Cancel
+                    Edit
+                  </button>
+                  <button
+                    class="action-btn btn btn-sm btn-danger"
+                    id="remove-instructor-2"
+                  >
+                    Remove
                   </button>
                 </div>
               </td>
-              <td>
+              <td
+                style="width: 8%;"
+              >
                 FAIL
               </td>
               <td
-                style="width: 500px;"
+                style="width: 40%;"
               >
-                
-                
                 <span
+                  class="message"
                   id="message-instructor-2"
                 >
                   The instructor cannot be added for some reason
@@ -603,10 +768,10 @@ exports[`AdminHomePageComponent should snap with some instructors details 1`] = 
           </tbody>
         </table>
         <button
-          class="btn btn-primary"
+          class="btn btn-primary top-padded"
           id="add-all-instructors"
         >
-          Add All Instructors
+           Add All Instructors 
         </button>
       </div>
     </div>

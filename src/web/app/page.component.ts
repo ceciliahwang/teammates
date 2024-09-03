@@ -11,11 +11,14 @@ import {
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import uaParser from 'ua-parser-js';
-import { environment } from '../environments/environment';
-
 import { fromEvent, merge, Observable, of } from 'rxjs';
-import { mapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import uaParser from 'ua-parser-js';
+import { Toast } from './components/toast/toast';
+import { environment } from '../environments/environment';
+import { AuthService } from '../services/auth.service';
+import { StatusMessageService } from '../services/status-message.service';
+import { NotificationTargetUser } from '../types/api-output';
 
 const DEFAULT_TITLE: string = 'TEAMMATES - Online Peer Feedback/Evaluation System for Student Team Projects';
 
@@ -29,6 +32,9 @@ const DEFAULT_TITLE: string = 'TEAMMATES - Online Peer Feedback/Evaluation Syste
 })
 export class PageComponent {
 
+  // enum
+  NotificationTargetUser: typeof NotificationTargetUser = NotificationTargetUser;
+
   @Input() isFetchingAuthDetails: boolean = false;
   @Input() studentLoginUrl: string = '';
   @Input() instructorLoginUrl: string = '';
@@ -36,11 +42,12 @@ export class PageComponent {
   @Input() isStudent: boolean = false;
   @Input() isInstructor: boolean = false;
   @Input() isAdmin: boolean = false;
+  @Input() isMaintainer: boolean = false;
   @Input() isValidUser: boolean = false;
+  @Input() notificationTargetUser: NotificationTargetUser = NotificationTargetUser.GENERAL;
   @Input() pageTitle: string = '';
   @Input() hideAuthInfo: boolean = false;
   @Input() navItems: any[] = [];
-  @Input() institute: string = '';
 
   isCollapsed: boolean = true;
   isUnsupportedBrowser: boolean = false;
@@ -49,28 +56,30 @@ export class PageComponent {
   isNetworkOnline$: Observable<boolean>;
   version: string = environment.version;
   logoutUrl: string = `${environment.backendUrl}/logout`;
+  toast: Toast | null = null;
 
   /**
    * Minimum versions of browsers supported.
    *
    * Angular browser support: https://angular.io/guide/browser-support
    *
-   * Bootstrap 4 browser support: https://getbootstrap.com/docs/4.0/getting-started/browsers-devices/
+   * Bootstrap 5 browser support: https://getbootstrap.com/docs/5.2/getting-started/browsers-devices/
    */
-  minimumVersions: { [key: string]: number } = {
-    Chrome: 45,
-    IE: 10,
-    Firefox: 40,
-    Safari: 7,
-    // Opera: ??
+  minimumVersions: Record<string, number> = {
+    Chrome: 87,
+    Firefox: 86,
+    Safari: 13,
+    Edge: 88,
   };
 
   constructor(private router: Router, private route: ActivatedRoute, private title: Title,
-              private modalService: NgbModal, location: Location) {
+              private ngbModal: NgbModal, location: Location,
+              private statusMessageService: StatusMessageService, private authService: AuthService) {
     this.checkBrowserVersion();
     this.router.events.subscribe((val: any) => {
       if (val instanceof NavigationEnd) {
         window.scrollTo(0, 0); // reset viewport
+        this.toast = null; // reset toast
         let r: ActivatedRoute = this.route;
         while (r.firstChild) {
           r = r.firstChild;
@@ -87,15 +96,19 @@ export class PageComponent {
 
     this.isNetworkOnline$ = merge(
         of(navigator.onLine),
-        fromEvent(window, 'online').pipe(mapTo(true)),
-        fromEvent(window, 'offline').pipe(mapTo(false)),
+        fromEvent(window, 'online').pipe(map(() => true)),
+        fromEvent(window, 'offline').pipe(map(() => false)),
     );
 
     // Close open modal(s) when moving backward or forward through history in the browser page
     location.subscribe(() => {
-      if (this.modalService.hasOpenModals()) {
-        this.modalService.dismissAll();
+      if (this.ngbModal.hasOpenModals()) {
+        this.ngbModal.dismissAll();
       }
+    });
+
+    this.statusMessageService.getToastEvent().subscribe((toast: Toast) => {
+      this.toast = toast;
     });
   }
 
@@ -105,6 +118,45 @@ export class PageComponent {
     this.isUnsupportedBrowser = !this.minimumVersions[browser.name]
         || this.minimumVersions[browser.name] > parseInt(browser.major, 10);
     this.isCookieDisabled = !navigator.cookieEnabled;
+  }
+
+  /**
+   * Method to toggle the isCollapsed property when an item on the navbar is clicked,
+   * when the user is using a mobile device.
+   */
+  toggleCollapse(): void {
+
+    // Check if the device is a mobile device
+    if (window.innerWidth < 992) {
+      this.isCollapsed = !this.isCollapsed;
+    }
+  }
+
+  /**
+   * Method that checks if current page has active modals and close them.
+   */
+  closeModal(): void {
+
+    if (this.ngbModal.hasOpenModals()) {
+      this.ngbModal.dismissAll();
+    }
+  }
+
+  /**
+   * Method to get the url of the current route.
+   */
+  getUrl(): string {
+    return this.router.url;
+  }
+
+  logout(): void {
+    if (environment.firebaseConfig?.projectId) {
+      this.authService.logout().then(() => {
+        window.location.href = this.logoutUrl;
+      });
+    } else {
+      window.location.href = this.logoutUrl;
+    }
   }
 }
 

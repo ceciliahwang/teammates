@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { SessionEditFormComponent } from './session-edit-form.component';
 import { AjaxLoadingModule } from '../ajax-loading/ajax-loading.module';
+import { DatepickerModule } from '../datepicker/datepicker.module';
 import { RichTextEditorModule } from '../rich-text-editor/rich-text-editor.module';
 import { TeammatesCommonModule } from '../teammates-common/teammates-common.module';
-import { SessionEditFormComponent } from './session-edit-form.component';
-import { SubmissionStatusNamePipe } from './submission-status-name.pipe';
-import { TimePickerComponent } from './time-picker/time-picker.component';
+import { TeammatesRouterModule } from '../teammates-router/teammates-router.module';
+import { TimepickerModule } from '../timepicker/timepicker.module';
 
 /**
  * Module for instructor session edit/create form.
@@ -16,15 +17,16 @@ import { TimePickerComponent } from './time-picker/time-picker.component';
   imports: [
     CommonModule,
     FormsModule,
-    NgbModule,
+    NgbTooltipModule,
     AjaxLoadingModule,
     TeammatesCommonModule,
     RichTextEditorModule,
+    TeammatesRouterModule,
+    DatepickerModule,
+    TimepickerModule,
   ],
   declarations: [
     SessionEditFormComponent,
-    TimePickerComponent,
-    SubmissionStatusNamePipe,
   ],
   exports: [
     SessionEditFormComponent,

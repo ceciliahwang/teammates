@@ -1,213 +1,121 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StudentCourseDetailsPageComponent should snap with default fields 1`] = `
+exports[`StudentCourseDetailsPageComponent should snap when all data are still loading 1`] = `
 <tm-student-course-details-page
-  Gender={[Function Object]}
+  SortBy={[Function Object]}
   course={[Function Object]}
+  courseId="undefined"
   courseService={[Function CourseService]}
-  httpRequestService={[Function HttpRequestService]}
+  hasLoadingFailed="false"
   instructorDetails={[Function Array]}
+  instructorService={[Function InstructorService]}
+  isLoadingCourse={[Function Boolean]}
+  isLoadingInstructor={[Function Boolean]}
+  isLoadingStudent={[Function Boolean]}
+  isLoadingTeammates={[Function Boolean]}
   route={[Function ActivatedRoute]}
   statusMessageService={[Function StatusMessageService]}
   student={[Function Object]}
-  studentProfileService={[Function StudentProfileService]}
   studentService={[Function StudentService]}
+  tableComparatorService={[Function TableComparatorService]}
   teammateProfiles={[Function Array]}
+  teammateProfilesSortBy="0"
 >
-  <h1
-    class="page-title"
-  >
-     
-  </h1><div
-    class="section"
-  >
+  <tm-loading-retry>
+  </tm-loading-retry><tm-loading-spinner>
     <div
-      class="col-sm-12"
-    >
-      <h4
-        class="font-weight-bold"
-      >
-        Course
-      </h4>
-    </div>
-    <div
-      class="card border-primary"
+      class="loading-container"
     >
       <div
-        class="card-body fill-plain"
+        class="row spinner-border text-primary"
+        role="status"
+      />
+      <div
+        class="row text-secondary"
       >
-        <div
-          class="form form-horizontal"
-        >
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Name
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                ID
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Timezone
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                UTC
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Created at
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                Thu, 01 Jan 1970, 00:00 AM UTC
-              </span>
-            </div>
-          </div>
-        </div>
+        Loading...
       </div>
     </div>
-  </div><div
+  </tm-loading-spinner>
+</tm-student-course-details-page>
+`;
+
+exports[`StudentCourseDetailsPageComponent should snap when it fails to load 1`] = `
+<tm-student-course-details-page
+  SortBy={[Function Object]}
+  course={[Function Object]}
+  courseId="undefined"
+  courseService={[Function CourseService]}
+  hasLoadingFailed={[Function Boolean]}
+  instructorDetails={[Function Array]}
+  instructorService={[Function InstructorService]}
+  isLoadingCourse={[Function Boolean]}
+  isLoadingInstructor={[Function Boolean]}
+  isLoadingStudent={[Function Boolean]}
+  isLoadingTeammates="false"
+  route={[Function ActivatedRoute]}
+  statusMessageService={[Function StatusMessageService]}
+  student={[Function Object]}
+  studentService={[Function StudentService]}
+  tableComparatorService={[Function TableComparatorService]}
+  teammateProfiles={[Function Array]}
+  teammateProfilesSortBy="0"
+>
+  <tm-loading-retry>
+  </tm-loading-retry><div
     class="section"
   >
     <div
-      class="col-sm-12"
-    >
-      <h4
-        class="font-weight-bold"
-      >
-        Self
-      </h4>
-    </div>
-    <div
-      class="card border-primary"
+      class="row top-padded"
     >
       <div
-        class="card-body fill-plain"
+        class="col-md-10"
       >
-        <div
-          class="form form-horizontal"
-        >
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Name
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Section
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Team
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Email
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                
-              </span>
-            </div>
-          </div>
-        </div>
+        <table>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</tm-student-course-details-page>
+`;
+
+exports[`StudentCourseDetailsPageComponent should snap with default fields 1`] = `
+<tm-student-course-details-page
+  SortBy={[Function Object]}
+  course={[Function Object]}
+  courseId="undefined"
+  courseService={[Function CourseService]}
+  hasLoadingFailed="false"
+  instructorDetails={[Function Array]}
+  instructorService={[Function InstructorService]}
+  isLoadingCourse={[Function Boolean]}
+  isLoadingInstructor={[Function Boolean]}
+  isLoadingStudent={[Function Boolean]}
+  isLoadingTeammates="false"
+  route={[Function ActivatedRoute]}
+  statusMessageService={[Function StatusMessageService]}
+  student={[Function Object]}
+  studentService={[Function StudentService]}
+  tableComparatorService={[Function TableComparatorService]}
+  teammateProfiles={[Function Array]}
+  teammateProfilesSortBy="0"
+>
+  <tm-loading-retry>
+  </tm-loading-retry><div
+    class="section"
+  >
+    <div
+      class="row top-padded"
+    >
+      <div
+        class="col-md-10"
+      >
+        <table>
+          <tbody>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -216,264 +124,200 @@ exports[`StudentCourseDetailsPageComponent should snap with default fields 1`] =
 
 exports[`StudentCourseDetailsPageComponent should snap with populated fields 1`] = `
 <tm-student-course-details-page
-  Gender={[Function Object]}
+  SortBy={[Function Object]}
   course={[Function Object]}
+  courseId="undefined"
   courseService={[Function CourseService]}
-  httpRequestService={[Function HttpRequestService]}
+  hasLoadingFailed="false"
   instructorDetails={[Function Array]}
+  instructorService={[Function InstructorService]}
+  isLoadingCourse="false"
+  isLoadingInstructor="false"
+  isLoadingStudent="false"
+  isLoadingTeammates="false"
   route={[Function ActivatedRoute]}
   statusMessageService={[Function StatusMessageService]}
   student={[Function Object]}
-  studentProfileService={[Function StudentProfileService]}
   studentService={[Function StudentService]}
+  tableComparatorService={[Function TableComparatorService]}
   teammateProfiles={[Function Array]}
+  teammateProfilesSortBy="0"
 >
   <h1
-    class="page-title"
+    class="page-title text-break"
   >
-     Sample Course 101
-  </h1><div
-    class="section"
-  >
+    Team Details for 1.1.c-demo2
+  </h1><tm-loading-retry>
     <div
-      class="col-sm-12"
-    >
-      <h4
-        class="font-weight-bold"
-      >
-        Course
-      </h4>
-    </div>
-    <div
-      class="card border-primary"
+      class="section"
     >
       <div
-        class="card-body fill-plain"
+        class="card"
       >
         <div
-          class="form form-horizontal"
+          class="card-body fill-plain"
         >
           <div
-            class="form-group row"
+            class="row"
           >
             <div
-              class="col-4 text-right"
+              class="col-3 text-end"
             >
               <label>
-                Name
+                Course ID:
               </label>
             </div>
             <div
-              class="col-8"
+              class="col-9"
             >
-              <span>
-                Sample Course 101
-              </span>
-            </div>
-          </div>
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                ID
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
+              <span
+                id="course-id"
+              >
                 1.1.c-demo2
               </span>
             </div>
           </div>
           <div
-            class="form-group row"
+            class="row"
           >
             <div
-              class="col-4 text-right"
+              class="col-3 text-end"
             >
               <label>
-                Timezone
+                Course name:
               </label>
             </div>
             <div
-              class="col-8"
+              class="col-9"
             >
-              <span>
-                UTC
+              <span
+                id="course-name"
+              >
+                Sample Course 101
               </span>
             </div>
           </div>
           <div
-            class="form-group row"
+            class="row"
           >
             <div
-              class="col-4 text-right"
+              class="col-3 text-end"
             >
               <label>
-                Created at
+                Course institute:
               </label>
             </div>
             <div
-              class="col-8"
+              class="col-9"
             >
-              <span>
-                Wed, 13 Mar 2019, 10:15 AM UTC
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div><div
-    class="section"
-  >
-    <div
-      class="col-sm-12"
-    >
-      <h4
-        class="font-weight-bold"
-      >
-        Instructors
-      </h4>
-    </div>
-    <div
-      class="row"
-    >
-      <div
-        class="col-12"
-      >
-        <div
-          class="row"
-        >
-          <div
-            class="col-12"
-          >
-            <table
-              class="table table-striped"
-            >
-              <thead>
-                <tr>
-                  <th
-                    class="font-weight-bold"
-                  >
-                    Name
-                  </th>
-                  <th
-                    class="font-weight-bold"
-                  >
-                    Email
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                
-                <tr>
-                  <td>
-                    1
-                  </td>
-                  <td>
-                    1@1.com
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div><div
-    class="section"
-  >
-    <div
-      class="col-sm-12"
-    >
-      <h4
-        class="font-weight-bold"
-      >
-        Self
-      </h4>
-    </div>
-    <div
-      class="card border-primary"
-    >
-      <div
-        class="card-body fill-plain"
-      >
-        <div
-          class="form form-horizontal"
-        >
-          <div
-            class="form-group row"
-          >
-            <div
-              class="col-4 text-right"
-            >
-              <label>
-                Name
-              </label>
-            </div>
-            <div
-              class="col-8"
-            >
-              <span>
-                1
+              <span
+                id="course-institute"
+              >
+                Test Institute
               </span>
             </div>
           </div>
           <div
-            class="form-group row"
+            class="row"
           >
             <div
-              class="col-4 text-right"
+              class="col-3 text-end"
             >
               <label>
-                Section
+                Instructors:
               </label>
             </div>
             <div
-              class="col-8"
+              class="col-9"
+              id="instructors"
+              style="margin-bottom: .5rem;"
             >
-              <span>
+              <div>
+                 Instructor: 
+                <a
+                  href="mailto:1@1.com"
+                >
+                  1 (1@1.com)
+                </a>
+              </div>
+            </div>
+          </div>
+          <div
+            class="row"
+          >
+            <div
+              class="col-3 text-end"
+            >
+              <label>
+                Your section:
+              </label>
+            </div>
+            <div
+              class="col-9"
+            >
+              <span
+                id="student-section"
+              >
                 Tutorial Group 2
               </span>
             </div>
           </div>
           <div
-            class="form-group row"
+            class="row"
           >
             <div
-              class="col-4 text-right"
+              class="col-3 text-end"
             >
               <label>
-                Team
+                Your team:
               </label>
             </div>
             <div
-              class="col-8"
+              class="col-9"
             >
-              <span>
+              <span
+                id="student-team"
+              >
                 Team 2
               </span>
             </div>
           </div>
           <div
-            class="form-group row"
+            class="row"
           >
             <div
-              class="col-4 text-right"
+              class="col-3 text-end"
             >
               <label>
-                Email
+                Your name:
               </label>
             </div>
             <div
-              class="col-8"
+              class="col-9"
             >
-              <span>
+              <span
+                id="student-name"
+              >
+                1
+              </span>
+            </div>
+          </div>
+          <div
+            class="row"
+          >
+            <div
+              class="col-3 text-end"
+            >
+              <label>
+                Your email:
+              </label>
+            </div>
+            <div
+              class="col-9"
+            >
+              <span
+                id="student-email"
+              >
                 1@1.com
               </span>
             </div>
@@ -481,107 +325,78 @@ exports[`StudentCourseDetailsPageComponent should snap with populated fields 1`]
         </div>
       </div>
     </div>
-  </div><div
+    <div
+      class="card bg-light mb-4"
+    >
+      <div
+        class="card-body"
+      >
+        <span
+          class="d-inline h5 fw-bold"
+        >
+          Sort By: 
+        </span>
+        <div
+          class="btn-group"
+          data-toggle="buttons"
+        >
+          <button
+            class="btn btn-light"
+            id="sort-name"
+          >
+            Name
+          </button>
+          <button
+            class="btn btn-light"
+          >
+            Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </tm-loading-retry><div
     class="section"
   >
     <div
-      class="col-sm-12"
-    >
-      <h4
-        class="font-weight-bold"
-      >
-        Team Profiles
-      </h4>
-    </div>
-    
-    <div
-      class="row"
+      class="row top-padded"
     >
       <div
-        class="col-12"
+        class="col-md-2"
       >
-        <div
-          class="row"
-        >
-          <div
-            class="col-md-2 col-3"
-          >
-            <img
-              class="profile-pic float-left"
-              src="/assets/images/profile_picture_default.png"
-            />
-          </div>
-          <div
-            class="col-md-10 col-sm-9 col-8"
-          >
-            <table
-              class="table table-striped"
-            >
-              <tbody>
-                <tr>
-                  <td
-                    class="font-weight-bold"
+        <strong>
+          Your teammates:
+        </strong>
+      </div>
+      <div
+        class="col-md-10"
+      >
+        <table>
+          <tbody>
+            <tr>
+              <td
+                class="team-member-profile-cell"
+                id="teammates-details-0"
+              >
+                <div>
+                  <label>
+                    Name:
+                  </label>
+                   2 
+                </div>
+                <div>
+                  <label>
+                    Email:
+                  </label>
+                  <a
+                    href="mailto:iam2@hello.com"
                   >
-                    Name
-                  </td>
-                  <td>
-                    <span>
-                      I am 2
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    class="font-weight-bold"
-                  >
-                    Email
-                  </td>
-                  <td>
-                    <span>
-                      iam2@hello.com
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    class="font-weight-bold"
-                  >
-                    Gender
-                  </td>
-                  <td>
-                    <span>
-                      MALE
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    class="font-weight-bold"
-                  >
-                    Institution
-                  </td>
-                  <td>
-                    <span>
-                      nus
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    class="font-weight-bold"
-                  >
-                    Nationality
-                  </td>
-                  <td>
-                    <span>
-                      Andorran
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+                    iam2@hello.com
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

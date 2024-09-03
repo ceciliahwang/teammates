@@ -1,48 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import moment from 'moment-timezone';
 import { forkJoin, Observable, of } from 'rxjs';
-import { concatMap, finalize, map, switchMap, tap } from 'rxjs/operators';
-import { FeedbackQuestionsService } from '../../../services/feedback-questions.service';
-import { FeedbackSessionsService, TemplateSession } from '../../../services/feedback-sessions.service';
-import { HttpRequestService } from '../../../services/http-request.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { StatusMessageService } from '../../../services/status-message.service';
-import { StudentService } from '../../../services/student.service';
-import {
-  LOCAL_DATE_TIME_FORMAT,
-  TimeResolvingResult,
-  TimezoneService,
-} from '../../../services/timezone.service';
-import {
-  Course,
-  Courses,
-  FeedbackQuestion,
-  FeedbackSession,
-  FeedbackSessionPublishStatus,
-  FeedbackSessions,
-  FeedbackSessionSubmissionStatus,
-  ResponseVisibleSetting,
-  SessionVisibleSetting,
-} from '../../../types/api-output';
-import { DEFAULT_INSTRUCTOR_PRIVILEGE } from '../../../types/instructor-privilege';
-import {
-  DateFormat,
-  SessionEditFormMode,
-  SessionEditFormModel,
-  TimeFormat,
-} from '../../components/session-edit-form/session-edit-form-model';
-import {
-  CopySessionResult,
-  SessionsTableColumn,
-  SessionsTableHeaderColorScheme,
-  SessionsTableRowModel,
-  SortBy,
-  SortOrder,
-} from '../../components/sessions-table/sessions-table-model';
-import { ErrorMessageOutput } from '../../error-message-output';
-import { InstructorSessionModalPageComponent } from '../instructor-session-modal-page.component';
+import { concatMap, finalize } from 'rxjs/operators';
 import { CopyFromOtherSessionsResult } from './copy-from-other-sessions-modal/copy-from-other-sessions-modal-model';
 import {
   CopyFromOtherSessionsModalComponent,
@@ -53,11 +14,50 @@ import {
 import {
   SessionsPermanentDeletionConfirmModalComponent,
 } from './sessions-permanent-deletion-confirm-modal/sessions-permanent-deletion-confirm-modal.component';
+import { CourseService } from '../../../services/course.service';
+import { FeedbackQuestionsService } from '../../../services/feedback-questions.service';
+import { FeedbackSessionActionsService } from '../../../services/feedback-session-actions.service';
+import { FeedbackSessionsService, TemplateSession } from '../../../services/feedback-sessions.service';
+import { InstructorService } from '../../../services/instructor.service';
+import { NavigationService } from '../../../services/navigation.service';
+import { ProgressBarService } from '../../../services/progress-bar.service';
+import { SimpleModalService } from '../../../services/simple-modal.service';
+import { StatusMessageService } from '../../../services/status-message.service';
+import { StudentService } from '../../../services/student.service';
+import { TableComparatorService } from '../../../services/table-comparator.service';
+import { TimezoneService } from '../../../services/timezone.service';
+import {
+  Course,
+  Courses,
+  FeedbackQuestion,
+  FeedbackSession,
+  FeedbackSessions,
+  ResponseVisibleSetting,
+  SessionVisibleSetting,
+} from '../../../types/api-output';
+import { DEFAULT_INSTRUCTOR_PRIVILEGE } from '../../../types/default-instructor-privilege';
+import { SortBy, SortOrder } from '../../../types/sort-properties';
+import {
+  SessionEditFormMode,
+} from '../../components/session-edit-form/session-edit-form-model';
+import {
+  CopySessionResult,
+  SessionsTableColumn,
+  SessionsTableRowModel,
+} from '../../components/sessions-table/sessions-table-model';
+import { Index, MutateEvent } from '../../components/sessions-table/sessions-table.component';
+import { SimpleModalType } from '../../components/simple-modal/simple-modal-type';
+import {
+  SortableEvent,
+  SortableTableHeaderColorScheme,
+} from '../../components/sortable-table/sortable-table.component';
+import { collapseAnim } from '../../components/teammates-common/collapse-anim';
+import { ErrorMessageOutput } from '../../error-message-output';
+import { InstructorSessionModalPageComponent } from '../instructor-session-modal-page.component';
 
 interface RecycleBinFeedbackSessionRowModel {
   feedbackSession: FeedbackSession;
 }
-
 /**
  * Instructor feedback sessions list page.
  */
@@ -65,6 +65,7 @@ interface RecycleBinFeedbackSessionRowModel {
   selector: 'tm-instructor-sessions-page',
   templateUrl: './instructor-sessions-page.component.html',
   styleUrls: ['./instructor-sessions-page.component.scss'],
+  animations: [collapseAnim],
 })
 export class InstructorSessionsPageComponent extends InstructorSessionModalPageComponent implements OnInit {
 
@@ -73,7 +74,7 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
   SortOrder: typeof SortOrder = SortOrder;
   SessionEditFormMode: typeof SessionEditFormMode = SessionEditFormMode;
   SessionsTableColumn: typeof SessionsTableColumn = SessionsTableColumn;
-  SessionsTableHeaderColorScheme: typeof SessionsTableHeaderColorScheme = SessionsTableHeaderColorScheme;
+  SortableTableHeaderColorScheme: typeof SortableTableHeaderColorScheme = SortableTableHeaderColorScheme;
 
   // url params
   courseId: string = '';
@@ -82,69 +83,54 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
   courseCandidates: Course[] = [];
   templateSessions: TemplateSession[] = [];
 
-  // models
-  sessionEditFormModel: SessionEditFormModel = {
-    courseId: '',
-    timeZone: 'UTC',
-    courseName: '',
-    feedbackSessionName: '',
-    instructions: 'Please answer all the given questions.',
-
-    submissionStartTime: { hour: 0, minute: 0 },
-    submissionStartDate: { year: 0, month: 0, day: 0 },
-    submissionEndTime: { hour: 0, minute: 0 },
-    submissionEndDate: { year: 0, month: 0, day: 0 },
-    gracePeriod: 0,
-
-    sessionVisibleSetting: SessionVisibleSetting.AT_OPEN,
-    customSessionVisibleTime: { hour: 0, minute: 0 },
-    customSessionVisibleDate: { year: 0, month: 0, day: 0 },
-
-    responseVisibleSetting: ResponseVisibleSetting.LATER,
-    customResponseVisibleTime: { hour: 0, minute: 0 },
-    customResponseVisibleDate: { year: 0, month: 0, day: 0 },
-
-    submissionStatus: FeedbackSessionSubmissionStatus.OPEN,
-    publishStatus: FeedbackSessionPublishStatus.NOT_PUBLISHED,
-
-    isClosingEmailEnabled: true,
-    isPublishedEmailEnabled: true,
-
-    templateSessionName: '',
-
-    isSaving: false,
-    isEditable: true,
-    hasVisibleSettingsPanelExpanded: false,
-    hasEmailSettingsPanelExpanded: false,
-  };
-
   isSessionEditFormExpanded: boolean = false;
 
   sessionsTableRowModels: SessionsTableRowModel[] = [];
-  sessionsTableRowModelsSortBy: SortBy = SortBy.NONE;
-  sessionsTableRowModelsSortOrder: SortOrder = SortOrder.ASC;
 
   isRecycleBinExpanded: boolean = false;
   recycleBinFeedbackSessionRowModels: RecycleBinFeedbackSessionRowModel[] = [];
   recycleBinFeedbackSessionRowModelsSortBy: SortBy = SortBy.NONE;
   recycleBinFeedbackSessionRowModelsSortOrder: SortOrder = SortOrder.ASC;
 
-  hasCoursesLoaded: boolean = false;
+  isCopyOtherSessionLoading: boolean = false;
+  isCoursesLoading: boolean = true;
+  isFeedbackSessionsLoading: boolean = true;
+  isMoveToRecycleBinLoading: boolean = false;
+  isCopySessionLoading: boolean = false;
+  isRecycleBinLoading: boolean = true;
+  isRestoreFeedbackSessionLoading: boolean = false;
+  isPermanentDeleteLoading: boolean = false;
+  hasCourseLoadingFailed: boolean = false;
+  hasFeedbackSessionLoadingFailed: boolean = false;
 
-  constructor(router: Router,
-              httpRequestService: HttpRequestService,
-              statusMessageService: StatusMessageService,
+  @ViewChild('modifiedTimestampsModal') modifiedTimestampsModal!: TemplateRef<any>;
+
+  constructor(statusMessageService: StatusMessageService,
               navigationService: NavigationService,
               feedbackSessionsService: FeedbackSessionsService,
               feedbackQuestionsService: FeedbackQuestionsService,
-              modalService: NgbModal,
+              ngbModalService: NgbModal,
               studentService: StudentService,
-              private route: ActivatedRoute,
-              private timezoneService: TimezoneService) {
-    super(router, httpRequestService, statusMessageService, navigationService,
-        feedbackSessionsService, feedbackQuestionsService, modalService, studentService);
-  }
+              instructorService: InstructorService,
+              tableComparatorService: TableComparatorService,
+              simpleModalService: SimpleModalService,
+              progressBarService: ProgressBarService,
+              feedbackSessionActionsService: FeedbackSessionActionsService,
+              timezoneService: TimezoneService,
+              private courseService: CourseService,
+              private route: ActivatedRoute) {
+    super(instructorService, statusMessageService, navigationService, feedbackSessionsService,
+        feedbackQuestionsService, tableComparatorService, ngbModalService,
+      simpleModalService, progressBarService, feedbackSessionActionsService, timezoneService, studentService);
 
+    this.sessionEditFormModel = {
+      ...this.sessionEditFormModel,
+      isEditable: true,
+      gracePeriod: 15,
+      responseVisibleSetting: ResponseVisibleSetting.LATER,
+      instructions: 'Please answer all the given questions.',
+    };
+  }
   ngOnInit(): void {
     this.route.queryParams.subscribe((queryParams: any) => {
       this.courseId = queryParams.courseid;
@@ -161,7 +147,8 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
    * Copies from other sessions.
    */
   copyFromOtherSessionsHandler(): void {
-    const modalRef: NgbModalRef = this.modalService.open(CopyFromOtherSessionsModalComponent);
+    this.isCopyOtherSessionLoading = true;
+    const modalRef: NgbModalRef = this.ngbModal.open(CopyFromOtherSessionsModalComponent);
     // select the current course Id.
     modalRef.componentInstance.copyToCourseId = this.sessionEditFormModel.courseId;
 
@@ -170,28 +157,64 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
         this.sessionsTableRowModels.map((model: SessionsTableRowModel) => model.feedbackSession);
 
     modalRef.result.then((result: CopyFromOtherSessionsResult) => {
-      this.copyFeedbackSession(result.fromFeedbackSession, result.newFeedbackSessionName, result.copyToCourseId)
-          .subscribe((createdFeedbackSession: FeedbackSession) => {
-            this.navigationService.navigateWithSuccessMessage(this.router, '/web/instructor/sessions/edit'
-                + `?courseid=${createdFeedbackSession.courseId}&fsname=${createdFeedbackSession.feedbackSessionName}`,
-                'The feedback session has been copied. Please modify settings/questions as necessary.');
-          }, (resp: ErrorMessageOutput) => { this.statusMessageService.showErrorMessage(resp.error.message); });
-    }, () => {});
+      this.coursesOfModifiedSession = [];
+      this.modifiedSession = {};
+      this.copyFeedbackSession(result.fromFeedbackSession, result.newFeedbackSessionName, result.copyToCourseId,
+        result.fromFeedbackSession.courseId)
+          .pipe(finalize(() => {
+            this.isCopyOtherSessionLoading = false;
+          }))
+          .subscribe({
+            next: (createdFeedbackSession: FeedbackSession) => {
+              if (this.coursesOfModifiedSession.length > 0) {
+                this.simpleModalService.openInformationModal('Note On Tweaked Session Timestamps',
+                    SimpleModalType.WARNING, this.modifiedTimestampsModal,
+                    {
+                      onClosed: () => this.navigationService.navigateByURLWithParamEncoding(
+                          '/web/instructor/sessions/edit',
+                          {
+                            courseid: createdFeedbackSession.courseId,
+                            fsname: createdFeedbackSession.feedbackSessionName,
+                          }),
+                    });
+              } else {
+                this.navigationService.navigateWithSuccessMessage('/web/instructor/sessions/edit',
+                    'The feedback session has been copied. Please modify settings/questions as necessary.',
+                    { courseid: createdFeedbackSession.courseId, fsname: createdFeedbackSession.feedbackSessionName });
+              }
+            },
+            error: (resp: ErrorMessageOutput) => {
+              this.statusMessageService.showErrorToast(
+                  this.formatErrorMessage(resp.error.message));
+            },
+          });
+    }).catch(() => {
+      this.isCopyOtherSessionLoading = false;
+    });
   }
 
   /**
    * Loads courses owned by the current user.
    */
   loadCandidatesCourse(): void {
-    this.httpRequestService.get('/courses', {
-      entitytype: 'instructor',
-      coursestatus: 'active',
-    }).pipe(finalize(() => this.hasCoursesLoaded = true)).subscribe((courses: Courses) => {
-      this.courseCandidates = courses.courses;
+    this.isCoursesLoading = true;
+    this.courseService.getInstructorCoursesThatAreActive()
+        .pipe(finalize(() => {
+          this.isCoursesLoading = false;
+        }))
+        .subscribe({
+          next: (courses: Courses) => {
+            this.courseCandidates = courses.courses;
 
-      this.initDefaultValuesForSessionEditForm();
-    }, (resp: ErrorMessageOutput) => { this.statusMessageService.showErrorMessage(resp.error.message); });
-  }
+            this.initDefaultValuesForSessionEditForm();
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.resetAllModels();
+            this.hasCourseLoadingFailed = true;
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
+        });
+   }
 
   /**
    * Sets default values for the session edit form.
@@ -216,7 +239,7 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
     }
 
     // set opening time to near future
-    const nearFuture: any = moment().add(1, 'hours');
+    const nearFuture: moment.Moment = moment().tz(this.sessionEditFormModel.timeZone).add(1, 'hours');
     this.sessionEditFormModel.submissionStartDate = {
       year: nearFuture.year(),
       month: nearFuture.month() + 1, // moment return 0-11 for month
@@ -227,7 +250,7 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
       hour: nearFuture.hour() === 0 ? 23 : nearFuture.hour(),
     };
     // set the closing time to tomorrow
-    const tomorrow: any = moment().add(1, 'days');
+    const tomorrow: moment.Moment = moment().tz(this.sessionEditFormModel.timeZone).add(1, 'days');
     this.sessionEditFormModel.submissionEndDate = {
       year: tomorrow.year(),
       month: tomorrow.month() + 1, // moment return 0-11 for month
@@ -240,254 +263,161 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
   }
 
   /**
-   * Redirects to page to create or unarchive courses.
-   */
-  createOrUnarchiveCourse(): void {
-    this.router.navigateByUrl('/web/instructor/courses');
-  }
-
-  /**
    * Adds a new feedback session.
    */
   addNewSessionHandler(): void {
     this.sessionEditFormModel.isSaving = true;
 
-    const resolvingResultMessages: string[] = [];
-    forkJoin(
-        this.resolveLocalDateTime(this.sessionEditFormModel.submissionStartDate,
-            this.sessionEditFormModel.submissionStartTime, this.sessionEditFormModel.timeZone,
-            'Submission opening time', resolvingResultMessages),
-        this.resolveLocalDateTime(this.sessionEditFormModel.submissionEndDate,
-            this.sessionEditFormModel.submissionEndTime, this.sessionEditFormModel.timeZone,
-            'Submission closing time', resolvingResultMessages),
-        this.sessionEditFormModel.sessionVisibleSetting === SessionVisibleSetting.CUSTOM ?
-            this.resolveLocalDateTime(this.sessionEditFormModel.customSessionVisibleDate,
-                this.sessionEditFormModel.customSessionVisibleTime, this.sessionEditFormModel.timeZone,
-                'Session visible time', resolvingResultMessages)
-            : of(0),
-        this.sessionEditFormModel.responseVisibleSetting === ResponseVisibleSetting.CUSTOM ?
-            this.resolveLocalDateTime(this.sessionEditFormModel.customResponseVisibleDate,
-                this.sessionEditFormModel.customResponseVisibleTime, this.sessionEditFormModel.timeZone,
-                'Response visible time', resolvingResultMessages)
-            : of(0),
-    ).pipe(
-        switchMap((vals: number[]) => {
-          return this.feedbackSessionsService.createFeedbackSession(this.sessionEditFormModel.courseId, {
-            feedbackSessionName: this.sessionEditFormModel.feedbackSessionName,
-            instructions: this.sessionEditFormModel.instructions,
+    const submissionStartTime: number = this.timezoneService.resolveLocalDateTime(
+        this.sessionEditFormModel.submissionStartDate, this.sessionEditFormModel.submissionStartTime,
+        this.sessionEditFormModel.timeZone, true);
+    const submissionEndTime: number = this.timezoneService.resolveLocalDateTime(
+        this.sessionEditFormModel.submissionEndDate, this.sessionEditFormModel.submissionEndTime,
+        this.sessionEditFormModel.timeZone, true);
+    let sessionVisibleTime: number = 0;
+    if (this.sessionEditFormModel.sessionVisibleSetting === SessionVisibleSetting.CUSTOM) {
+      sessionVisibleTime = this.timezoneService.resolveLocalDateTime(
+          this.sessionEditFormModel.customSessionVisibleDate, this.sessionEditFormModel.customSessionVisibleTime,
+          this.sessionEditFormModel.timeZone, true);
+    }
+    let responseVisibleTime: number = 0;
+    if (this.sessionEditFormModel.responseVisibleSetting === ResponseVisibleSetting.CUSTOM) {
+      responseVisibleTime = this.timezoneService.resolveLocalDateTime(
+          this.sessionEditFormModel.customResponseVisibleDate, this.sessionEditFormModel.customResponseVisibleTime,
+          this.sessionEditFormModel.timeZone, true);
+    }
 
-            submissionStartTimestamp: vals[0],
-            submissionEndTimestamp: vals[1],
-            gracePeriod: this.sessionEditFormModel.gracePeriod,
+    this.feedbackSessionsService.createFeedbackSession(this.sessionEditFormModel.courseId, {
+      feedbackSessionName: this.sessionEditFormModel.feedbackSessionName,
+      instructions: this.sessionEditFormModel.instructions,
 
-            sessionVisibleSetting: this.sessionEditFormModel.sessionVisibleSetting,
-            customSessionVisibleTimestamp: vals[2],
+      submissionStartTimestamp: submissionStartTime,
+      submissionEndTimestamp: submissionEndTime,
+      gracePeriod: this.sessionEditFormModel.gracePeriod,
 
-            responseVisibleSetting: this.sessionEditFormModel.responseVisibleSetting,
-            customResponseVisibleTimestamp: vals[3],
+      sessionVisibleSetting: this.sessionEditFormModel.sessionVisibleSetting,
+      customSessionVisibleTimestamp: sessionVisibleTime,
 
-            isClosingEmailEnabled: this.sessionEditFormModel.isClosingEmailEnabled,
-            isPublishedEmailEnabled: this.sessionEditFormModel.isPublishedEmailEnabled,
-          });
-        }),
-    ).subscribe((feedbackSession: FeedbackSession) => {
+      responseVisibleSetting: this.sessionEditFormModel.responseVisibleSetting,
+      customResponseVisibleTimestamp: responseVisibleTime,
 
-      // begin to populate session with template
-      const templateSession: TemplateSession | undefined =
-          this.feedbackSessionsService.getTemplateSessions().find(
-              (t: TemplateSession) => t.name === this.sessionEditFormModel.templateSessionName);
-      if (!templateSession) {
-        return;
-      }
-      of(...templateSession.questions).pipe(
-          concatMap((question: FeedbackQuestion) => {
-            return this.feedbackQuestionsService.createFeedbackQuestion(
-                feedbackSession.courseId, feedbackSession.feedbackSessionName, {
-                  questionNumber: question.questionNumber,
-                  questionBrief: question.questionBrief,
-                  questionDescription: question.questionDescription,
+      isClosingEmailEnabled: this.sessionEditFormModel.isClosingEmailEnabled,
+      isPublishedEmailEnabled: this.sessionEditFormModel.isPublishedEmailEnabled,
+    }).subscribe({
+      next: (feedbackSession: FeedbackSession) => {
 
-                  questionDetails: question.questionDetails,
-                  questionType: question.questionType,
+        // begin to populate session with template
+        const templateSession: TemplateSession | undefined =
+            this.feedbackSessionsService.getTemplateSessions().find(
+                (t: TemplateSession) => t.name === this.sessionEditFormModel.templateSessionName);
+        if (!templateSession) {
+          return;
+        }
+        of(...templateSession.questions).pipe(
+            concatMap((question: FeedbackQuestion) => {
+              return this.feedbackQuestionsService.createFeedbackQuestion(
+                  feedbackSession.courseId, feedbackSession.feedbackSessionName, {
+                    questionNumber: question.questionNumber,
+                    questionBrief: question.questionBrief,
+                    questionDescription: question.questionDescription,
 
-                  giverType: question.giverType,
-                  recipientType: question.recipientType,
+                    questionDetails: question.questionDetails,
+                    questionType: question.questionType,
 
-                  numberOfEntitiesToGiveFeedbackToSetting: question.numberOfEntitiesToGiveFeedbackToSetting,
-                  customNumberOfEntitiesToGiveFeedbackTo: question.customNumberOfEntitiesToGiveFeedbackTo,
+                    giverType: question.giverType,
+                    recipientType: question.recipientType,
 
-                  showResponsesTo: question.showResponsesTo,
-                  showGiverNameTo: question.showGiverNameTo,
-                  showRecipientNameTo: question.showRecipientNameTo,
-                });
-          }),
-      ).subscribe(() => {}, (resp: ErrorMessageOutput) => {
-        this.sessionEditFormModel.isSaving = false;
-        this.statusMessageService.showErrorMessage(
-            `The session is created but the template questions cannot be created: ${resp.error.message}`);
-      }, () => {
-        this.router.navigateByUrl(
-            '/web/instructor/sessions/edit'
-            + `?courseid=${feedbackSession.courseId}&fsname=${feedbackSession.feedbackSessionName}`)
-            .then(() => {
-              resolvingResultMessages.forEach((msg: string) => {
-                this.statusMessageService.showWarningMessage(msg);
-              });
-              this.statusMessageService.showSuccessMessage('The feedback session has been added.'
-                  + 'Click the "Add New Question" button below to begin adding questions for the feedback session.');
+                    numberOfEntitiesToGiveFeedbackToSetting: question.numberOfEntitiesToGiveFeedbackToSetting,
+                    customNumberOfEntitiesToGiveFeedbackTo: question.customNumberOfEntitiesToGiveFeedbackTo,
+
+                    showResponsesTo: question.showResponsesTo,
+                    showGiverNameTo: question.showGiverNameTo,
+                    showRecipientNameTo: question.showRecipientNameTo,
+                  },
+                );
+              }),
+            )
+            .subscribe({
+              next: () => {},
+              error: (resp: ErrorMessageOutput) => {
+                this.sessionEditFormModel.isSaving = false;
+                this.statusMessageService.showErrorToast(
+                  `The session is created but the template questions cannot be created: ${resp.error.message}`,
+                );
+              },
+              complete: () => {
+                this.navigationService
+                  .navigateByURLWithParamEncoding('/web/instructor/sessions/edit', {
+                    courseid: feedbackSession.courseId,
+                    fsname: feedbackSession.feedbackSessionName,
+                  })
+                  .then(() => {
+                    this.statusMessageService.showSuccessToast(
+                      'The feedback session has been added.'
+                        + 'Click the "Add New Question" button below to begin adding questions '
+                        + 'for the feedback session.',
+                    );
+                  });
+              },
             });
+        },
+        error: (resp: ErrorMessageOutput) => {
+          this.sessionEditFormModel.isSaving = false;
+          this.statusMessageService.showErrorToast(this.formatErrorMessage(resp.error.message));
+        },
       });
-    }, (resp: ErrorMessageOutput) => {
-      this.sessionEditFormModel.isSaving = false;
-      this.statusMessageService.showErrorMessage(resp.error.message);
-    });
   }
 
-  /**
-   * Resolves the local date time to an UNIX timestamp.
-   */
-  private resolveLocalDateTime(date: DateFormat, time: TimeFormat, timeZone: string,
-                               fieldName: string, resolvingResultMessages: string[]): Observable<number> {
-    const inst: any = moment();
-    inst.set('year', date.year);
-    inst.set('month', date.month - 1); // moment month is from 0-11
-    inst.set('date', date.day);
-    inst.set('hour', time.hour);
-    inst.set('minute', time.minute);
-
-    const localDateTime: string = inst.format(LOCAL_DATE_TIME_FORMAT);
-    return this.timezoneService.getResolvedTimestamp(localDateTime, timeZone, fieldName).pipe(
-        tap((result: TimeResolvingResult) => {
-          if (result.message.length !== 0) {
-            resolvingResultMessages.push(result.message);
-          }
-        }),
-        map((result: TimeResolvingResult) => result.timestamp));
+  formatErrorMessage(errorMessage: string): string {
+    if (errorMessage.match('exists already in the course')) {
+      return `${errorMessage}
+          Tip: If you can't find such a session in that course, also check the 'Recycle bin'
+          (shown at the bottom of the 'Sessions' page).`;
+    }
+    return errorMessage;
   }
 
   /**
    * Loads all feedback sessions that can be accessed by current user.
    */
   loadFeedbackSessions(): void {
+    this.isFeedbackSessionsLoading = true;
     this.feedbackSessionsService.getFeedbackSessionsForInstructor()
-        .subscribe((response: FeedbackSessions) => {
+        .pipe(finalize(() => {
+          this.isFeedbackSessionsLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (response: FeedbackSessions) => {
           response.feedbackSessions.forEach((session: FeedbackSession) => {
             const model: SessionsTableRowModel = {
               feedbackSession: session,
               responseRate: '',
               isLoadingResponseRate: false,
-
-              instructorPrivilege: DEFAULT_INSTRUCTOR_PRIVILEGE,
+              instructorPrivilege: session.privileges || DEFAULT_INSTRUCTOR_PRIVILEGE(),
             };
             this.sessionsTableRowModels.push(model);
-            this.updateInstructorPrivilege(model);
           });
-        }, (resp: ErrorMessageOutput) => {
-          this.statusMessageService.showErrorMessage(resp.error.message);
-        });
+        },
+        error: (resp: ErrorMessageOutput) => {
+          this.resetAllModels();
+          this.hasFeedbackSessionLoadingFailed = true;
+          this.statusMessageService.showErrorToast(resp.error.message);
+        },
+      });
   }
 
   /**
    * Sorts the list of feedback session row.
    */
-  sortSessionsTableRowModelsEvent(by: SortBy): void {
-    this.sessionsTableRowModelsSortBy = by;
-    // reverse the sort order
-    this.sessionsTableRowModelsSortOrder =
-        this.sessionsTableRowModelsSortOrder === SortOrder.DESC ? SortOrder.ASC : SortOrder.DESC;
-    this.sessionsTableRowModels.sort(this.sortModelsBy(by, this.sessionsTableRowModelsSortOrder));
-  }
-
-  /**
-   * Loads response rate of a feedback session.
-   */
-  loadResponseRateEventHandler(rowIndex: number): void {
-    this.loadResponseRate(this.sessionsTableRowModels[rowIndex]);
-  }
-
-  /**
-   * Edits the feedback session.
-   */
-  editSessionEventHandler(rowIndex: number): void {
-    this.editSession(this.sessionsTableRowModels[rowIndex]);
-  }
-
-  /**
-   * Moves the feedback session to the recycle bin.
-   */
-  moveSessionToRecycleBinEventHandler(rowIndex: number): void {
-    const model: SessionsTableRowModel = this.sessionsTableRowModels[rowIndex];
-    const paramMap: { [key: string]: string } = {
-      courseid: model.feedbackSession.courseId,
-      fsname: model.feedbackSession.feedbackSessionName,
-    };
-
-    this.httpRequestService.put('/bin/session', paramMap)
-        .subscribe((feedbackSession: FeedbackSession) => {
-          this.sessionsTableRowModels.splice(this.sessionsTableRowModels.indexOf(model), 1);
-          this.recycleBinFeedbackSessionRowModels.push({
-            feedbackSession,
-          });
-          this.statusMessageService.showSuccessMessage('The feedback session has been deleted. '
-              + 'You can restore it from the deleted sessions table below.');
-        }, (resp: ErrorMessageOutput) => { this.statusMessageService.showErrorMessage(resp.error.message); });
-  }
-
-  /**
-   * Edits the feedback session.
-   */
-  copySessionEventHandler(result: CopySessionResult): void {
-    this.copySession(this.sessionsTableRowModels[result.sessionToCopyRowIndex], result);
-  }
-
-  /**
-   * Submits the feedback session as instructor.
-   */
-  submitSessionAsInstructorEventHandler(rowIndex: number): void {
-    this.submitSessionAsInstructor(this.sessionsTableRowModels[rowIndex]);
-  }
-
-  /**
-   * Views the result of a feedback session.
-   */
-  viewSessionResultEventHandler(rowIndex: number): void {
-    this.viewSessionResult(this.sessionsTableRowModels[rowIndex]);
-  }
-
-  /**
-   * Publishes a feedback session.
-   */
-  publishSessionEventHandler(rowIndex: number): void {
-    this.publishSession(this.sessionsTableRowModels[rowIndex]);
-  }
-
-  /**
-   * Unpublishes a feedback session.
-   */
-  unpublishSessionEventHandler(rowIndex: number): void {
-    this.unpublishSession(this.sessionsTableRowModels[rowIndex]);
-  }
-
-  /**
-   * Loads all feedback sessions in recycle bin that can be accessed by current user.
-   */
-  loadRecycleBinFeedbackSessions(): void {
-    this.feedbackSessionsService.getFeedbackSessionsInRecycleBinForInstructor()
-        .subscribe((response: FeedbackSessions) => {
-          response.feedbackSessions.forEach((session: FeedbackSession) => {
-            this.recycleBinFeedbackSessionRowModels.push({
-              feedbackSession: session,
-            });
-          });
-        }, (resp: ErrorMessageOutput) => {
-          this.statusMessageService.showErrorMessage(resp.error.message);
-        });
+  sortSessionsTableRowModelsEvent(event: SortableEvent): void {
+    this.sessionsTableRowModels.sort(this.sortModelsBy(event.sortBy, event.sortOrder));
   }
 
   /**
    * Sorts the list of feedback session rows in recycle bin table.
    */
-  sortRecycleBinFeedbackSessionRows(by: SortBy): void {
+  sortRecycleBinFeedbackSessionRowsEvent(by: SortBy): void {
     this.recycleBinFeedbackSessionRowModelsSortBy = by;
     // reverse the sort order
     this.recycleBinFeedbackSessionRowModelsSortOrder =
@@ -495,92 +425,239 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
     this.recycleBinFeedbackSessionRowModels.sort(
         this.sortModelsBy(by, this.recycleBinFeedbackSessionRowModelsSortOrder));
   }
+  /**
+   * Loads response rate of a feedback session.
+   */
+  loadResponseRateEventHandler(rowIdx: Index): void {
+    this.loadResponseRate((models: SessionsTableRowModel[]): void => {
+      this.sessionsTableRowModels = [...models];
+    }, this.sessionsTableRowModels, rowIdx);
+  }
 
   /**
    * Restores a recycle bin feedback session.
    */
   restoreRecycleBinFeedbackSession(model: RecycleBinFeedbackSessionRowModel): void {
-    const paramMap: { [key: string]: string } = {
-      courseid: model.feedbackSession.courseId,
-      fsname: model.feedbackSession.feedbackSessionName,
-    };
+    this.isRestoreFeedbackSessionLoading = true;
+    this.feedbackSessionsService.deleteSessionFromRecycleBin(
+        model.feedbackSession.courseId,
+        model.feedbackSession.feedbackSessionName,
+    )
+        .pipe(finalize(() => {
+          this.isRestoreFeedbackSessionLoading = false;
+        }))
+        .subscribe({
+          next: (feedbackSession: FeedbackSession) => {
+            this.recycleBinFeedbackSessionRowModels.splice(
+                this.recycleBinFeedbackSessionRowModels.indexOf(model), 1);
+            const m: SessionsTableRowModel = {
+              feedbackSession,
+              responseRate: '',
+              isLoadingResponseRate: false,
+              instructorPrivilege: feedbackSession.privileges || DEFAULT_INSTRUCTOR_PRIVILEGE(),
+            };
+            this.sessionsTableRowModels = [...this.sessionsTableRowModels, m];
+            this.statusMessageService.showSuccessToast('The feedback session has been restored.');
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
+        });
+  }
 
-    this.httpRequestService.delete('/bin/session', paramMap)
-        .subscribe((feedbackSession: FeedbackSession) => {
-          this.recycleBinFeedbackSessionRowModels.splice(
-              this.recycleBinFeedbackSessionRowModels.indexOf(model), 1);
-          const m: SessionsTableRowModel = {
-            feedbackSession,
-            responseRate: '',
-            isLoadingResponseRate: false,
-            instructorPrivilege: DEFAULT_INSTRUCTOR_PRIVILEGE,
-          };
-          this.sessionsTableRowModels.push(m);
-          this.updateInstructorPrivilege(m);
-          this.statusMessageService.showSuccessMessage('The feedback session has been restored.');
-        }, (resp: ErrorMessageOutput) => { this.statusMessageService.showErrorMessage(resp.error.message); });
+  /**
+   * Moves the feedback session to the recycle bin.
+   */
+  moveSessionToRecycleBinEventHandler(rowIndex: Index): void {
+    this.isMoveToRecycleBinLoading = true;
+    const model: SessionsTableRowModel = this.sessionsTableRowModels[rowIndex];
+    this.feedbackSessionsService.moveSessionToRecycleBin(
+        model.feedbackSession.courseId,
+        model.feedbackSession.feedbackSessionName,
+    )
+        .pipe(finalize(() => {
+          this.isMoveToRecycleBinLoading = false;
+        }))
+        .subscribe({
+          next: (feedbackSession: FeedbackSession) => {
+            this.sessionsTableRowModels.splice(this.sessionsTableRowModels.indexOf(model), 1);
+            this.recycleBinFeedbackSessionRowModels.push({
+              feedbackSession,
+            });
+            this.statusMessageService.showSuccessToast('The feedback session has been deleted. '
+                + 'You can restore it from the deleted sessions table below.');
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
+        });
+  }
+
+  /**
+   * Edits the feedback session.
+   */
+  copySessionEventHandler(result: CopySessionResult): void {
+    this.isCopySessionLoading = true;
+    this.failedToCopySessions = {};
+    this.coursesOfModifiedSession = [];
+    this.modifiedSession = {};
+    const requestList: Observable<FeedbackSession>[] = this.createSessionCopyRequestsFromRowModel(
+        this.sessionsTableRowModels[result.sessionToCopyRowIndex], result);
+    if (requestList.length === 1) {
+      this.copySingleSession(requestList[0].pipe(finalize(() => {
+        this.isCopySessionLoading = false;
+      })), this.modifiedTimestampsModal);
+    }
+    if (requestList.length > 1) {
+      forkJoin(requestList).pipe(finalize(() => {
+        this.isCopySessionLoading = false;
+      }))
+        .subscribe((newSessions: FeedbackSession[]) => {
+          if (newSessions.length > 0) {
+            newSessions.forEach((session: FeedbackSession) => {
+              const model: SessionsTableRowModel = {
+                feedbackSession: session,
+                responseRate: '',
+                isLoadingResponseRate: false,
+                instructorPrivilege: session.privileges || DEFAULT_INSTRUCTOR_PRIVILEGE(),
+              };
+              this.sessionsTableRowModels.push(model);
+            });
+          }
+          this.showCopyStatusMessage(this.modifiedTimestampsModal);
+        });
+    }
+  }
+
+  /**
+   * Submits the feedback session as instructor.
+   */
+  submitSessionAsInstructorEventHandler(rowIndex: Index): void {
+    this.submitSessionAsInstructor(this.sessionsTableRowModels[rowIndex]);
+  }
+
+  /**
+   * Publishes a feedback session.
+   */
+  publishSessionEventHandler(event: MutateEvent): void {
+    this.publishSession(this.sessionsTableRowModels[event.idx], event.rowData, event.columnsData);
+  }
+
+  /**
+   * Unpublishes a feedback session.
+   */
+  unpublishSessionEventHandler(event: MutateEvent): void {
+    this.unpublishSession(this.sessionsTableRowModels[event.idx], event.rowData, event.columnsData);
+  }
+
+  /**
+   * Downloads the result of a feedback session in csv.
+   */
+  downloadSessionResultEventHandler(rowIndex: Index): void {
+    this.downloadSessionResult(this.sessionsTableRowModels[rowIndex]);
+  }
+
+  /**
+   * Loads all feedback sessions in recycle bin that can be accessed by current user.
+   */
+  loadRecycleBinFeedbackSessions(): void {
+    this.isRecycleBinLoading = true;
+    this.feedbackSessionsService.getFeedbackSessionsInRecycleBinForInstructor()
+      .pipe(finalize(() => {
+          this.isRecycleBinLoading = false;
+        }))
+        .subscribe({
+          next: (response: FeedbackSessions) => {
+            response.feedbackSessions.forEach((session: FeedbackSession) => {
+              this.recycleBinFeedbackSessionRowModels.push({
+                feedbackSession: session,
+            });
+          });
+        },
+        error: (resp: ErrorMessageOutput) => {
+          this.resetAllModels();
+          this.hasFeedbackSessionLoadingFailed = true;
+          this.statusMessageService.showErrorToast(resp.error.message);
+        },
+        complete: () => this.sortRecycleBinFeedbackSessionRowsEvent(SortBy.SESSION_DELETION_DATE),
+      });
   }
 
   /**
    * Restores all feedback sessions in recycle bin.
    */
   restoreAllRecycleBinFeedbackSession(): void {
+    this.isRestoreFeedbackSessionLoading = true;
     const restoreRequests: Observable<FeedbackSession>[] = [];
     this.recycleBinFeedbackSessionRowModels.forEach((model: RecycleBinFeedbackSessionRowModel) => {
-      const paramMap: { [key: string]: string } = {
-        courseid: model.feedbackSession.courseId,
-        fsname: model.feedbackSession.feedbackSessionName,
-      };
-      restoreRequests.push(this.httpRequestService.delete('/bin/session', paramMap));
+      restoreRequests.push(
+          this.feedbackSessionsService.deleteSessionFromRecycleBin(
+              model.feedbackSession.courseId,
+              model.feedbackSession.feedbackSessionName,
+          ));
     });
 
-    forkJoin(restoreRequests).subscribe((restoredSessions: FeedbackSession[]) => {
-      restoredSessions.forEach((session: FeedbackSession) => {
-        this.recycleBinFeedbackSessionRowModels = [];
-        const m: SessionsTableRowModel = {
-          feedbackSession: session,
-          responseRate: '',
-          isLoadingResponseRate: false,
-          instructorPrivilege: DEFAULT_INSTRUCTOR_PRIVILEGE,
-        };
-        this.sessionsTableRowModels.push(m);
-        this.updateInstructorPrivilege(m);
+    forkJoin(restoreRequests).pipe(finalize(() => {
+      this.isRestoreFeedbackSessionLoading = false;
+    }))
+      .subscribe({
+        next: (restoredSessions: FeedbackSession[]) => {
+          restoredSessions.forEach((session: FeedbackSession) => {
+            this.recycleBinFeedbackSessionRowModels = [];
+            const m: SessionsTableRowModel = {
+              feedbackSession: session,
+              responseRate: '',
+              isLoadingResponseRate: false,
+              instructorPrivilege: session.privileges || DEFAULT_INSTRUCTOR_PRIVILEGE(),
+            };
+            this.sessionsTableRowModels = [...this.sessionsTableRowModels, m];
+          });
+          this.statusMessageService.showSuccessToast('All sessions have been restored.');
+        },
+        error: (resp: ErrorMessageOutput) => {
+          this.statusMessageService.showErrorToast(resp.error.message);
+        },
       });
-      this.statusMessageService.showSuccessMessage('All sessions have been restored.');
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
-    });
   }
 
   /**
    * Deletes the feedback session permanently.
    */
   permanentDeleteSession(model: RecycleBinFeedbackSessionRowModel): void {
-    const modalRef: NgbModalRef = this.modalService.open(SessionPermanentDeletionConfirmModalComponent);
+    this.isPermanentDeleteLoading = true;
+    const modalRef: NgbModalRef = this.ngbModal.open(SessionPermanentDeletionConfirmModalComponent);
     modalRef.componentInstance.courseId = model.feedbackSession.courseId;
     modalRef.componentInstance.feedbackSessionName = model.feedbackSession.feedbackSessionName;
 
     modalRef.result.then(() => {
-      const paramMap: { [key: string]: string } = {
-        courseid: model.feedbackSession.courseId,
-        fsname: model.feedbackSession.feedbackSessionName,
-      };
-
-      this.httpRequestService.delete('/session', paramMap).subscribe(() => {
-        this.recycleBinFeedbackSessionRowModels.splice(
-            this.recycleBinFeedbackSessionRowModels.indexOf(model), 1);
-        this.statusMessageService.showSuccessMessage('The feedback session has been permanently deleted.');
-      }, (resp: ErrorMessageOutput) => {
-        this.statusMessageService.showErrorMessage(resp.error.message);
-      });
-    }, () => {});
+      this.feedbackSessionsService.deleteFeedbackSession(
+          model.feedbackSession.courseId,
+          model.feedbackSession.feedbackSessionName,
+      )
+        .pipe(finalize(() => {
+          this.isPermanentDeleteLoading = false;
+        }))
+        .subscribe({
+          next: () => {
+            this.recycleBinFeedbackSessionRowModels.splice(
+                this.recycleBinFeedbackSessionRowModels.indexOf(model), 1);
+            this.statusMessageService.showSuccessToast('The feedback session has been permanently deleted.');
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
+        });
+    }).catch(() => {
+      this.isPermanentDeleteLoading = false;
+    });
   }
 
   /**
    * Deletes all feedback sessions in the recycle bin permanently.
    */
   permanentDeleteAllSessions(): void {
-    const modalRef: NgbModalRef = this.modalService.open(SessionsPermanentDeletionConfirmModalComponent);
+    this.isPermanentDeleteLoading = true;
+    const modalRef: NgbModalRef = this.ngbModal.open(SessionsPermanentDeletionConfirmModalComponent);
     modalRef.componentInstance.sessionsToDelete =
         this.recycleBinFeedbackSessionRowModels.map(
             (model: RecycleBinFeedbackSessionRowModel) => model.feedbackSession);
@@ -589,20 +666,45 @@ export class InstructorSessionsPageComponent extends InstructorSessionModalPageC
       const deleteRequests: Observable<any>[] = [];
 
       this.recycleBinFeedbackSessionRowModels.forEach((model: RecycleBinFeedbackSessionRowModel) => {
-        const paramMap: { [key: string]: string } = {
-          courseid: model.feedbackSession.courseId,
-          fsname: model.feedbackSession.feedbackSessionName,
-        };
-
-        deleteRequests.push(this.httpRequestService.delete('/session', paramMap));
+        deleteRequests.push(this.feedbackSessionsService.deleteFeedbackSession(
+            model.feedbackSession.courseId,
+            model.feedbackSession.feedbackSessionName,
+        ));
       });
 
-      forkJoin(deleteRequests).subscribe(() => {
-        this.recycleBinFeedbackSessionRowModels = [];
-        this.statusMessageService.showSuccessMessage('All sessions have been permanently deleted.');
-      }, (resp: ErrorMessageOutput) => {
-        this.statusMessageService.showErrorMessage(resp.error.message);
+      forkJoin(deleteRequests).pipe(finalize(() => {
+              this.isPermanentDeleteLoading = false;
+            }),
+          )
+          .subscribe({
+            next: () => {
+              this.recycleBinFeedbackSessionRowModels = [];
+              this.statusMessageService.showSuccessToast('All sessions have been permanently deleted.');
+            },
+            error: (resp: ErrorMessageOutput) => {
+              this.statusMessageService.showErrorToast(resp.error.message);
+            },
+          });
+      })
+      .catch(() => {
+        this.isPermanentDeleteLoading = false;
       });
-    }, () => {});
+  }
+
+  /**
+   * Attempts to load all data again.
+   */
+  retryLoadingAllData(): void {
+    this.hasFeedbackSessionLoadingFailed = false;
+    this.hasCourseLoadingFailed = false;
+    this.loadCandidatesCourse();
+    this.loadFeedbackSessions();
+    this.loadRecycleBinFeedbackSessions();
+  }
+
+  resetAllModels(): void {
+    this.courseCandidates = [];
+    this.sessionsTableRowModels = [];
+    this.recycleBinFeedbackSessionRowModels = [];
   }
 }

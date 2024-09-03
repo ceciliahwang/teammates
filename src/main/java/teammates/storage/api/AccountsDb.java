@@ -2,14 +2,16 @@ package teammates.storage.api;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.cmd.LoadType;
 
 import teammates.common.datatransfer.attributes.AccountAttributes;
 import teammates.common.exception.EntityDoesNotExistException;
 import teammates.common.exception.InvalidParametersException;
-import teammates.common.util.Assumption;
-import teammates.common.util.Const;
 import teammates.storage.entity.Account;
 
 /**
@@ -18,15 +20,36 @@ import teammates.storage.entity.Account;
  * @see Account
  * @see AccountAttributes
  */
-public class AccountsDb extends EntitiesDb<Account, AccountAttributes> {
+public final class AccountsDb extends EntitiesDb<Account, AccountAttributes> {
+
+    private static final AccountsDb instance = new AccountsDb();
+
+    private AccountsDb() {
+        // prevent initialization
+    }
+
+    public static AccountsDb inst() {
+        return instance;
+    }
 
     /**
      * Gets an account.
      */
     public AccountAttributes getAccount(String googleId) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, googleId);
+        assert googleId != null;
 
         return googleId.isEmpty() ? null : makeAttributesOrNull(getAccountEntity(googleId));
+    }
+
+    /**
+     * Returns a list of accounts with email matching {@code email}.
+     */
+    public List<AccountAttributes> getAccountsForEmail(String email) {
+        assert email != null;
+
+        List<Account> accounts = load().filter("email =", email).list();
+
+        return makeAttributes(accounts);
     }
 
     /**
@@ -38,7 +61,7 @@ public class AccountsDb extends EntitiesDb<Account, AccountAttributes> {
      */
     public AccountAttributes updateAccount(AccountAttributes.UpdateOptions updateOptions)
             throws InvalidParametersException, EntityDoesNotExistException {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, updateOptions);
+        assert updateOptions != null;
 
         Account account = getAccountEntity(updateOptions.getGoogleId());
         if (account == null) {
@@ -54,13 +77,16 @@ public class AccountsDb extends EntitiesDb<Account, AccountAttributes> {
         }
 
         // update only if change
-        boolean hasSameAttributes = this.<Boolean>hasSameValue(account.isInstructor(), newAttributes.isInstructor());
+        boolean hasSameAttributes =
+                this.<Map<String, Instant>>hasSameValue(account.getReadNotifications(), newAttributes.getReadNotifications())
+                && this.hasSameValue(account.isMigrated(), newAttributes.isMigrated());
         if (hasSameAttributes) {
             log.info(String.format(OPTIMIZED_SAVING_POLICY_APPLIED, Account.class.getSimpleName(), updateOptions));
             return newAttributes;
         }
 
-        account.setIsInstructor(newAttributes.isInstructor);
+        account.setReadNotifications(newAttributes.getReadNotifications());
+        account.setMigrated(newAttributes.isMigrated());
 
         saveEntity(account);
 
@@ -73,34 +99,29 @@ public class AccountsDb extends EntitiesDb<Account, AccountAttributes> {
      * <p>Fails silently if there is no such account.
      */
     public void deleteAccount(String googleId) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, googleId);
+        assert googleId != null;
 
         deleteEntity(Key.create(Account.class, googleId));
     }
 
     private Account getAccountEntity(String googleId) {
-        Account account = load().id(googleId).now();
-        if (account == null) {
-            return null;
-        }
-
-        return account;
+        return load().id(googleId).now();
     }
 
     @Override
-    protected LoadType<Account> load() {
+    LoadType<Account> load() {
         return ofy().load().type(Account.class);
     }
 
     @Override
-    protected boolean hasExistingEntities(AccountAttributes entityToCreate) {
+    boolean hasExistingEntities(AccountAttributes entityToCreate) {
         Key<Account> keyToFind = Key.create(Account.class, entityToCreate.getGoogleId());
         return !load().filterKey(keyToFind).keys().list().isEmpty();
     }
 
     @Override
-    protected AccountAttributes makeAttributes(Account entity) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, entity);
+    AccountAttributes makeAttributes(Account entity) {
+        assert entity != null;
 
         return AccountAttributes.valueOf(entity);
     }

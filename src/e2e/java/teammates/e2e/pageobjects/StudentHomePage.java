@@ -1,15 +1,16 @@
 package teammates.e2e.pageobjects;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
 
 /**
  * Page Object Model for student home page.
  */
 public class StudentHomePage extends AppPage {
-
-    @FindBy(linkText = "View team")
-    private WebElement studentViewTeamBtn;
 
     public StudentHomePage(Browser browser) {
         super(browser);
@@ -17,17 +18,48 @@ public class StudentHomePage extends AppPage {
 
     @Override
     protected boolean containsExpectedPageContents() {
-        return getPageTitle().equals("Student Home");
+        return "Student Home".equals(getPageTitle());
     }
 
-    /**
-     * Equivalent of clicking the 'View team' button on course panel.
-     * @return the loaded page
-     */
-    public StudentCourseDetailsPage loadStudentCourseDetails() {
-        click(studentViewTeamBtn);
-        waitForPageToLoad();
-        return changePageType(StudentCourseDetailsPage.class);
+    private List<WebElement> getStudentHomeCoursePanels() {
+        return browser.driver.findElements(By.cssSelector("div.card.bg-light"));
+    }
+
+    public int getStudentHomeCoursePanelIndex(String courseName) {
+        List<WebElement> coursePanels = getStudentHomeCoursePanels();
+        int coursePanelIndex = -1;
+        for (int i = 0; i < coursePanels.size(); i++) {
+            if (coursePanels.get(i).getText().contains(courseName)) {
+                coursePanelIndex = i;
+            }
+        }
+        assertTrue(coursePanelIndex >= 0);
+        return coursePanelIndex;
+    }
+
+    public void verifyVisibleFeedbackSessionToStudents(String feedbackSessionName, int index) {
+        assertTrue(getStudentHomeCoursePanels().get(index)
+                .findElement(By.cssSelector("div.table-responsive table.table tbody")).getText()
+                .contains(feedbackSessionName));
+    }
+
+    public void clickCloseNotificationBannerButton() {
+        WebElement closeNotifButton = browser.driver.findElement(By.id("btn-close-notif"));
+        waitForElementToBeClickable(closeNotifButton);
+        click(closeNotifButton);
+        waitUntilAnimationFinish();
+    }
+
+    public void clickMarkAsReadButton() {
+        WebElement markNotifAsReadButton = browser.driver.findElement(By.id("btn-mark-as-read"));
+        waitForElementToBeClickable(markNotifAsReadButton);
+        click(markNotifAsReadButton);
+        waitUntilAnimationFinish();
+    }
+
+    public String getNotificationId() {
+        WebElement notificationBanner = browser.driver.findElement(By.id("notification-banner"));
+        return notificationBanner.getAttribute("data-testid");
     }
 
 }

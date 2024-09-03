@@ -7,7 +7,7 @@ public class AppUrl extends Url {
 
     public AppUrl(String url) {
         super(url);
-        Assumption.assertTrue(url.startsWith("http")); // must either be http or https
+        assert url.startsWith("http"); // must either be http or https
     }
 
     public AppUrl withUserId(String userId) {
@@ -18,8 +18,8 @@ public class AppUrl extends Url {
         return withParam(Const.ParamsNames.REGKEY, key);
     }
 
-    public AppUrl withInstructorInstitution(String institute) {
-        return withParam(Const.ParamsNames.INSTRUCTOR_INSTITUTION, institute);
+    public AppUrl withIsCreatingAccount(String isCreatingAccount) {
+        return withParam(Const.ParamsNames.IS_CREATING_ACCOUNT, isCreatingAccount);
     }
 
     public AppUrl withCourseId(String courseId) {
@@ -34,17 +34,8 @@ public class AppUrl extends Url {
         return withParam(Const.ParamsNames.STUDENT_EMAIL, email);
     }
 
-    public AppUrl withInstructorId(String instructorId) {
-        return withParam(Const.ParamsNames.INSTRUCTOR_ID, instructorId);
-    }
-
-    public AppUrl withQuestionNumber(String questionNumber) {
-        return withParam(Const.ParamsNames.FEEDBACK_QUESTION_NUMBER, questionNumber);
-    }
-
-    @Deprecated
-    public AppUrl withEnableSessionEditDetails(boolean shouldLoadInEditMode) {
-        return withParam(Const.ParamsNames.FEEDBACK_SESSION_ENABLE_EDIT, Boolean.toString(shouldLoadInEditMode));
+    public AppUrl withEntityType(String entityType) {
+        return withParam(Const.ParamsNames.ENTITY_TYPE, entityType);
     }
 
 }

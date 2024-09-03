@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { QuestionEditAnswerFormComponent } from './question-edit-answer-form';
 import {
   FeedbackConstantSumDistributePointsType,
   FeedbackConstantSumQuestionDetails,
@@ -8,7 +9,6 @@ import {
   DEFAULT_CONSTSUM_OPTIONS_QUESTION_DETAILS,
   DEFAULT_CONSTSUM_RESPONSE_DETAILS,
 } from '../../../../types/default-question-structs';
-import { QuestionEditAnswerFormComponent } from './question-edit-answer-form';
 
 /**
  * The constsum question options submission form for a recipient.
@@ -29,18 +29,23 @@ export class ConstsumOptionsQuestionEditAnswerFormComponent
     super(DEFAULT_CONSTSUM_OPTIONS_QUESTION_DETAILS(), DEFAULT_CONSTSUM_RESPONSE_DETAILS());
   }
 
+  getAriaLabelForOption(option: string): string {
+    const baseAriaLabel: string = this.getAriaLabel();
+    return `${baseAriaLabel} for ${option} Option`;
+  }
+
   /**
    * Assigns a point to the option specified by index.
    */
   triggerResponse(index: number, event: number): void {
     let newAnswers: number[] = this.responseDetails.answers.slice();
 
-    if (newAnswers.length !== this.questionDetails.numOfConstSumOptions) {
+    if (newAnswers.length !== this.questionDetails.constSumOptions.length) {
       // initialize answers array on the fly
-      newAnswers = Array(this.questionDetails.numOfConstSumOptions).fill(0);
+      newAnswers = Array(this.questionDetails.constSumOptions.length).fill(0);
     }
 
-    newAnswers[index] = event ? event : 0;
+    newAnswers[index] = event ? Math.ceil(event) : 0;
     this.triggerResponseDetailsChange('answers', newAnswers);
   }
 
@@ -49,7 +54,7 @@ export class ConstsumOptionsQuestionEditAnswerFormComponent
    */
   get totalRequiredPoints(): number {
     if (this.questionDetails.pointsPerOption) {
-      return this.questionDetails.points * this.questionDetails.numOfConstSumOptions;
+      return this.questionDetails.points * this.questionDetails.constSumOptions.length;
     }
     return this.questionDetails.points;
   }
@@ -83,6 +88,33 @@ export class ConstsumOptionsQuestionEditAnswerFormComponent
     this.responseDetails.answers.forEach((ans: number) => set.add(ans));
 
     return set.size !== 1;
+  }
+
+  /**
+   * Checks if any of the points are negative.
+   */
+  get isAnyPointsNegative(): boolean {
+    return this.responseDetails.answers.reduce((isNegative: boolean, curr: number) => isNegative || (curr < 0), false);
+  }
+
+  /**
+   * Checks if any of the points are below the minPoint.
+   */
+  get isAnyPointBelowMinimum(): boolean {
+    const comparator : number = this.questionDetails.minPoint ? this.questionDetails.minPoint : 0;
+    return this.responseDetails.answers.reduce((isBelowMinimum: boolean, curr: number) =>
+      isBelowMinimum || (curr < comparator), false);
+  }
+
+  /**
+   * Checks if any of the points are above the maxPoint.
+   */
+  get isAnyPointAboveMaximum(): boolean {
+    const comparator : number = this.questionDetails.maxPoint
+      ? this.questionDetails.maxPoint
+      : this.totalRequiredPoints;
+    return this.responseDetails.answers.reduce((isAboveMaximum: boolean, curr: number) =>
+      isAboveMaximum || (curr > comparator), false);
   }
 
 }

@@ -1,7 +1,5 @@
 package teammates.common.datatransfer;
 
-import com.google.appengine.api.users.User;
-
 /**
  * Represents a user type.
  * <br> Contains user's Google ID and flags to indicate whether the user
@@ -9,18 +7,33 @@ import com.google.appengine.api.users.User;
  */
 public class UserInfo {
 
+    /**
+     * The user's Google ID.
+     */
     public String id;
 
+    /**
+     * Indicates whether the user has admin privilege.
+     */
     public boolean isAdmin;
+
+    /**
+     * Indicates whether the user has instructor privilege.
+     */
     public boolean isInstructor;
+
+    /**
+     * Indicates whether the user has student privilege.
+     */
     public boolean isStudent;
+
+    /**
+     * Indicates whether the user has maintainer privilege.
+     */
+    public boolean isMaintainer;
 
     public UserInfo(String googleId) {
         this.id = googleId;
-    }
-
-    public UserInfo(User user) {
-        this.id = user.getNickname();
     }
 
     public String getId() {
@@ -37,6 +50,10 @@ public class UserInfo {
 
     public boolean getIsStudent() {
         return isStudent;
+    }
+
+    public boolean getIsMaintainer() {
+        return isMaintainer;
     }
 
 }

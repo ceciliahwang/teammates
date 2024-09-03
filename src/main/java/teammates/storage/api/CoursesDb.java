@@ -12,8 +12,6 @@ import com.googlecode.objectify.cmd.LoadType;
 import teammates.common.datatransfer.attributes.CourseAttributes;
 import teammates.common.exception.EntityDoesNotExistException;
 import teammates.common.exception.InvalidParametersException;
-import teammates.common.util.Assumption;
-import teammates.common.util.Const;
 import teammates.storage.entity.Course;
 
 /**
@@ -22,13 +20,23 @@ import teammates.storage.entity.Course;
  * @see Course
  * @see CourseAttributes
  */
-public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
+public final class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
+
+    private static final CoursesDb instance = new CoursesDb();
+
+    private CoursesDb() {
+        // prevent initialization
+    }
+
+    public static CoursesDb inst() {
+        return instance;
+    }
 
     /**
      * Gets a course.
      */
     public CourseAttributes getCourse(String courseId) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseId);
+        assert courseId != null;
 
         return makeAttributesOrNull(getCourseEntity(courseId));
     }
@@ -37,8 +45,8 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
      * Gets a list of courses.
      */
     public List<CourseAttributes> getCourses(List<String> courseIds) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseIds);
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseIds.toArray());
+        assert courseIds != null;
+        assert courseIds.toArray() != null;
 
         return makeAttributes(getCourseEntities(courseIds));
     }
@@ -52,7 +60,7 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
      */
     public CourseAttributes updateCourse(CourseAttributes.UpdateOptions updateOptions)
             throws InvalidParametersException, EntityDoesNotExistException {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, updateOptions);
+        assert updateOptions != null;
 
         Course course = getCourseEntity(updateOptions.getCourseId());
 
@@ -71,14 +79,18 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
         // update only if change
         boolean hasSameAttributes =
                 this.<String>hasSameValue(course.getName(), newAttributes.getName())
-                && this.<String>hasSameValue(course.getTimeZone(), newAttributes.getTimeZone().getId());
+                && this.<String>hasSameValue(course.getInstitute(), newAttributes.getInstitute())
+                && this.<String>hasSameValue(course.getTimeZone(), newAttributes.getTimeZone())
+                && this.hasSameValue(course.isMigrated(), newAttributes.isMigrated());
         if (hasSameAttributes) {
             log.info(String.format(OPTIMIZED_SAVING_POLICY_APPLIED, Course.class.getSimpleName(), updateOptions));
             return newAttributes;
         }
 
         course.setName(newAttributes.getName());
-        course.setTimeZone(newAttributes.getTimeZone().getId());
+        course.setTimeZone(newAttributes.getTimeZone());
+        course.setInstitute(newAttributes.getInstitute());
+        course.setMigrated(newAttributes.isMigrated());
 
         saveEntity(course);
 
@@ -89,7 +101,7 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
      * Deletes a course.
      */
     public void deleteCourse(String courseId) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseId);
+        assert courseId != null;
 
         deleteEntity(Key.create(Course.class, courseId));
     }
@@ -99,7 +111,7 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
      * @return Soft-deletion time of the course.
      */
     public Instant softDeleteCourse(String courseId) throws EntityDoesNotExistException {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseId);
+        assert courseId != null;
         Course courseEntity = getCourseEntity(courseId);
 
         if (courseEntity == null) {
@@ -116,7 +128,7 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
      * Restores a soft-deleted course by its given corresponding ID.
      */
     public void restoreDeletedCourse(String courseId) throws EntityDoesNotExistException {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseId);
+        assert courseId != null;
         Course courseEntity = getCourseEntity(courseId);
 
         if (courseEntity == null) {
@@ -128,12 +140,12 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
     }
 
     @Override
-    protected LoadType<Course> load() {
+    LoadType<Course> load() {
         return ofy().load().type(Course.class);
     }
 
     @Override
-    protected boolean hasExistingEntities(CourseAttributes entityToCreate) {
+    boolean hasExistingEntities(CourseAttributes entityToCreate) {
         Key<Course> keyToFind = Key.create(Course.class, entityToCreate.getId());
         return !load().filterKey(keyToFind).keys().list().isEmpty();
     }
@@ -152,9 +164,20 @@ public class CoursesDb extends EntitiesDb<Course, CourseAttributes> {
     }
 
     @Override
-    protected CourseAttributes makeAttributes(Course entity) {
-        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, entity);
+    CourseAttributes makeAttributes(Course entity) {
+        assert entity != null;
 
         return CourseAttributes.valueOf(entity);
     }
+
+    /**
+     * Gets the number of courses created within a specified time range.
+     */
+    public int getNumCoursesByTimeRange(Instant startTime, Instant endTime) {
+        return load()
+                .filter("createdAt >=", startTime)
+                .filter("createdAt <", endTime)
+                .count();
+    }
+
 }

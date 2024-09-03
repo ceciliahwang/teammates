@@ -1,23 +1,24 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { of, throwError } from 'rxjs';
-import { HttpRequestService } from '../../../services/http-request.service';
 import { ErrorReportComponent } from './error-report.component';
+import { HttpRequestService } from '../../../services/http-request.service';
 
 describe('ErrorReportComponent', () => {
   let component: ErrorReportComponent;
   let fixture: ComponentFixture<ErrorReportComponent>;
   let httpRequestService: HttpRequestService;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorReportComponent],
       imports: [
         FormsModule,
         HttpClientTestingModule,
       ],
-      providers: [HttpRequestService],
+      providers: [HttpRequestService, NgbActiveModal],
     })
     .compileComponents();
   }));
@@ -25,7 +26,7 @@ describe('ErrorReportComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ErrorReportComponent);
     component = fixture.componentInstance;
-    httpRequestService = TestBed.get(HttpRequestService);
+    httpRequestService = TestBed.inject(HttpRequestService);
     fixture.detectChanges();
   });
 
@@ -46,7 +47,7 @@ describe('ErrorReportComponent', () => {
     expect(component.sendButtonEnabled).toBeTruthy();
     expect(component.errorReportSubmitted).toBeFalsy();
 
-    spyOn(httpRequestService, 'post').and.returnValue(of(''));
+    jest.spyOn(httpRequestService, 'post').mockReturnValue(of(''));
     fixture.nativeElement.querySelector('button').click();
     fixture.detectChanges();
 
@@ -59,11 +60,11 @@ describe('ErrorReportComponent', () => {
     expect(component.sendButtonEnabled).toBeTruthy();
     expect(component.errorReportSubmitted).toBeFalsy();
 
-    spyOn(httpRequestService, 'post').and.returnValue(throwError({
+    jest.spyOn(httpRequestService, 'post').mockReturnValue(throwError(() => ({
       error: {
         message: 'This is the error message',
       },
-    }));
+    })));
     fixture.nativeElement.querySelector('button').click();
     fixture.detectChanges();
 
@@ -75,5 +76,11 @@ describe('ErrorReportComponent', () => {
   it('should snap with default view', () => {
     expect(fixture).toMatchSnapshot();
   });
+
+  it('should disable error reporting if CSRF error message is detected', () => {
+      component.errorMessage = 'Missing CSRF token.';
+      component.ngOnInit();
+      expect(component.errorReportEnabled).toBe(false);
+    });
 
 });

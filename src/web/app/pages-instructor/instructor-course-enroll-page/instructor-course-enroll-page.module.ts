@@ -1,10 +1,25 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { HotTableModule } from '@handsontable/angular';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AjaxPreloadModule } from '../../components/ajax-preload/ajax-preload.module';
-import { StatusMessageModule } from '../../components/status-message/status-message.module';
+import { registerAllModules } from 'handsontable/registry';
 import { InstructorCourseEnrollPageComponent } from './instructor-course-enroll-page.component';
+import { AjaxLoadingModule } from '../../components/ajax-loading/ajax-loading.module';
+import { AjaxPreloadModule } from '../../components/ajax-preload/ajax-preload.module';
+import { LoadingRetryModule } from '../../components/loading-retry/loading-retry.module';
+import { LoadingSpinnerModule } from '../../components/loading-spinner/loading-spinner.module';
+import { PanelChevronModule } from '../../components/panel-chevron/panel-chevron.module';
+import { ProgressBarModule } from '../../components/progress-bar/progress-bar.module';
+import { StatusMessageModule } from '../../components/status-message/status-message.module';
+
+registerAllModules();
+
+const routes: Routes = [
+  {
+    path: '',
+    component: InstructorCourseEnrollPageComponent,
+  },
+];
 
 /**
  * Module for instructor course enroll page.
@@ -18,10 +33,15 @@ import { InstructorCourseEnrollPageComponent } from './instructor-course-enroll-
   ],
   imports: [
     CommonModule,
-    NgbModule,
     HotTableModule,
     StatusMessageModule,
     AjaxPreloadModule,
+    RouterModule.forChild(routes),
+    AjaxLoadingModule,
+    LoadingRetryModule,
+    ProgressBarModule,
+    LoadingSpinnerModule,
+    PanelChevronModule,
   ],
 })
 export class InstructorCourseEnrollPageModule { }

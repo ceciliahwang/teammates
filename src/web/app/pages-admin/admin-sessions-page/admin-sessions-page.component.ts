@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import moment from 'moment-timezone';
+import { finalize } from 'rxjs/operators';
 import { FeedbackSessionsService } from '../../../services/feedback-sessions.service';
-import { HttpRequestService } from '../../../services/http-request.service';
 import { StatusMessageService } from '../../../services/status-message.service';
 import { TimezoneService } from '../../../services/timezone.service';
 import { FeedbackSessionStats, OngoingSession, OngoingSessions } from '../../../types/api-output';
+import { DateFormat, TimeFormat, getDefaultDateFormat, getLatestTimeFormat } from '../../../types/datetime-const';
+import { collapseAnim } from '../../components/teammates-common/collapse-anim';
 import { ErrorMessageOutput } from '../../error-message-output';
 
 interface OngoingSessionModel {
   ongoingSession: OngoingSession;
+  startTimeString: string;
+  endTimeString: string;
   responseRate?: string;
 }
 
@@ -19,6 +23,7 @@ interface OngoingSessionModel {
   selector: 'tm-admin-sessions-page',
   templateUrl: './admin-sessions-page.component.html',
   styleUrls: ['./admin-sessions-page.component.scss'],
+  animations: [collapseAnim],
 })
 export class AdminSessionsPageComponent implements OnInit {
 
@@ -27,33 +32,36 @@ export class AdminSessionsPageComponent implements OnInit {
   totalClosedSessions: number = 0;
   totalAwaitingSessions: number = 0;
   totalInstitutes: number = 0;
-  sessions: { [key: string]: OngoingSessionModel[] } = {};
+  sessions: Record<string, OngoingSessionModel[]> = {};
 
   // Tracks the whether the panel of an institute has been opened
-  institutionPanelsStatus: { [key: string]: boolean } = {};
+  institutionPanelsStatus: Record<string, boolean> = {};
 
   showFilter: boolean = false;
   timezones: string[] = [];
-  timezone: string = '';
-  startDate: any = {};
-  startTime: any = {};
-  endDate: any = {};
-  endTime: any = {};
+  filterTimezone: string = '';
+  tableTimezone: string = '';
+  startDate: DateFormat = getDefaultDateFormat();
+  startTime: TimeFormat = getLatestTimeFormat();
+  endDate: DateFormat = getDefaultDateFormat();
+  endTime: TimeFormat = getLatestTimeFormat();
 
   timezoneString: string = '';
   startTimeString: string = '';
   endTimeString: string = '';
 
+  isLoadingOngoingSessions: boolean = false;
+
   constructor(private timezoneService: TimezoneService,
               private statusMessageService: StatusMessageService,
-              private feedbackSessionsService: FeedbackSessionsService,
-              private httpRequestService: HttpRequestService) {}
+              private feedbackSessionsService: FeedbackSessionsService) {}
 
   ngOnInit(): void {
     this.timezones = Object.keys(this.timezoneService.getTzOffsets());
-    this.timezone = moment.tz.guess();
+    this.filterTimezone = this.timezoneService.guessTimezone();
+    this.tableTimezone = this.timezoneService.guessTimezone();
 
-    const now: any = moment();
+    const now: moment.Moment = moment();
     this.startDate = {
       year: now.year(),
       month: now.month() + 1,
@@ -68,7 +76,7 @@ export class AdminSessionsPageComponent implements OnInit {
       minute: now.minute(),
     };
 
-    const nextWeek: any = moment(now).add(1, 'weeks');
+    const nextWeek: moment.Moment = moment(now).add(1, 'weeks');
     this.endDate = {
       year: nextWeek.year(),
       month: nextWeek.month() + 1,
@@ -100,53 +108,57 @@ export class AdminSessionsPageComponent implements OnInit {
    * Converts milliseconds to readable date format.
    */
   showDateFromMillis(millis: number): string {
-    return moment(millis).format('ddd, DD MMM YYYY, hh:mm a');
-  }
-
-  private getMomentInstant(year: number, month: number, day: number, hour: number, minute: number): any {
-    const inst: any = moment.tz(this.timezone);
-    inst.set('year', year);
-    inst.set('month', month);
-    inst.set('date', day);
-    inst.set('hour', hour);
-    inst.set('minute', minute);
-    return inst;
+    return this.timezoneService.formatToString(millis, this.tableTimezone, 'ddd, DD MMM YYYY, hh:mm a');
   }
 
   /**
    * Gets the feedback sessions which have opening time satisfying the query range.
    */
   getFeedbackSessions(): void {
-    const startTime: any = this.getMomentInstant(this.startDate.year, this.startDate.month - 1,
-        this.startDate.day, this.startTime.hour, this.startTime.minute);
-    const endTime: any = this.getMomentInstant(this.endDate.year, this.endDate.month - 1,
-        this.endDate.day, this.endTime.hour, this.endTime.minute);
+    const timezone: string = this.filterTimezone;
+    const startTime: number = this.timezoneService.resolveLocalDateTime(
+        { year: this.startDate.year, month: this.startDate.month, day: this.startDate.day },
+        { hour: this.startTime.hour, minute: this.startTime.minute },
+        timezone);
+    const endTime: number = this.timezoneService.resolveLocalDateTime(
+        { year: this.endDate.year, month: this.endDate.month, day: this.endDate.day },
+        { hour: this.endTime.hour, minute: this.endTime.minute },
+        timezone);
     const displayFormat: string = 'ddd, DD MMM YYYY, hh:mm a';
-    this.startTimeString = startTime.format(displayFormat);
-    this.endTimeString = endTime.format(displayFormat);
-    this.timezoneString = this.timezone;
+    this.startTimeString = this.timezoneService.formatToString(startTime, timezone, displayFormat);
+    this.endTimeString = this.timezoneService.formatToString(endTime, timezone, displayFormat);
+    this.timezoneString = this.filterTimezone;
+    this.isLoadingOngoingSessions = true;
 
-    this.feedbackSessionsService.getOngoingSessions(startTime.toDate().getTime(), endTime.toDate().getTime())
-        .subscribe((resp: OngoingSessions) => {
-          this.totalOngoingSessions = resp.totalOngoingSessions;
-          this.totalOpenSessions = resp.totalOpenSessions;
-          this.totalClosedSessions = resp.totalClosedSessions;
-          this.totalAwaitingSessions = resp.totalAwaitingSessions;
-          this.totalInstitutes = resp.totalInstitutes;
-          Object.keys(resp.sessions).forEach((key: string) => {
-            this.sessions[key] = resp.sessions[key].map((ongoingSession: OngoingSession) => {
-              return {
-                ongoingSession,
-              };
+    this.feedbackSessionsService.getOngoingSessions(startTime, endTime)
+        .pipe(finalize(() => {
+          this.isLoadingOngoingSessions = false;
+        }))
+        .subscribe({
+          next: (resp: OngoingSessions) => {
+            this.totalOngoingSessions = resp.totalOngoingSessions;
+            this.totalOpenSessions = resp.totalOpenSessions;
+            this.totalClosedSessions = resp.totalClosedSessions;
+            this.totalAwaitingSessions = resp.totalAwaitingSessions;
+            this.totalInstitutes = resp.totalInstitutes;
+            Object.keys(resp.sessions).forEach((key: string) => {
+              this.sessions[key] = resp.sessions[key].map((ongoingSession: OngoingSession) => {
+                return {
+                  ongoingSession,
+                  startTimeString: this.showDateFromMillis(ongoingSession.startTime),
+                  endTimeString: this.showDateFromMillis(ongoingSession.endTime),
+                };
+              });
             });
-          });
 
-          this.institutionPanelsStatus = {};
-          for (const institution of Object.keys(resp.sessions)) {
-            this.institutionPanelsStatus[institution] = true;
-          }
-        }, (resp: ErrorMessageOutput) => {
-          this.statusMessageService.showErrorMessage(resp.error.message);
+            this.institutionPanelsStatus = {};
+            for (const institution of Object.keys(resp.sessions)) {
+              this.institutionPanelsStatus[institution] = true;
+            }
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
         });
   }
 
@@ -158,21 +170,30 @@ export class AdminSessionsPageComponent implements OnInit {
       event.preventDefault();
       event.stopPropagation();
     }
-    const paramMap: { [key: string]: string } = {
-      courseid: courseId,
-      fsname: feedbackSessionName,
-    };
-    this.httpRequestService.get('/session/stats', paramMap).subscribe((resp: FeedbackSessionStats) => {
-      const sessions: OngoingSessionModel[] = this.sessions[institute].filter((session: OngoingSessionModel) =>
-          session.ongoingSession.courseId === courseId
-          && session.ongoingSession.feedbackSessionName === feedbackSessionName,
-      );
-      if (sessions.length) {
-        sessions[0].responseRate = `${resp.submittedTotal} / ${resp.expectedTotal}`;
+    this.feedbackSessionsService.loadSessionStatistics(courseId, feedbackSessionName)
+        .subscribe({
+          next: (resp: FeedbackSessionStats) => {
+            const sessions: OngoingSessionModel[] = this.sessions[institute].filter((session: OngoingSessionModel) =>
+                session.ongoingSession.courseId === courseId
+                && session.ongoingSession.feedbackSessionName === feedbackSessionName,
+            );
+            if (sessions.length) {
+              sessions[0].responseRate = `${resp.submittedTotal} / ${resp.expectedTotal}`;
+            }
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
+        });
+  }
+
+  updateDisplayedTimes(): void {
+    for (const sessions of Object.values(this.sessions)) {
+      for (const session of sessions) {
+        session.startTimeString = this.showDateFromMillis(session.ongoingSession.startTime);
+        session.endTimeString = this.showDateFromMillis(session.ongoingSession.endTime);
       }
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
-    });
+    }
   }
 
 }

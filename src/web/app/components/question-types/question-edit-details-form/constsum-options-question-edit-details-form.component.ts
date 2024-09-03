@@ -1,12 +1,12 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
+import { QuestionEditDetailsFormComponent } from './question-edit-details-form.component';
 import { StatusMessageService } from '../../../../services/status-message.service';
 import {
   FeedbackConstantSumDistributePointsType,
   FeedbackConstantSumQuestionDetails,
 } from '../../../../types/api-output';
 import { DEFAULT_CONSTSUM_OPTIONS_QUESTION_DETAILS } from '../../../../types/default-question-structs';
-import { QuestionEditDetailsFormComponent } from './question-edit-details-form.component';
 
 /**
  * Question details edit form component for constsum options question.
@@ -14,7 +14,7 @@ import { QuestionEditDetailsFormComponent } from './question-edit-details-form.c
 @Component({
   selector: 'tm-constsum-options-question-edit-details-form',
   templateUrl: './constsum-options-question-edit-details-form.component.html',
-  styleUrls: ['./constsum-options-question-edit-details-form.component.scss'],
+  styleUrls: ['./constsum-options-question-edit-details-form.component.scss', './cdk-drag-drop.scss'],
 })
 export class ConstsumOptionsQuestionEditDetailsFormComponent
     extends QuestionEditDetailsFormComponent<FeedbackConstantSumQuestionDetails> {
@@ -27,6 +27,14 @@ export class ConstsumOptionsQuestionEditDetailsFormComponent
     super(DEFAULT_CONSTSUM_OPTIONS_QUESTION_DETAILS());
   }
 
+  get hasMaxPoint(): boolean {
+    return this.model.maxPoint !== undefined;
+  }
+
+  get hasMinPoint(): boolean {
+    return this.model.minPoint !== undefined;
+  }
+
   /**
    * Increases number of Constsum options.
    */
@@ -35,7 +43,6 @@ export class ConstsumOptionsQuestionEditDetailsFormComponent
     newOptions.push('');
 
     this.triggerModelChangeBatch({
-      numOfConstSumOptions: this.model.numOfConstSumOptions + 1,
       constSumOptions: newOptions,
     });
   }
@@ -66,7 +73,7 @@ export class ConstsumOptionsQuestionEditDetailsFormComponent
    */
   onConstsumOptionDeleted(event: number): void {
     if (this.model.constSumOptions.length <= 2) {
-      this.statusMessageService.showErrorMessage('There must be at least one option.');
+      this.statusMessageService.showErrorToast('There must be at least one option.');
       return;
     }
 
@@ -74,7 +81,6 @@ export class ConstsumOptionsQuestionEditDetailsFormComponent
     newOptions.splice(event, 1);
 
     this.triggerModelChangeBatch({
-      numOfConstSumOptions: this.model.numOfConstSumOptions - 1,
       constSumOptions: newOptions,
     });
   }
@@ -100,4 +106,25 @@ export class ConstsumOptionsQuestionEditDetailsFormComponent
     });
   }
 
+  /**
+   * Resets maxPoint.
+   */
+  resetMaxPoint(event: boolean): void {
+    if (event) {
+      this.triggerModelChange('maxPoint', 0);
+    } else {
+      this.triggerModelChange('maxPoint', undefined);
+    }
+  }
+
+  /**
+   * Resets minPoint.
+   */
+  resetMinPoint(event: boolean): void {
+    if (event) {
+      this.triggerModelChange('minPoint', 0);
+    } else {
+      this.triggerModelChange('minPoint', undefined);
+    }
+  }
 }

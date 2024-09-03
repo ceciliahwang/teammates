@@ -1,11 +1,8 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
-import {
-  FeedbackMcqQuestionDetails,
-  FeedbackParticipantType,
-} from '../../../../types/api-output';
-import { DEFAULT_MCQ_QUESTION_DETAILS } from '../../../../types/default-question-structs';
 import { QuestionEditDetailsFormComponent } from './question-edit-details-form.component';
+import { FeedbackMcqQuestionDetails, FeedbackParticipantType } from '../../../../types/api-output';
+import { DEFAULT_MCQ_QUESTION_DETAILS } from '../../../../types/default-question-structs';
 
 /**
  * Question details edit form component for Mcq question.
@@ -13,14 +10,26 @@ import { QuestionEditDetailsFormComponent } from './question-edit-details-form.c
 @Component({
   selector: 'tm-mcq-question-edit-details-form',
   templateUrl: './mcq-question-edit-details-form.component.html',
-  styleUrls: ['./mcq-question-edit-details-form.component.scss'],
+  styleUrls: ['./mcq-question-edit-details-form.component.scss', './cdk-drag-drop.scss'],
 })
 export class McqQuestionEditDetailsFormComponent
     extends QuestionEditDetailsFormComponent<FeedbackMcqQuestionDetails> {
 
-  readonly PARTICIPANT_TYPES: string[] = [FeedbackParticipantType.STUDENTS,
-    FeedbackParticipantType.STUDENTS_EXCLUDING_SELF, FeedbackParticipantType.TEAMS,
-    FeedbackParticipantType.TEAMS_EXCLUDING_SELF, FeedbackParticipantType.INSTRUCTORS];
+  readonly PARTICIPANT_TYPES: string[] = [
+    FeedbackParticipantType.STUDENTS,
+    FeedbackParticipantType.STUDENTS_EXCLUDING_SELF,
+    FeedbackParticipantType.TEAMS,
+    FeedbackParticipantType.TEAMS_EXCLUDING_SELF,
+    FeedbackParticipantType.OWN_TEAM_MEMBERS_INCLUDING_SELF,
+    FeedbackParticipantType.OWN_TEAM_MEMBERS,
+    FeedbackParticipantType.INSTRUCTORS,
+  ];
+
+  // Used to store and restore user input when user toggles generate option
+  storageModel: FeedbackMcqQuestionDetails = {
+    ...DEFAULT_MCQ_QUESTION_DETAILS(),
+    mcqChoices: ['', ''],
+  };
 
   constructor() {
     super(DEFAULT_MCQ_QUESTION_DETAILS());
@@ -49,7 +58,6 @@ export class McqQuestionEditDetailsFormComponent
    */
   increaseNumberOfOptions(): void {
     const fieldsToUpdate: any = {};
-    fieldsToUpdate.numOfMcqChoices = this.model.numOfMcqChoices + 1;
     const newOptions: string[] = this.model.mcqChoices.slice();
     newOptions.push('');
     fieldsToUpdate.mcqChoices = newOptions;
@@ -66,7 +74,6 @@ export class McqQuestionEditDetailsFormComponent
    */
   onMcqOptionDeleted(event: number): void {
     const fieldsToUpdate: any = {};
-    fieldsToUpdate.numOfMcqChoices = this.model.numOfMcqChoices - 1;
     const newOptions: string[] = this.model.mcqChoices.slice();
     newOptions.splice(event, 1);
     fieldsToUpdate.mcqChoices = newOptions;
@@ -115,7 +122,7 @@ export class McqQuestionEditDetailsFormComponent
    */
   triggerWeightsColumn(checked: boolean): void {
     this.triggerModelChangeBatch({
-      mcqWeights: checked ? Array(this.model.numOfMcqChoices).fill(0) : [],
+      mcqWeights: checked ? Array(this.model.mcqChoices.length).fill(0) : [],
       mcqOtherWeight: 0,
       hasAssignedWeights: checked,
     });
@@ -132,18 +139,31 @@ export class McqQuestionEditDetailsFormComponent
   }
 
   /**
+   * Triggers the setting of choosing other option.
+   */
+  triggerQuestionDropdownEnabled(checked: boolean): void {
+    this.triggerModelChangeBatch({
+      questionDropdownEnabled: checked,
+    });
+  }
+
+  /**
    * Assigns a default value to generateOptionsFor when checkbox is clicked.
    */
   triggerGeneratedOptionsChange(checked: boolean): void {
-    this.triggerModelChangeBatch({
-      generateOptionsFor: checked ? FeedbackParticipantType.STUDENTS : FeedbackParticipantType.NONE,
-      numOfMcqChoices: checked ? 0 : 2,
-      mcqChoices: checked ? [] : ['', ''],
-      otherEnabled: false,
-      hasAssignedWeights: false,
-      mcqWeights: [],
-      mcqOtherWeight: 0,
-    });
+    if (checked) {
+      this.storageModel = this.model;
+      this.triggerModelChangeBatch({
+        generateOptionsFor: FeedbackParticipantType.STUDENTS,
+        mcqChoices: [],
+        otherEnabled: false,
+        hasAssignedWeights: false,
+        mcqWeights: [],
+        mcqOtherWeight: 0,
+      });
+    } else {
+      this.triggerModelChangeBatch(this.storageModel);
+    }
   }
 
   /**

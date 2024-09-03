@@ -9,6 +9,7 @@ import { RankOptionsQuestionResponseComponent } from './rank-options-question-re
 import { RankRecipientsQuestionResponseComponent } from './rank-recipients-question-response.component';
 import { RubricQuestionResponseComponent } from './rubric-question-response.component';
 import { TextQuestionResponseComponent } from './text-question-response.component';
+import { TeammatesCommonModule } from '../../teammates-common/teammates-common.module';
 
 /**
  * Module for all different types of question responses.
@@ -38,6 +39,7 @@ import { TextQuestionResponseComponent } from './text-question-response.componen
   ],
   imports: [
     CommonModule,
+    TeammatesCommonModule,
   ],
 })
 export class QuestionResponseModule { }

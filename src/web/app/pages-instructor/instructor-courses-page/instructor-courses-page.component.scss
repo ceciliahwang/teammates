@@ -1,5 +1,40 @@
+// applies only to mobile screens
+@media (width <= 768px) {
+  .custom-button-active {
+    width: 115px;
+    margin-bottom: 5px;
+  }
+}
+
+// applies only to mobile screens
+@media (width <= 768px) {
+  .custom-button-archived {
+    width: 95px;
+    margin-bottom: 5px;
+  }
+}
+
 .sortable-header {
   cursor: pointer;
+
+  i {
+    margin-left: 0.3em;
+  }
+
+  .fa-stack {
+    width: 20%;
+  }
+
+  button {
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    text-align: left;
+    width: 100%;
+    font: inherit;
+    cursor: inherit;
+  }
 }
 
 .course-section {
@@ -14,12 +49,8 @@
   padding: 0;
 }
 
-.margin-left-10px {
-  margin-left: 10px;
-}
-
 .background-color-medium-gray {
-  background-color: #E5E5E6;
+  background-color: #e5e5e6;
 }
 
 .text-color-black {
@@ -28,6 +59,10 @@
 
 .text-color-gray {
   color: gray;
+}
+
+.text-color-lightgray {
+  color: lightgray;
 }
 
 .text-color-red {
@@ -44,14 +79,45 @@
   margin-bottom: 0;
 }
 
+.archive-body {
+  padding: 0;
+}
+
+.archive-table {
+  margin-bottom: 0;
+}
+
 .margin-top-30px {
   margin-top: 30px;
 }
 
-.bin-header-button button {
-  margin-right: .6em;
+// applies only to non-mobile screens
+@media (width >= 768px) {
+  .actions-cell button:not(.dropdown-item) {
+    margin-left: var(--btn-margin);
+  }
 }
 
-.actions-cell button {
-  margin: 2px;
+.dropdown-menu {
+  min-width: 0.5rem;
+}
+
+.table-responsive {
+  overflow: auto;
+}
+
+.d-inline-block {
+  position: inherit;
+}
+
+.link-button {
+  border: none;
+  text-decoration: underline;
+  color: var(--bs-link-color);
+  padding: 0;
+  background: none;
+}
+
+.link-button:hover {
+  color: var(--bs-link-hover-color);
 }

@@ -1,17 +1,23 @@
 import { TestBed } from '@angular/core/testing';
 
-import { MatSnackBarModule } from '@angular/material';
+import { RouterTestingModule } from '@angular/router/testing';
 import { NavigationService } from './navigation.service';
 
 describe('NavigationService', () => {
-  beforeEach(() => TestBed.configureTestingModule({
-    imports: [
-      MatSnackBarModule,
-    ],
-  }));
+  let service: NavigationService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
+    });
+    service = TestBed.inject(NavigationService);
+  });
 
   it('should be created', () => {
-    const service: NavigationService = TestBed.get(NavigationService);
     expect(service).toBeTruthy();
+  });
+
+  it('should return an encoded param string upon calling encodeParams', () => {
+    expect(service.encodeParams({ courseId: '#123?123' })).toEqual('?courseId=%23123%3F123');
   });
 });

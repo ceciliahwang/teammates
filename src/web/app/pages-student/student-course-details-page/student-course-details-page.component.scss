@@ -6,18 +6,24 @@
   margin-bottom: 40px;
 }
 
-.profile-pic {
-  height: 35%;
-}
-
-.form-group.row {
-  border-bottom: 1px solid #CCC;
-}
-
 .fill-plain {
-  background-color: #EAEFF5;
+  background-color: #eaeff5;
 }
 
 label {
   font-weight: bold;
+}
+
+.top-padded {
+  margin-top: 20px;
+}
+
+.team-member-profile-cell {
+  padding-bottom: 15px;
+  padding-left: 30px;
+  vertical-align: middle;
+
+  label {
+    margin-bottom: 2px;
+  }
 }

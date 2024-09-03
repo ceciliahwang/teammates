@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ReCaptcha2Component } from 'ngx-captcha';
+import { finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { HttpRequestService } from '../../../services/http-request.service';
+import { FeedbackSessionsService } from '../../../services/feedback-sessions.service';
 import { StatusMessageService } from '../../../services/status-message.service';
 import { SessionLinksRecoveryResponse } from '../../../types/api-output';
 import { ErrorMessageOutput } from '../../error-message-output';
@@ -23,14 +24,15 @@ export class SessionLinksRecoveryPageComponent implements OnInit {
   size: 'compact' | 'normal' = 'normal';
   lang: string = 'en';
 
-  formSessionLinksRecovery!: FormGroup;
+  formSessionLinksRecovery!: UntypedFormGroup;
+  isFormSubmitting: boolean = false;
   readonly captchaSiteKey: string = environment.captchaSiteKey;
 
   @ViewChild('captchaElem') captchaElem!: ReCaptcha2Component;
 
-  constructor(private httpRequestService: HttpRequestService,
+  constructor(private feedbackSessionsService: FeedbackSessionsService,
               private statusMessageService: StatusMessageService,
-              private formBuilder: FormBuilder) {}
+              private formBuilder: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.formSessionLinksRecovery = this.formBuilder.group({
@@ -42,30 +44,36 @@ export class SessionLinksRecoveryPageComponent implements OnInit {
   /**
    * Sends the feedback session links to the recovery email address.
    */
-  onSubmitFormSessionLinksRecovery(sessionLinksRecoveryForm: FormGroup): void {
+  onSubmitFormSessionLinksRecovery(sessionLinksRecoveryForm: UntypedFormGroup): void {
     if (!this.captchaSiteKey) {
       this.captchaResponse = '';
     }
 
     if (!this.formSessionLinksRecovery.valid || this.captchaResponse === undefined) {
-      this.statusMessageService.showErrorMessage(
+      this.statusMessageService.showErrorToast(
           'Please enter a valid email address and click the reCAPTCHA before submitting.');
       return;
     }
 
-    const paramsMap: { [key: string]: string } = {
-      sessionlinksrecoveryemail: sessionLinksRecoveryForm.controls.email.value,
-      captcharesponse: this.captchaResponse,
-    };
+    this.isFormSubmitting = true;
 
-    this.httpRequestService.post('/sessionlinksrecovery', paramsMap)
-      .subscribe((resp: SessionLinksRecoveryResponse) => {
-        resp.isEmailSent
-            ? this.statusMessageService.showSuccessMessage(resp.message)
-            : this.statusMessageService.showErrorMessage(resp.message);
-      }, (response: ErrorMessageOutput) => {
-        this.statusMessageService.showErrorMessage(response.error.message);
-      });
+    this.feedbackSessionsService.sendFeedbackSessionLinkToRecoveryEmail({
+      sessionLinksRecoveryEmail: sessionLinksRecoveryForm.controls['email'].value,
+      captchaResponse: this.captchaResponse,
+    }).pipe(finalize(() => {
+      this.isFormSubmitting = false;
+    })).subscribe({
+      next: (resp: SessionLinksRecoveryResponse) => {
+        if (resp.isEmailSent) {
+          this.statusMessageService.showSuccessToast(resp.message);
+        } else {
+          this.statusMessageService.showErrorToast(resp.message);
+        }
+      },
+      error: (response: ErrorMessageOutput) => {
+        this.statusMessageService.showErrorToast(response.error.message);
+      },
+    });
     this.resetFormGroups();
   }
 
@@ -92,6 +100,7 @@ export class SessionLinksRecoveryPageComponent implements OnInit {
 
   /**
    * Handles successful completion recaptcha challenge.
+   *
    * @param captchaResponse User's captcha response token
    */
   handleSuccess(captchaResponse: string): void {

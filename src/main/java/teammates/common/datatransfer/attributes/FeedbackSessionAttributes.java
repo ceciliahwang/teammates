@@ -2,52 +2,23 @@ package teammates.common.datatransfer.attributes;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.function.Supplier;
 
-import teammates.common.util.Assumption;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.common.util.SanitizationHelper;
-import teammates.common.util.TimeHelper;
 import teammates.storage.entity.FeedbackSession;
 
-public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession> {
-
-    /**
-     * Comparator to sort SessionAttributes on DESCENDING order based on
-     * end time, followed by start time and session name.
-     */
-    public static final Comparator<FeedbackSessionAttributes> DESCENDING_ORDER = (session1, session2) -> {
-
-        Assumption.assertNotNull(session1.getFeedbackSessionName());
-        Assumption.assertNotNull(session1.getStartTime());
-        Assumption.assertNotNull(session1.getEndTime());
-        Assumption.assertNotNull(session2.getFeedbackSessionName());
-        Assumption.assertNotNull(session2.getStartTime());
-        Assumption.assertNotNull(session2.getEndTime());
-
-        // Compares end times
-        int result = session1.getEndTime().isAfter(session2.getEndTime()) ? -1
-                : session1.getEndTime().isBefore(session2.getEndTime()) ? 1 : 0;
-
-        // If the end time is same, compares start times
-        if (result == 0) {
-            result = session1.getStartTime().isAfter(session2.getStartTime()) ? -1
-                    : session1.getStartTime().isBefore(session2.getStartTime()) ? 1 : 0;
-        }
-
-        // If both end and start time is same, compares session name
-        if (result == 0) {
-            result = session1.getFeedbackSessionName().compareTo(session2.getFeedbackSessionName());
-        }
-        return result;
-    };
+/**
+ * The data transfer object for {@link FeedbackSession} entities.
+ */
+public final class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession> {
 
     private String feedbackSessionName;
     private String courseId;
@@ -60,8 +31,9 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     private Instant endTime;
     private Instant sessionVisibleFromTime;
     private Instant resultsVisibleFromTime;
-    private ZoneId timeZone;
+    private String timeZone;
     private Duration gracePeriod;
+    private boolean sentOpeningSoonEmail;
     private boolean sentOpenEmail;
     private boolean sentClosingEmail;
     private boolean sentClosedEmail;
@@ -69,10 +41,13 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     private boolean isOpeningEmailEnabled;
     private boolean isClosingEmailEnabled;
     private boolean isPublishedEmailEnabled;
-    private transient Set<String> respondingInstructorList;
-    private transient Set<String> respondingStudentList;
+    private Map<String, Instant> studentDeadlines;
+    private Map<String, Instant> instructorDeadlines;
 
-    FeedbackSessionAttributes(String feedbackSessionName, String courseId) {
+    private transient String userEmail;
+    private transient Supplier<Instant> deadlineSupplier;
+
+    private FeedbackSessionAttributes(String feedbackSessionName, String courseId) {
         this.feedbackSessionName = feedbackSessionName;
         this.courseId = courseId;
 
@@ -83,14 +58,17 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         this.isClosingEmailEnabled = true;
         this.isPublishedEmailEnabled = true;
 
-        this.respondingInstructorList = new HashSet<>();
-        this.respondingStudentList = new HashSet<>();
+        this.studentDeadlines = new HashMap<>();
+        this.instructorDeadlines = new HashMap<>();
 
         this.timeZone = Const.DEFAULT_TIME_ZONE;
         this.gracePeriod = Duration.ZERO;
 
     }
 
+    /**
+     * Gets the {@link FeedbackSessionAttributes} instance of the given {@link FeedbackSession}.
+     */
     public static FeedbackSessionAttributes valueOf(FeedbackSession fs) {
         FeedbackSessionAttributes feedbackSessionAttributes =
                 new FeedbackSessionAttributes(fs.getFeedbackSessionName(), fs.getCourseId());
@@ -105,8 +83,9 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         feedbackSessionAttributes.endTime = fs.getEndTime();
         feedbackSessionAttributes.sessionVisibleFromTime = fs.getSessionVisibleFromTime();
         feedbackSessionAttributes.resultsVisibleFromTime = fs.getResultsVisibleFromTime();
-        feedbackSessionAttributes.timeZone = ZoneId.of(fs.getTimeZone());
+        feedbackSessionAttributes.timeZone = fs.getTimeZone();
         feedbackSessionAttributes.gracePeriod = Duration.ofMinutes(fs.getGracePeriod());
+        feedbackSessionAttributes.sentOpeningSoonEmail = fs.isSentOpeningSoonEmail();
         feedbackSessionAttributes.sentOpenEmail = fs.isSentOpenEmail();
         feedbackSessionAttributes.sentClosingEmail = fs.isSentClosingEmail();
         feedbackSessionAttributes.sentClosedEmail = fs.isSentClosedEmail();
@@ -114,11 +93,11 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         feedbackSessionAttributes.isOpeningEmailEnabled = fs.isOpeningEmailEnabled();
         feedbackSessionAttributes.isClosingEmailEnabled = fs.isClosingEmailEnabled();
         feedbackSessionAttributes.isPublishedEmailEnabled = fs.isPublishedEmailEnabled();
-        if (fs.getRespondingStudentList() != null) {
-            feedbackSessionAttributes.respondingStudentList = new HashSet<>(fs.getRespondingStudentList());
+        if (fs.getStudentDeadlines() != null) {
+            feedbackSessionAttributes.studentDeadlines = fs.getStudentDeadlines();
         }
-        if (fs.getRespondingInstructorList() != null) {
-            feedbackSessionAttributes.respondingInstructorList = new HashSet<>(fs.getRespondingInstructorList());
+        if (fs.getInstructorDeadlines() != null) {
+            feedbackSessionAttributes.instructorDeadlines = fs.getInstructorDeadlines();
         }
 
         return feedbackSessionAttributes;
@@ -131,8 +110,37 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         return new Builder(feedbackSessionName, courseId);
     }
 
+    /**
+     * Gets a deep copy of this object.
+     */
     public FeedbackSessionAttributes getCopy() {
         return valueOf(toEntity());
+    }
+
+    /**
+     * Creates a copy that uses the specific deadline for the given student.
+     *
+     * @param studentEmail The email address of the given student.
+     * @return The copy of this object for the given student.
+     */
+    public FeedbackSessionAttributes getCopyForStudent(String studentEmail) {
+        FeedbackSessionAttributes copy = getCopy();
+        copy.deadlineSupplier = () -> copy.studentDeadlines.getOrDefault(studentEmail, endTime);
+        copy.userEmail = studentEmail;
+        return copy;
+    }
+
+    /**
+     * Creates a copy that uses the specific deadline for the given instructor.
+     *
+     * @param instructorEmail The email address of the given instructor.
+     * @return The copy of this object for the given instructor.
+     */
+    public FeedbackSessionAttributes getCopyForInstructor(String instructorEmail) {
+        FeedbackSessionAttributes copy = getCopy();
+        copy.deadlineSupplier = () -> copy.instructorDeadlines.getOrDefault(instructorEmail, endTime);
+        copy.userEmail = instructorEmail;
+        return copy;
     }
 
     public String getCourseId() {
@@ -143,22 +151,9 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         return feedbackSessionName;
     }
 
-    public String getStartTimeString() {
-        return TimeHelper.formatDateTimeForDisplay(startTime, timeZone);
-    }
-
-    public String getStartTimeInIso8601UtcFormat() {
-        return TimeHelper.formatDateTimeToIso8601Utc(startTime);
-    }
-
-    public String getEndTimeString() {
-        return TimeHelper.formatDateTimeForDisplay(endTime, timeZone);
-    }
-
-    public String getEndTimeInIso8601UtcFormat() {
-        return TimeHelper.formatDateTimeToIso8601Utc(endTime);
-    }
-
+    /**
+     * Gets the instructions of the feedback session.
+     */
     public String getInstructionsString() {
         if (instructions == null) {
             return null;
@@ -171,10 +166,10 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     public FeedbackSession toEntity() {
         return new FeedbackSession(feedbackSessionName, courseId, creatorEmail, instructions,
                 createdTime, deletedTime, startTime, endTime, sessionVisibleFromTime, resultsVisibleFromTime,
-                timeZone.getId(), getGracePeriodMinutes(),
-                sentOpenEmail, sentClosingEmail, sentClosedEmail, sentPublishedEmail,
-                isOpeningEmailEnabled, isClosingEmailEnabled, isPublishedEmailEnabled,
-                respondingInstructorList, respondingStudentList);
+                timeZone, getGracePeriodMinutes(),
+                sentOpeningSoonEmail, sentOpenEmail, sentClosingEmail, sentClosedEmail, sentPublishedEmail,
+                isOpeningEmailEnabled, isClosingEmailEnabled, isPublishedEmailEnabled, new HashMap<>(studentDeadlines),
+                new HashMap<>(instructorDeadlines));
     }
 
     @Override
@@ -239,16 +234,56 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         addNonEmptyError(FieldValidator.getInvalidityInfoForTimeForVisibilityStartAndResultsPublish(
                 actualSessionVisibleFromTime, resultsVisibleFromTime), errors);
 
+        addNonEmptyError(FieldValidator.getInvalidityInfoForTimeForSessionEndAndExtendedDeadlines(
+                endTime, studentDeadlines), errors);
+
+        addNonEmptyError(FieldValidator.getInvalidityInfoForTimeForSessionEndAndExtendedDeadlines(
+                endTime, instructorDeadlines), errors);
+
         return errors;
     }
 
-    public boolean isClosedAfter(long hours) {
-        return Instant.now().plus(Duration.ofHours(hours)).isAfter(endTime);
+    /**
+     * Finds the point in time when the session is considered closed, excluding the grace period.
+     * <p>This varies depending on who is looking at the session:</p>
+     * <ul>
+     *     <li>For instructors looking at the session in full detail, this is when the end time is reached.</li>
+     *     <li>For participants, this is when the end time is reached, or their extension deadline, if it exists.</li>
+     * </ul>
+     */
+    public Instant getDeadline() {
+        if (deadlineSupplier == null) {
+            return endTime;
+        }
+        return deadlineSupplier.get();
     }
 
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    /**
+     * Returns true if session's start time is opening from now to anytime before
+     * now() + the specific number of {@param hours} supplied in the argument.
+     */
+    public boolean isOpeningInHours(long hours) {
+        return startTime.isAfter(Instant.now())
+                && Instant.now().plus(Duration.ofHours(hours)).isAfter(startTime);
+    }
+
+    /**
+     * Returns true if the feedback session is closed after the number of specified hours.
+     */
+    public boolean isClosedAfter(long hours) {
+        return Instant.now().plus(Duration.ofHours(hours)).isAfter(getDeadline());
+    }
+
+    /**
+     * Returns true if the feedback session is closing (almost closed) after the number of specified hours.
+     */
     public boolean isClosingWithinTimeLimit(long hours) {
         Instant now = Instant.now();
-        Duration difference = Duration.between(now, endTime);
+        Duration difference = Duration.between(now, getDeadline());
         // If now and start are almost similar, it means the feedback session
         // is open for only 24 hours.
         // Hence we do not send a reminder e-mail for feedback session.
@@ -258,38 +293,54 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     }
 
     /**
+     * Returns true if the feedback session opens after the number of specified hours.
+     */
+    public boolean isOpeningWithinTimeLimit(long hours) {
+        Instant now = Instant.now();
+        Duration difference = Duration.between(now, startTime);
+
+        return now.isBefore(startTime)
+                && difference.compareTo(Duration.ofHours(hours - 1)) >= 0
+                && difference.compareTo(Duration.ofHours(hours)) < 0;
+    }
+
+    /**
      * Checks if the session closed some time in the last one hour from calling this function.
      *
      * @return true if the session closed within the past hour; false otherwise.
      */
     public boolean isClosedWithinPastHour() {
         Instant now = Instant.now();
-        Instant given = endTime.plus(gracePeriod);
+        Instant given = getDeadline().plus(gracePeriod);
         return given.isBefore(now) && Duration.between(given, now).compareTo(Duration.ofHours(1)) < 0;
     }
 
     /**
-     * Returns {@code true} if it is after the closing time of this feedback session; {@code false} if not.
+     * Checks if the feedback session is closed.
+     * This occurs when the current time is after both the deadline and the grace period.
      */
     public boolean isClosed() {
-        return Instant.now().isAfter(endTime.plus(gracePeriod));
+        return Instant.now().isAfter(getDeadline().plus(gracePeriod));
     }
 
     /**
-     * Returns true if the session is currently open and accepting responses.
+     * Checks if the feedback session is open.
+     * This occurs when the current time is either the start time or later but before the deadline.
      */
     public boolean isOpened() {
         Instant now = Instant.now();
-        return (now.isAfter(startTime) || now.equals(startTime)) && now.isBefore(endTime);
+        return (now.isAfter(startTime) || now.equals(startTime)) && now.isBefore(getDeadline());
     }
 
     /**
-     * Returns true if the session is currently close but is still accept responses.
+     * Checks if the feedback session is closed but still accepts responses.
+     * This occurs when the current time is either the deadline or later but still within the grace period.
      */
     public boolean isInGracePeriod() {
         Instant now = Instant.now();
-        Instant gracedEnd = endTime.plus(gracePeriod);
-        return (now.isAfter(endTime) || now.equals(endTime)) && (now.isBefore(gracedEnd) || now.equals(gracedEnd));
+        Instant deadline = getDeadline();
+        Instant gracedEnd = deadline.plus(gracePeriod);
+        return (now.isAfter(deadline) || now.equals(deadline)) && (now.isBefore(gracedEnd) || now.equals(gracedEnd));
     }
 
     /**
@@ -337,13 +388,8 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     }
 
     /**
-     * Returns {@code true} if the session has been set by the creator to be manually published.
+     * Returns true if the given email is the same as the creator email of the feedback session.
      */
-    public boolean isManuallyPublished() {
-        return resultsVisibleFromTime.equals(Const.TIME_REPRESENTS_LATER)
-               || resultsVisibleFromTime.equals(Const.TIME_REPRESENTS_NOW);
-    }
-
     public boolean isCreator(String instructorEmail) {
         return creatorEmail.equals(instructorEmail);
     }
@@ -358,45 +404,48 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         return "FeedbackSessionAttributes [feedbackSessionName="
                + feedbackSessionName + ", courseId=" + courseId
                + ", creatorEmail=" + creatorEmail + ", instructions=" + instructions
+               + ", createdTime=" + createdTime + ", deletedTime=" + deletedTime
                + ", startTime=" + startTime
                + ", endTime=" + endTime + ", sessionVisibleFromTime="
                + sessionVisibleFromTime + ", resultsVisibleFromTime="
                + resultsVisibleFromTime + ", timeZone=" + timeZone
                + ", gracePeriod=" + getGracePeriodMinutes() + "min"
+               + ", sentOpeningSoonEmail=" + sentOpeningSoonEmail
                + ", sentOpenEmail=" + sentOpenEmail
+               + ", sentClosingEmail=" + sentClosingEmail
+               + ", sentClosedEmail=" + sentClosedEmail
                + ", sentPublishedEmail=" + sentPublishedEmail
                + ", isOpeningEmailEnabled=" + isOpeningEmailEnabled
                + ", isClosingEmailEnabled=" + isClosingEmailEnabled
-               + ", isPublishedEmailEnabled=" + isPublishedEmailEnabled + "]";
+               + ", isPublishedEmailEnabled=" + isPublishedEmailEnabled
+               + ", studentDeadlines=" + new TreeMap<>(studentDeadlines)
+               + ", instructorDeadlines=" + new TreeMap<>(instructorDeadlines)
+               + "]";
     }
 
-    /**
-     * Sorts feedback session based courseID (ascending), then by create time (ascending), deadline
-     * (ascending), then by start time (ascending), then by feedback session name
-     * (ascending). The sort by CourseID part is to cater the case when this
-     * method is called with combined feedback sessions from many courses
-     */
-    public static void sortFeedbackSessionsByCreationTime(List<FeedbackSessionAttributes> sessions) {
-        sessions.sort(Comparator.comparing((FeedbackSessionAttributes session) -> session.courseId)
-                .thenComparing(session -> session.createdTime)
-                .thenComparing(session -> session.endTime)
-                .thenComparing(session -> session.startTime)
-                .thenComparing(session -> session.feedbackSessionName));
+    @Override
+    public int hashCode() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(this.feedbackSessionName).append(this.courseId)
+                .append(this.instructions).append(this.creatorEmail);
+        return stringBuilder.toString().hashCode();
     }
 
-    /**
-     * Sorts feedback session based on create time (descending), deadline
-     * (descending), then by start time (descending),then by courseID (ascending),then by feedback session name
-     * (ascending). The sort by CourseID part is to cater the case when this
-     * method is called with combined feedback sessions from many courses
-     */
-    public static void sortFeedbackSessionsByCreationTimeDescending(List<FeedbackSessionAttributes> sessions) {
-        sessions.sort(Comparator.comparing((FeedbackSessionAttributes session) ->
-                session.createdTime, Comparator.reverseOrder())
-                .thenComparing(session -> session.endTime, Comparator.nullsFirst(Comparator.reverseOrder()))
-                .thenComparing(session -> session.startTime, Comparator.reverseOrder())
-                .thenComparing(session -> session.courseId)
-                .thenComparing(session -> session.feedbackSessionName));
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        } else if (this == other) {
+            return true;
+        } else if (this.getClass() == other.getClass()) {
+            FeedbackSessionAttributes otherFeedbackSession = (FeedbackSessionAttributes) other;
+            return Objects.equals(this.feedbackSessionName, otherFeedbackSession.feedbackSessionName)
+                    && Objects.equals(this.courseId, otherFeedbackSession.courseId)
+                    && Objects.equals(this.instructions, otherFeedbackSession.instructions)
+                    && Objects.equals(this.creatorEmail, otherFeedbackSession.creatorEmail);
+        } else {
+            return false;
+        }
     }
 
     public void setFeedbackSessionName(String feedbackSessionName) {
@@ -423,41 +472,6 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         this.instructions = instructions;
     }
 
-    public String getCreatedTimeDateString() {
-        return TimeHelper.formatDateForInstructorPages(createdTime, timeZone);
-    }
-
-    public String getCreatedTimeDateStamp() {
-        return TimeHelper.formatDateTimeToIso8601Utc(createdTime);
-    }
-
-    public String getCreatedTimeFullDateTimeString() {
-        LocalDateTime localDateTime = TimeHelper.convertInstantToLocalDateTime(createdTime, timeZone);
-        return TimeHelper.formatDateTimeForDisplay(localDateTime);
-    }
-
-    public String getDeletedTimeDateString() {
-        if (this.deletedTime == null) {
-            return Const.DELETION_DATE_NOT_APPLICABLE;
-        }
-        return TimeHelper.formatDateForInstructorPages(deletedTime, timeZone);
-    }
-
-    public String getDeletedTimeDateStamp() {
-        if (this.deletedTime == null) {
-            return Const.DELETION_DATE_NOT_APPLICABLE;
-        }
-        return TimeHelper.formatDateTimeToIso8601Utc(deletedTime);
-    }
-
-    public String getDeletedTimeFullDateTimeString() {
-        if (this.deletedTime == null) {
-            return Const.DELETION_DATE_NOT_APPLICABLE;
-        }
-        LocalDateTime localDateTime = TimeHelper.convertInstantToLocalDateTime(deletedTime, timeZone);
-        return TimeHelper.formatDateTimeForDisplay(localDateTime);
-    }
-
     public Instant getCreatedTime() {
         return createdTime;
     }
@@ -474,20 +488,12 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         this.deletedTime = deletedTime;
     }
 
-    public void resetDeletedTime() {
-        this.deletedTime = null;
-    }
-
     public boolean isSessionDeleted() {
         return this.deletedTime != null;
     }
 
     public Instant getStartTime() {
         return startTime;
-    }
-
-    public LocalDateTime getStartTimeLocal() {
-        return TimeHelper.convertInstantToLocalDateTime(startTime, timeZone);
     }
 
     public void setStartTime(Instant startTime) {
@@ -498,20 +504,12 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         return endTime;
     }
 
-    public LocalDateTime getEndTimeLocal() {
-        return TimeHelper.convertInstantToLocalDateTime(endTime, timeZone);
-    }
-
     public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
 
     public Instant getSessionVisibleFromTime() {
         return sessionVisibleFromTime;
-    }
-
-    public LocalDateTime getSessionVisibleFromTimeLocal() {
-        return TimeHelper.convertInstantToLocalDateTime(sessionVisibleFromTime, timeZone);
     }
 
     public void setSessionVisibleFromTime(Instant sessionVisibleFromTime) {
@@ -522,19 +520,15 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         return resultsVisibleFromTime;
     }
 
-    public LocalDateTime getResultsVisibleFromTimeLocal() {
-        return TimeHelper.convertInstantToLocalDateTime(resultsVisibleFromTime, timeZone);
-    }
-
     public void setResultsVisibleFromTime(Instant resultsVisibleFromTime) {
         this.resultsVisibleFromTime = resultsVisibleFromTime;
     }
 
-    public ZoneId getTimeZone() {
+    public String getTimeZone() {
         return timeZone;
     }
 
-    public void setTimeZone(ZoneId timeZone) {
+    public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
 
@@ -544,6 +538,14 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
 
     public void setGracePeriodMinutes(long gracePeriodMinutes) {
         this.gracePeriod = Duration.ofMinutes(gracePeriodMinutes);
+    }
+
+    public boolean isSentOpeningSoonEmail() {
+        return sentOpeningSoonEmail;
+    }
+
+    public void setSentOpeningSoonEmail(boolean sentOpeningSoonEmail) {
+        this.sentOpeningSoonEmail = sentOpeningSoonEmail;
     }
 
     public boolean isSentOpenEmail() {
@@ -602,20 +604,20 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         this.isPublishedEmailEnabled = isPublishedEmailEnabled;
     }
 
-    public Set<String> getRespondingInstructorList() {
-        return respondingInstructorList;
+    public Map<String, Instant> getStudentDeadlines() {
+        return studentDeadlines;
     }
 
-    public void setRespondingInstructorList(Set<String> respondingInstructorList) {
-        this.respondingInstructorList = respondingInstructorList;
+    public void setStudentDeadlines(Map<String, Instant> studentDeadlines) {
+        this.studentDeadlines = studentDeadlines;
     }
 
-    public Set<String> getRespondingStudentList() {
-        return respondingStudentList;
+    public Map<String, Instant> getInstructorDeadlines() {
+        return instructorDeadlines;
     }
 
-    public void setRespondingStudentList(Set<String> respondingStudentList) {
-        this.respondingStudentList = respondingStudentList;
+    public void setInstructorDeadlines(Map<String, Instant> instructorDeadlines) {
+        this.instructorDeadlines = instructorDeadlines;
     }
 
     /**
@@ -629,31 +631,15 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         updateOptions.resultsVisibleFromTimeOption.ifPresent(s -> resultsVisibleFromTime = s);
         updateOptions.timeZoneOption.ifPresent(s -> timeZone = s);
         updateOptions.gracePeriodOption.ifPresent(s -> gracePeriod = s);
+        updateOptions.sentOpeningSoonEmailOption.ifPresent(s -> sentOpeningSoonEmail = s);
         updateOptions.sentOpenEmailOption.ifPresent(s -> sentOpenEmail = s);
         updateOptions.sentClosingEmailOption.ifPresent(s -> sentClosingEmail = s);
         updateOptions.sentClosedEmailOption.ifPresent(s -> sentClosedEmail = s);
         updateOptions.sentPublishedEmailOption.ifPresent(s -> sentPublishedEmail = s);
         updateOptions.isClosingEmailEnabledOption.ifPresent(s -> isClosingEmailEnabled = s);
         updateOptions.isPublishedEmailEnabledOption.ifPresent(s -> isPublishedEmailEnabled = s);
-
-        updateOptions.addingStudentRespondentOption.ifPresent(s -> respondingStudentList.add(s));
-        updateOptions.removingStudentRespondentOption.ifPresent(s -> respondingStudentList.remove(s));
-        updateOptions.addingInstructorRespondentOption.ifPresent(s -> respondingInstructorList.add(s));
-        updateOptions.removingInstructorRespondentOption.ifPresent(s -> respondingInstructorList.remove(s));
-
-        updateOptions.updatingStudentRespondentOption.ifPresent(s -> {
-            if (respondingStudentList.contains(s.getOldEmail())) {
-                respondingStudentList.remove(s.getOldEmail());
-                respondingStudentList.add(s.getNewEmail());
-            }
-        });
-
-        updateOptions.updatingInstructorRespondentOption.ifPresent(s -> {
-            if (respondingInstructorList.contains(s.getOldEmail())) {
-                respondingInstructorList.remove(s.getOldEmail());
-                respondingInstructorList.add(s.getNewEmail());
-            }
-        });
+        updateOptions.studentDeadlinesOption.ifPresent(s -> studentDeadlines = s);
+        updateOptions.instructorDeadlinesOption.ifPresent(s -> instructorDeadlines = s);
     }
 
     /**
@@ -673,7 +659,7 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     /**
      * A builder for {@link FeedbackSessionAttributes}.
      */
-    public static class Builder extends BasicBuilder<FeedbackSessionAttributes, Builder> {
+    public static final class Builder extends BasicBuilder<FeedbackSessionAttributes, Builder> {
         private final FeedbackSessionAttributes feedbackSessionAttributes;
 
         private Builder(String feedbackSessionName, String courseId) {
@@ -684,7 +670,7 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         }
 
         public Builder withCreatorEmail(String creatorEmail) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, creatorEmail);
+            assert creatorEmail != null;
 
             feedbackSessionAttributes.creatorEmail = creatorEmail;
 
@@ -702,7 +688,7 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
     /**
      * Helper class to specific the fields to update in {@link FeedbackSessionAttributes}.
      */
-    public static class UpdateOptions {
+    public static final class UpdateOptions {
         private String courseId;
         private String feedbackSessionName;
 
@@ -711,25 +697,21 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
         private UpdateOption<Instant> endTimeOption = UpdateOption.empty();
         private UpdateOption<Instant> sessionVisibleFromTimeOption = UpdateOption.empty();
         private UpdateOption<Instant> resultsVisibleFromTimeOption = UpdateOption.empty();
-        private UpdateOption<ZoneId> timeZoneOption = UpdateOption.empty();
+        private UpdateOption<String> timeZoneOption = UpdateOption.empty();
         private UpdateOption<Duration> gracePeriodOption = UpdateOption.empty();
+        private UpdateOption<Boolean> sentOpeningSoonEmailOption = UpdateOption.empty();
         private UpdateOption<Boolean> sentOpenEmailOption = UpdateOption.empty();
         private UpdateOption<Boolean> sentClosingEmailOption = UpdateOption.empty();
         private UpdateOption<Boolean> sentClosedEmailOption = UpdateOption.empty();
         private UpdateOption<Boolean> sentPublishedEmailOption = UpdateOption.empty();
         private UpdateOption<Boolean> isClosingEmailEnabledOption = UpdateOption.empty();
         private UpdateOption<Boolean> isPublishedEmailEnabledOption = UpdateOption.empty();
-
-        private UpdateOption<String> addingStudentRespondentOption = UpdateOption.empty();
-        private UpdateOption<String> removingStudentRespondentOption = UpdateOption.empty();
-        private UpdateOption<String> addingInstructorRespondentOption = UpdateOption.empty();
-        private UpdateOption<String> removingInstructorRespondentOption = UpdateOption.empty();
-        private UpdateOption<EmailChange> updatingStudentRespondentOption = UpdateOption.empty();
-        private UpdateOption<EmailChange> updatingInstructorRespondentOption = UpdateOption.empty();
+        private UpdateOption<Map<String, Instant>> studentDeadlinesOption = UpdateOption.empty();
+        private UpdateOption<Map<String, Instant>> instructorDeadlinesOption = UpdateOption.empty();
 
         private UpdateOptions(String feedbackSessionName, String courseId) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, feedbackSessionName);
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, courseId);
+            assert feedbackSessionName != null;
+            assert courseId != null;
 
             this.feedbackSessionName = feedbackSessionName;
             this.courseId = courseId;
@@ -745,7 +727,7 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
 
         @Override
         public String toString() {
-            return "StudentAttributes.UpdateOptions ["
+            return "FeedbackSessionAttributes.UpdateOptions ["
                     + "feedbackSessionName = " + feedbackSessionName
                     + ", courseId = " + courseId
                     + ", instructions = " + instructionsOption
@@ -755,57 +737,37 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
                     + ", resultsVisibleFromTime = " + resultsVisibleFromTimeOption
                     + ", timeZone = " + timeZoneOption
                     + ", gracePeriod = " + gracePeriodOption
+                    + ", sentOpeningSoonEmail = " + sentOpeningSoonEmailOption
                     + ", sentOpenEmail = " + sentOpenEmailOption
                     + ", sentClosingEmail = " + sentClosingEmailOption
                     + ", sentClosedEmail = " + sentClosedEmailOption
                     + ", sentPublishedEmail = " + sentPublishedEmailOption
                     + ", isClosingEmailEnabled = " + isClosingEmailEnabledOption
                     + ", isPublishedEmailEnabled = " + isPublishedEmailEnabledOption
-                    + ", addingStudentRespondent = " + addingStudentRespondentOption
-                    + ", removingStudentRespondent = " + removingStudentRespondentOption
-                    + ", addingInstructorRespondent = " + addingInstructorRespondentOption
-                    + ", removingInstructorRespondent = " + removingInstructorRespondentOption
-                    + ", updatingStudentRespondent = " + updatingStudentRespondentOption
-                    + ", updatingInstructorRespondent = " + updatingInstructorRespondentOption
+                    + ", studentDeadlines = " + studentDeadlinesOption
+                    + ", instructorDeadlines = " + instructorDeadlinesOption
                     + "]";
-        }
-
-        /**
-         * Represents the change of email for an(a) instructor/student.
-         */
-        private static class EmailChange {
-
-            private String oldEmail;
-            private String newEmail;
-
-            private EmailChange(String oldEmail, String newEmail) {
-                this.oldEmail = oldEmail;
-                this.newEmail = newEmail;
-            }
-
-            private String getOldEmail() {
-                return oldEmail;
-            }
-
-            private String getNewEmail() {
-                return newEmail;
-            }
         }
 
         /**
          * Builder class to build {@link UpdateOptions}.
          */
-        public static class Builder extends BasicBuilder<UpdateOptions, Builder> {
+        public static final class Builder extends BasicBuilder<UpdateOptions, Builder> {
 
             private Builder(UpdateOptions updateOptions) {
                 super(updateOptions);
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, updateOptions);
+                assert updateOptions != null;
                 thisBuilder = this;
             }
 
             private Builder(String feedbackSessionName, String courseId) {
                 super(new UpdateOptions(feedbackSessionName, courseId));
                 thisBuilder = this;
+            }
+
+            public Builder withSentOpeningSoonEmail(boolean sentOpeningSoonEmailOption) {
+                updateOptions.sentOpeningSoonEmailOption = UpdateOption.of(sentOpeningSoonEmailOption);
+                return this;
             }
 
             public Builder withSentOpenEmail(boolean sentOpenEmail) {
@@ -828,50 +790,6 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
                 return this;
             }
 
-            public Builder withAddingStudentRespondent(String email) {
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, email);
-
-                updateOptions.addingStudentRespondentOption = UpdateOption.of(email);
-                return this;
-            }
-
-            public Builder withRemovingStudentRespondent(String email) {
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, email);
-
-                updateOptions.removingStudentRespondentOption = UpdateOption.of(email);
-                return this;
-            }
-
-            public Builder withAddingInstructorRespondent(String email) {
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, email);
-
-                updateOptions.addingInstructorRespondentOption = UpdateOption.of(email);
-                return this;
-            }
-
-            public Builder withRemovingInstructorRespondent(String email) {
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, email);
-
-                updateOptions.removingInstructorRespondentOption = UpdateOption.of(email);
-                return this;
-            }
-
-            public Builder withUpdatingStudentRespondent(String oldEmail, String newEmail) {
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, oldEmail);
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, newEmail);
-
-                updateOptions.updatingStudentRespondentOption = UpdateOption.of(new EmailChange(oldEmail, newEmail));
-                return this;
-            }
-
-            public Builder withUpdatingInstructorRespondent(String oldEmail, String newEmail) {
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, oldEmail);
-                Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, newEmail);
-
-                updateOptions.updatingInstructorRespondentOption = UpdateOption.of(new EmailChange(oldEmail, newEmail));
-                return this;
-            }
-
             @Override
             public UpdateOptions build() {
                 return updateOptions;
@@ -889,57 +807,57 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
      */
     private abstract static class BasicBuilder<T, B extends BasicBuilder<T, B>> {
 
-        protected UpdateOptions updateOptions;
-        protected B thisBuilder;
+        UpdateOptions updateOptions;
+        B thisBuilder;
 
-        protected BasicBuilder(UpdateOptions updateOptions) {
+        BasicBuilder(UpdateOptions updateOptions) {
             this.updateOptions = updateOptions;
         }
 
         public B withInstructions(String instruction) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, instruction);
+            assert instruction != null;
 
             updateOptions.instructionsOption = UpdateOption.of(instruction);
             return thisBuilder;
         }
 
         public B withStartTime(Instant startTime) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, startTime);
+            assert startTime != null;
 
             updateOptions.startTimeOption = UpdateOption.of(startTime);
             return thisBuilder;
         }
 
         public B withEndTime(Instant endTime) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, endTime);
+            assert endTime != null;
 
             updateOptions.endTimeOption = UpdateOption.of(endTime);
             return thisBuilder;
         }
 
         public B withSessionVisibleFromTime(Instant sessionVisibleFromTime) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, sessionVisibleFromTime);
+            assert sessionVisibleFromTime != null;
 
             updateOptions.sessionVisibleFromTimeOption = UpdateOption.of(sessionVisibleFromTime);
             return thisBuilder;
         }
 
         public B withResultsVisibleFromTime(Instant resultsVisibleFromTime) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, resultsVisibleFromTime);
+            assert resultsVisibleFromTime != null;
 
             updateOptions.resultsVisibleFromTimeOption = UpdateOption.of(resultsVisibleFromTime);
             return thisBuilder;
         }
 
-        public B withTimeZone(ZoneId timeZone) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, timeZone);
+        public B withTimeZone(String timeZone) {
+            assert timeZone != null;
 
             updateOptions.timeZoneOption = UpdateOption.of(timeZone);
             return thisBuilder;
         }
 
         public B withGracePeriod(Duration gracePeriod) {
-            Assumption.assertNotNull(Const.StatusCodes.NULL_PARAMETER, gracePeriod);
+            assert gracePeriod != null;
 
             updateOptions.gracePeriodOption = UpdateOption.of(gracePeriod);
             return thisBuilder;
@@ -952,6 +870,20 @@ public class FeedbackSessionAttributes extends EntityAttributes<FeedbackSession>
 
         public B withIsPublishedEmailEnabled(boolean isPublishedEmailEnabled) {
             updateOptions.isPublishedEmailEnabledOption = UpdateOption.of(isPublishedEmailEnabled);
+            return thisBuilder;
+        }
+
+        public B withStudentDeadlines(Map<String, Instant> studentDeadlines) {
+            assert studentDeadlines != null;
+
+            updateOptions.studentDeadlinesOption = UpdateOption.of(studentDeadlines);
+            return thisBuilder;
+        }
+
+        public B withInstructorDeadlines(Map<String, Instant> instructorDeadlines) {
+            assert instructorDeadlines != null;
+
+            updateOptions.instructorDeadlinesOption = UpdateOption.of(instructorDeadlines);
             return thisBuilder;
         }
 

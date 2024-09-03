@@ -3,51 +3,46 @@
     "FQLogicPCT.instr": {
       "googleId": "FQLogicPCT.instr",
       "name": "Teammates Test",
-      "isInstructor": true,
       "email": "FQLogicPCT.instr@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "FQLogicPCT.alice.b": {
       "googleId": "FQLogicPCT.alice.b",
       "name": "Alice B.",
-      "isInstructor": false,
       "email": "FQLogicPCT.alice.b@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "FQLogicPCT.benny.c": {
       "googleId": "FQLogicPCT.benny.c",
       "name": "Benny C.",
-      "isInstructor": false,
       "email": "FQLogicPCT.benny.c@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "FQLogicPCT.charlie.d": {
       "googleId": "FQLogicPCT.charlie.d",
       "name": "Charlie D.",
-      "isInstructor": false,
       "email": "FQLogicPCT.charlie.d@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "FQLogicPCT.danny.e": {
       "googleId": "FQLogicPCT.danny.e",
       "name": "Danny E.",
-      "isInstructor": false,
       "email": "FQLogicPCT.danny.e@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     },
     "FQLogicPCT.emily.f": {
       "googleId": "FQLogicPCT.emily.f",
       "name": "Emily F.",
-      "isInstructor": false,
       "email": "FQLogicPCT.emily.f@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
+      "readNotifications": {}
     }
   },
   "courses": {
     "FQLogicPCT.CS2104": {
       "id": "FQLogicPCT.CS2104",
       "name": "Programming Language Concepts",
-      "timeZone": "UTC"
+      "institute": "TEAMMATES Test Institute 1",
+      "timeZone": "Asia/Singapore"
     }
   },
   "instructors": {
@@ -61,14 +56,14 @@
       "displayedName": "Co-owner",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -147,19 +142,22 @@
       "creatorEmail": "FQLogicPCT.instr@gmail.tmt",
       "instructions": "Instructions for first session",
       "createdTime": "2012-04-01T23:59:00Z",
-      "startTime": "2012-04-01T15:59:00Z",
-      "endTime": "2026-04-30T15:59:00Z",
-      "sessionVisibleFromTime": "2012-04-01T15:59:00Z",
-      "resultsVisibleFromTime": "2012-05-01T15:59:00Z",
+      "startTime": "2012-04-01T16:00:00Z",
+      "endTime": "2026-04-30T16:00:00Z",
+      "sessionVisibleFromTime": "2012-04-01T16:00:00Z",
+      "resultsVisibleFromTime": "2012-05-01T16:00:00Z",
       "timeZone": "Asia/Singapore",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
       "sentPublishedEmail": true,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     }
   },
   "feedbackQuestions": {
@@ -187,22 +185,11 @@
     }
   },
   "feedbackResponses": {
-    "response1": {
-      "feedbackSessionName": "First Session",
-      "courseId": "FQLogicPCT.CS2104",
-      "feedbackQuestionId": "1",
-      "giver": "FQLogicPCT.charlie.d@gmail.tmt",
-      "recipient": "Team 1\"><'",
-      "responseDetails": {
-        "questionType": "TEXT",
-        "answer": "Team 2 (charlie) to team 1"
-      }
-    },
     "response2": {
       "feedbackSessionName": "First Session",
       "courseId": "FQLogicPCT.CS2104",
       "feedbackQuestionId": "1",
-      "giver": "FQLogicPCT.danny.e@gmail.tmt",
+      "giver": "Team 2",
       "recipient": "Team 1\"><'",
       "responseDetails": {
         "questionType": "TEXT",
@@ -213,7 +200,7 @@
       "feedbackSessionName": "First Session",
       "courseId": "FQLogicPCT.CS2104",
       "feedbackQuestionId": "1",
-      "giver": "FQLogicPCT.emily.f@gmail.tmt",
+      "giver": "Team 3",
       "recipient": "Team 1\"><'",
       "responseDetails": {
         "questionType": "TEXT",
@@ -224,7 +211,7 @@
       "feedbackSessionName": "First Session",
       "courseId": "FQLogicPCT.CS2104",
       "feedbackQuestionId": "1",
-      "giver": "FQLogicPCT.alice.b@gmail.tmt",
+      "giver": "Team 1\"><'",
       "recipient": "Team 2",
       "responseDetails": {
         "questionType": "TEXT",
@@ -232,6 +219,5 @@
       }
     }
   },
-  "feedbackResponseComments": {},
-  "profiles": {}
+  "feedbackResponseComments": {}
 }

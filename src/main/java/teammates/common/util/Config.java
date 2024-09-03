@@ -2,12 +2,10 @@ package teammates.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
-
-import com.google.appengine.api.utils.SystemProperty;
-import com.google.apphosting.api.ApiProxy;
-
-import teammates.common.exception.TeammatesException;
 
 /**
  * Represents the deployment-specific configuration values of the system.
@@ -15,17 +13,32 @@ import teammates.common.exception.TeammatesException;
  */
 public final class Config {
 
-    /** The value of the application URL, or null if no server instance is running. */
-    public static final String APP_URL;
-
     /** The value of the "app.id" in build.properties file. */
     public static final String APP_ID;
+
+    /** The value of the "app.region" in build.properties file. */
+    public static final String APP_REGION;
 
     /** The value of the "app.version" in build.properties file. */
     public static final String APP_VERSION;
 
-    /** The value of the "app.frontenddev.url" in build.properties file. */
-    public static final String APP_FRONTENDDEV_URL;
+    /** The value of the "app.frontend.url" in build.properties file. */
+    public static final String APP_FRONTEND_URL;
+
+    /** The value of the "app.postgres.host" in build.properties file. */
+    public static final String POSTGRES_HOST;
+
+    /** The value of the "app.postgres.port" in build.properties file. */
+    public static final String POSTGRES_PORT;
+
+    /** The value of the "app.postgres.databasename" in build.properties file. */
+    public static final String POSTGRES_DATABASENAME;
+
+    /** The value of the "app.postgres.username" in build.properties file. */
+    public static final String POSTGRES_USERNAME;
+
+    /** The value of the "app.postgres.password" in build.properties file. */
+    public static final String POSTGRES_PASSWORD;
 
     /** The value of the "app.production.gcs.bucketname" in build.properties file. */
     public static final String PRODUCTION_GCS_BUCKETNAME;
@@ -42,8 +55,23 @@ public final class Config {
     /** The value of the "app.encryption.key" in build.properties file. */
     public static final String ENCRYPTION_KEY;
 
+    /** The value of the "app.auth.type" in build.properties file. */
+    public static final String AUTH_TYPE;
+
+    /** The value of the "app.oauth2.client.id" in build.properties file. */
+    public static final String OAUTH2_CLIENT_ID;
+
+    /** The value of the "app.oauth2.client.secret" in build.properties file. */
+    public static final String OAUTH2_CLIENT_SECRET;
+
     /** The value of the "app.captcha.secretkey" in build.properties file. */
     public static final String CAPTCHA_SECRET_KEY;
+
+    /** The value of the "app.admins" in build.properties file. */
+    public static final List<String> APP_ADMINS;
+
+    /** The value of the "app.maintainers" in build.properties file. */
+    public static final List<String> APP_MAINTAINERS;
 
     /** The value of the "app.crashreport.email" in build.properties file. */
     public static final String SUPPORT_EMAIL;
@@ -75,76 +103,190 @@ public final class Config {
     /** The value of the "app.mailjet.secretkey" in build.properties file. */
     public static final String MAILJET_SECRETKEY;
 
+    /** The value of the "app.search.service.host" in build.properties file. */
+    public static final String SEARCH_SERVICE_HOST;
+
     /** The value of the "app.enable.datastore.backup" in build.properties file. */
     public static final boolean ENABLE_DATASTORE_BACKUP;
 
+    /** The value of the "app.maintenance" in build.properties file. */
+    public static final boolean MAINTENANCE;
+
+    /** The value of the "app.localdatastore.port" in build-dev.properties file. */
+    public static final int APP_LOCALDATASTORE_PORT;
+
+    /** The value of the "app.enable.devserver.login" in build-dev.properties file. */
+    public static final boolean ENABLE_DEVSERVER_LOGIN;
+
+    /** The value of the "app.taskqueue.active" in build-dev.properties file. */
+    public static final boolean TASKQUEUE_ACTIVE;
+
+    // Other properties
+
+    /** Indicates whether the current server is dev server. */
+    public static final boolean IS_DEV_SERVER;
+
+    private static final Logger log = Logger.getLogger();
+
     static {
-        APP_URL = readAppUrl();
         Properties properties = new Properties();
         try (InputStream buildPropStream = FileHelper.getResourceAsStream("build.properties")) {
             properties.load(buildPropStream);
         } catch (IOException e) {
-            Assumption.fail(TeammatesException.toStringWithStackTrace(e));
+            assert false;
         }
-        APP_ID = properties.getProperty("app.id");
-        APP_VERSION = properties.getProperty("app.version").replace("-", ".");
-        APP_FRONTENDDEV_URL = properties.getProperty("app.frontenddev.url");
-        CSRF_KEY = properties.getProperty("app.csrf.key");
-        BACKDOOR_KEY = properties.getProperty("app.backdoor.key");
-        PRODUCTION_GCS_BUCKETNAME = properties.getProperty("app.production.gcs.bucketname");
-        BACKUP_GCS_BUCKETNAME = properties.getProperty("app.backup.gcs.bucketname");
-        ENCRYPTION_KEY = properties.getProperty("app.encryption.key");
-        CAPTCHA_SECRET_KEY = properties.getProperty("app.captcha.secretkey");
-        SUPPORT_EMAIL = properties.getProperty("app.crashreport.email");
-        EMAIL_SENDEREMAIL = properties.getProperty("app.email.senderemail");
-        EMAIL_SENDERNAME = properties.getProperty("app.email.sendername");
-        EMAIL_REPLYTO = properties.getProperty("app.email.replyto");
-        EMAIL_SERVICE = properties.getProperty("app.email.service");
-        SENDGRID_APIKEY = properties.getProperty("app.sendgrid.apikey");
-        MAILGUN_APIKEY = properties.getProperty("app.mailgun.apikey");
-        MAILGUN_DOMAINNAME = properties.getProperty("app.mailgun.domainname");
-        MAILJET_APIKEY = properties.getProperty("app.mailjet.apikey");
-        MAILJET_SECRETKEY = properties.getProperty("app.mailjet.secretkey");
-        ENABLE_DATASTORE_BACKUP = Boolean.parseBoolean(properties.getProperty("app.enable.datastore.backup", "false"));
+
+        String appVersion = properties.getProperty("app.version");
+        String appId = properties.getProperty("app.id");
+        IS_DEV_SERVER = isDevServer(appVersion, appId);
+
+        Properties devProperties = new Properties();
+        if (IS_DEV_SERVER) {
+            try (InputStream devPropStream = FileHelper.getResourceAsStream("build-dev.properties")) {
+                if (devPropStream != null) {
+                    devProperties.load(devPropStream);
+                }
+            } catch (IOException e) {
+                log.warning("Dev environment detected but failed to load build-dev.properties file.");
+            }
+            APP_ID = getProperty(properties, devProperties, "app.id");
+            APP_VERSION = getProperty(properties, devProperties, "app.version");
+        } else {
+            APP_ID = appId;
+            APP_VERSION = appVersion;
+        }
+
+        APP_REGION = getProperty(properties, devProperties, "app.region");
+        APP_FRONTEND_URL = getProperty(properties, devProperties, "app.frontend.url", getDefaultFrontEndUrl());
+        CSRF_KEY = getProperty(properties, devProperties, "app.csrf.key");
+        BACKDOOR_KEY = getProperty(properties, devProperties, "app.backdoor.key");
+        PRODUCTION_GCS_BUCKETNAME = getProperty(properties, devProperties, "app.production.gcs.bucketname");
+        POSTGRES_HOST = getProperty(properties, devProperties, "app.postgres.host");
+        POSTGRES_PORT = getProperty(properties, devProperties, "app.postgres.port");
+        POSTGRES_DATABASENAME = getProperty(properties, devProperties, "app.postgres.databasename");
+        POSTGRES_USERNAME = getProperty(properties, devProperties, "app.postgres.username");
+        POSTGRES_PASSWORD = getProperty(properties, devProperties, "app.postgres.password");
+        BACKUP_GCS_BUCKETNAME = getProperty(properties, devProperties, "app.backup.gcs.bucketname");
+        ENCRYPTION_KEY = getProperty(properties, devProperties, "app.encryption.key");
+        AUTH_TYPE = getProperty(properties, devProperties, "app.auth.type");
+        OAUTH2_CLIENT_ID = getProperty(properties, devProperties, "app.oauth2.client.id");
+        OAUTH2_CLIENT_SECRET = getProperty(properties, devProperties, "app.oauth2.client.secret");
+        CAPTCHA_SECRET_KEY = getProperty(properties, devProperties, "app.captcha.secretkey");
+        APP_ADMINS = Collections.unmodifiableList(
+                Arrays.asList(getProperty(properties, devProperties, "app.admins", "").split(",")));
+        APP_MAINTAINERS = Collections.unmodifiableList(
+                Arrays.asList(getProperty(properties, devProperties, "app.maintainers", "").split(",")));
+        SUPPORT_EMAIL = getProperty(properties, devProperties, "app.crashreport.email");
+        EMAIL_SENDEREMAIL = getProperty(properties, devProperties, "app.email.senderemail");
+        EMAIL_SENDERNAME = getProperty(properties, devProperties, "app.email.sendername");
+        EMAIL_REPLYTO = getProperty(properties, devProperties, "app.email.replyto");
+        EMAIL_SERVICE = getProperty(properties, devProperties, "app.email.service");
+        SENDGRID_APIKEY = getProperty(properties, devProperties, "app.sendgrid.apikey");
+        MAILGUN_APIKEY = getProperty(properties, devProperties, "app.mailgun.apikey");
+        MAILGUN_DOMAINNAME = getProperty(properties, devProperties, "app.mailgun.domainname");
+        MAILJET_APIKEY = getProperty(properties, devProperties, "app.mailjet.apikey");
+        MAILJET_SECRETKEY = getProperty(properties, devProperties, "app.mailjet.secretkey");
+        SEARCH_SERVICE_HOST = getProperty(properties, devProperties, "app.search.service.host");
+        ENABLE_DATASTORE_BACKUP = Boolean.parseBoolean(
+                getProperty(properties, devProperties, "app.enable.datastore.backup", "false"));
+        MAINTENANCE = Boolean.parseBoolean(getProperty(properties, devProperties, "app.maintenance", "false"));
+
+        // The following properties are not used in production server.
+        // So they will only be read from build-dev.properties file.
+        APP_LOCALDATASTORE_PORT = Integer.parseInt(devProperties.getProperty("app.localdatastore.port", "8484"));
+        ENABLE_DEVSERVER_LOGIN = Boolean.parseBoolean(devProperties.getProperty("app.enable.devserver.login", "false"));
+        TASKQUEUE_ACTIVE = Boolean.parseBoolean(devProperties.getProperty("app.taskqueue.active", "true"));
     }
 
     private Config() {
         // access static fields directly
     }
 
-    private static String readAppUrl() {
-        ApiProxy.Environment serverEnvironment = ApiProxy.getCurrentEnvironment();
-        if (serverEnvironment == null) {
-            return null;
+    /**
+     * Returns the a default frontend URL if it is not set in property file(s).
+     */
+    static String getDefaultFrontEndUrl() {
+        return IS_DEV_SERVER ? "http://localhost:" + getPort() : "https://" + APP_ID + ".appspot.com";
+    }
+
+    /**
+     * Returns the property value based on running environment.
+     *
+     * <p>If it is in dev server, it will return the value from build-dev.properties file.
+     * If the respective key does not exist in build-dev.properties file, or it is in production server,
+     * it will return the value from build.properties file instead.
+     *
+     * <p>If still no key found in build.properties file, the specified default value will be returned.
+     */
+    private static String getProperty(Properties properties, Properties devProperties, String key, String defaultValue) {
+        if (IS_DEV_SERVER) {
+            String val = devProperties.getProperty(key);
+            if (val != null) {
+                return val;
+            }
         }
-        String hostname = (String) serverEnvironment.getAttributes()
-                .get("com.google.appengine.runtime.default_version_hostname");
-        if (hostname == null) {
-            return null;
+        return defaultValue == null ? properties.getProperty(key) : properties.getProperty(key, defaultValue);
+    }
+
+    /**
+     * Returns the property value based on running environment. null is returned when no match values are found.
+     */
+    private static String getProperty(Properties properties, Properties devProperties, String key) {
+        return getProperty(properties, devProperties, key, null);
+    }
+
+    /**
+     * Returns the port number at which the system will be run in.
+     */
+    public static int getPort() {
+        String portEnv = System.getenv("PORT");
+        if (portEnv == null || !portEnv.matches("\\d{2,5}")) {
+            return 8080;
         }
-        return (isDevServer() ? "http://" : "https://") + hostname;
+        return Integer.parseInt(portEnv);
+    }
+
+    /**
+     * Returns the GAE instance ID.
+     */
+    public static String getInstanceId() {
+        String instanceId = System.getenv("GAE_INSTANCE");
+        if (instanceId == null) {
+            return "dev_server_instance_id";
+        }
+        return instanceId;
     }
 
     /**
      * Returns true if the server is configured to be the dev server.
      */
-    public static boolean isDevServer() {
-        return SystemProperty.environment.value() != SystemProperty.Environment.Value.Production;
+    private static boolean isDevServer(String appVersion, String appId) {
+        // In production server, GAE sets some non-overrideable environment variables.
+        // We will make use of some of them to determine whether the server is dev server or not.
+        // This means that any developer can replicate this condition in dev server,
+        // but it is their own choice and risk should they choose to do so.
+
+        String version = System.getenv("GAE_VERSION");
+        if (!appVersion.equals(version)) {
+            return true;
+        }
+
+        String env = System.getenv("GAE_ENV");
+        if ("standard".equals(env)) {
+            // GAE standard
+            String appName = System.getenv("GAE_APPLICATION");
+            return appName == null || !appName.endsWith(appId);
+        }
+
+        // GAE flexible; GAE_ENV variable should not exist in GAE flexible environment
+        return env != null;
     }
 
     /**
-     * Returns the GAE's internal request ID of a request. This is not related to HttpServletRequest.
-     *
-     * @see <a href="https://cloud.google.com/appengine/docs/standard/java/how-requests-are-handled">https://cloud.google.com/appengine/docs/standard/java/how-requests-are-handled</a>
+     * Indicates whether dev server login is enabled.
      */
-    public static String getRequestId() {
-        ApiProxy.Environment serverEnvironment = ApiProxy.getCurrentEnvironment();
-        if (serverEnvironment == null) {
-            // This will be the case in dev server
-            return "dummyrequestid";
-        }
-        return String.valueOf(ApiProxy.getCurrentEnvironment().getAttributes()
-                .get("com.google.appengine.runtime.request_log_id"));
+    public static boolean isDevServerLoginEnabled() {
+        return IS_DEV_SERVER && ENABLE_DEVSERVER_LOGIN;
     }
 
     /**
@@ -153,21 +295,18 @@ public final class Config {
      * {@code relativeUrl} must start with a "/".
      */
     public static AppUrl getFrontEndAppUrl(String relativeUrl) {
-        if (Config.isDevServer() && APP_FRONTENDDEV_URL != null) {
-            return new AppUrl(APP_FRONTENDDEV_URL + relativeUrl);
-        }
+        return new AppUrl(APP_FRONTEND_URL + relativeUrl);
+    }
 
-        // In production, the back-end and front-end lives under the same domain
-        return getBackEndAppUrl(relativeUrl);
+    public static boolean isUsingFirebase() {
+        return "firebase".equalsIgnoreCase(AUTH_TYPE);
     }
 
     /**
-     * Creates an {@link AppUrl} for the supplied {@code relativeUrl} parameter.
-     * The base URL will be the application back-end URL.
-     * {@code relativeUrl} must start with a "/".
+     * Returns db connection URL.
      */
-    public static AppUrl getBackEndAppUrl(String relativeUrl) {
-        return new AppUrl(APP_URL + relativeUrl);
+    public static String getDbConnectionUrl() {
+        return String.format("jdbc:postgresql://%s:%s/%s", POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DATABASENAME);
     }
 
     public static boolean isUsingSendgrid() {

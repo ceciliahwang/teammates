@@ -8,6 +8,8 @@
     </description>
     <exclude-pattern>.*/test/java/.*</exclude-pattern>
     <exclude-pattern>.*/e2e/java/.*</exclude-pattern>
+    <exclude-pattern>.*/lnp/java/.*</exclude-pattern>
+    <exclude-pattern>.*/it/java/.*</exclude-pattern>
     <exclude-pattern>.*/client/java/.*</exclude-pattern>
     <exclude-pattern>.*.html</exclude-pattern>
     <exclude-pattern>.*.xml</exclude-pattern>
@@ -15,4 +17,5 @@
     <rule ref="category/java/bestpractices.xml/SystemPrintln"/>
     <rule ref="category/java/design.xml/AvoidThrowingRawExceptionTypes"/>
     <rule ref="category/java/design.xml/SignatureDeclareThrowsException"/>
+    <rule ref="category/java/errorprone.xml/AvoidAccessibilityAlteration"/>
 </ruleset>

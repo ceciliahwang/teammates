@@ -6,6 +6,7 @@ import {
   FeedbackVisibilityType,
   NumberOfEntitiesToGiveFeedbackToSetting,
 } from '../../../types/api-output';
+import { CommentRowModel } from '../comment-box/comment-row/comment-row.component';
 
 /**
  * The mode of operation for question submission form.
@@ -46,6 +47,14 @@ export interface QuestionSubmissionFormModel {
   showResponsesTo: FeedbackVisibilityType[];
   showGiverNameTo: FeedbackVisibilityType[];
   showRecipientNameTo: FeedbackVisibilityType[];
+
+  isLoading: boolean;
+  isLoaded: boolean;
+
+  hasResponseChangedForRecipients: Map<string, boolean>;
+  isTabExpandedForRecipients: Map<string, boolean>;
+
+  isTabExpanded: boolean;
 }
 
 /**
@@ -54,6 +63,8 @@ export interface QuestionSubmissionFormModel {
 export interface FeedbackResponseRecipient {
   recipientIdentifier: string;
   recipientName: string;
+  recipientSection?: string;
+  recipientTeam?: string;
 }
 
 /**
@@ -63,4 +74,18 @@ export interface FeedbackResponseRecipientSubmissionFormModel {
   responseId: string;
   recipientIdentifier: string;
   responseDetails: FeedbackResponseDetails;
+
+  isValid: boolean;
+
+  // comment by giver
+  commentByGiver?: CommentRowModel;
+}
+
+export enum FeedbackRecipientLabelType {
+  // show section, team and name
+  INCLUDE_SECTION,
+  // show team and name
+  INCLUDE_TEAM,
+  // show name
+  INCLUDE_NAME,
 }

@@ -2,7 +2,6 @@ package teammates.storage.entity;
 
 import java.time.Instant;
 
-import com.google.appengine.api.datastore.Text;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -36,6 +35,10 @@ public class FeedbackResponse extends BaseEntity {
 
     private FeedbackQuestionType feedbackQuestionType;
 
+    /**
+     * {@code giverEmail} does not necessarily contain an email. Depending on the question giver type,
+     * it may contain the giver's email, the team name, "anonymous", etc.
+     */
     private String giverEmail;
 
     private String giverSection;
@@ -47,10 +50,10 @@ public class FeedbackResponse extends BaseEntity {
     /**
      * Serialized {@link teammates.common.datatransfer.questions.FeedbackResponseDetails} stored as a string.
      *
-     * @see teammates.common.datatransfer.attributes.FeedbackResponseAttributes#getResponseDetails()
+     * @see teammates.common.datatransfer.attributes.FeedbackResponseAttributes#getResponseDetailsCopy()
      */
     @Unindex
-    private Text answer;
+    private String answer;
 
     @Translate(InstantTranslatorFactory.class)
     private Instant createdAt;
@@ -74,7 +77,7 @@ public class FeedbackResponse extends BaseEntity {
         this.giverSection = giverSection;
         this.receiver = recipient;
         this.receiverSection = recipientSection;
-        setAnswer(answer);
+        this.answer = answer;
 
         this.feedbackResponseId = generateId(feedbackQuestionId, giverEmail, receiver);
 
@@ -159,12 +162,12 @@ public class FeedbackResponse extends BaseEntity {
         this.receiverSection = recipientSection;
     }
 
-    public String getResponseMetaData() {
-        return answer == null ? null : answer.getValue();
+    public String getAnswer() {
+        return answer;
     }
 
     public void setAnswer(String answer) {
-        this.answer = answer == null ? null : new Text(answer);
+        this.answer = answer;
     }
 
     public Instant getCreatedAt() {

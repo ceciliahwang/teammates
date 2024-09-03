@@ -1,9 +1,9 @@
 import { FeedbackParticipantType, FeedbackVisibilityType } from '../types/api-output';
 import { VisibilityControl } from '../types/visibility-control';
 
-/* tslint:disable: no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
- * The state machine for visibility settings.
+ * The state machine for visibility settings for responses.
  */
 export class VisibilityStateMachine {
 
@@ -79,6 +79,8 @@ export class VisibilityStateMachine {
         this.applicability.delete(FeedbackVisibilityType.RECIPIENT_TEAM_MEMBERS);
         break;
       case FeedbackParticipantType.STUDENTS:
+      case FeedbackParticipantType.STUDENTS_EXCLUDING_SELF:
+      case FeedbackParticipantType.STUDENTS_IN_SAME_SECTION:
         // all options enabled when recipientType is STUDENTS (subject to options disabled by giverType)
         break;
       case FeedbackParticipantType.OWN_TEAM:
@@ -91,6 +93,8 @@ export class VisibilityStateMachine {
         this.applicability.delete(FeedbackVisibilityType.RECIPIENT_TEAM_MEMBERS);
         break;
       case FeedbackParticipantType.TEAMS:
+      case FeedbackParticipantType.TEAMS_EXCLUDING_SELF:
+      case FeedbackParticipantType.TEAMS_IN_SAME_SECTION:
         // RECIPIENT_TEAM_MEMBERS is disabled because it is the same as RECIPIENT
         this.applicability.delete(FeedbackVisibilityType.RECIPIENT_TEAM_MEMBERS);
         break;
@@ -125,7 +129,7 @@ export class VisibilityStateMachine {
   /**
    * Clears existing visibility settings and applied the given visibility settings.
    */
-  applyVisibilitySettings(visibilitySettings: {[TKey in VisibilityControl]: FeedbackVisibilityType[] }): void {
+  applyVisibilitySettings(visibilitySettings: { [TKey in VisibilityControl]: FeedbackVisibilityType[] }): void {
     this.resetVisibility();
     for (const visibilityType of visibilitySettings.SHOW_RESPONSE) {
       this.allowToSee(visibilityType, VisibilityControl.SHOW_RESPONSE);
@@ -242,7 +246,7 @@ export class VisibilityStateMachine {
    * Gets the visibility control for a certain {@code visibilityType}.
    */
   getVisibilityControlUnderVisibilityType(visibilityType: FeedbackVisibilityType)
-      : {[TKey in VisibilityControl]: boolean} {
+      : { [TKey in VisibilityControl]: boolean } {
     return {
       SHOW_RESPONSE: this.isVisible(visibilityType, VisibilityControl.SHOW_RESPONSE),
       SHOW_GIVER_NAME: this.isVisible(visibilityType, VisibilityControl.SHOW_GIVER_NAME),
@@ -250,4 +254,4 @@ export class VisibilityStateMachine {
     };
   }
 }
-/* tslint:enable: no-non-null-assertion */
+/* eslint-enable @typescript-eslint/no-non-null-assertion */

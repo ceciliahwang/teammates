@@ -1,38 +1,29 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 import { InstructorHelpPageComponent } from './instructor-help-page.component';
-
-import { Component, Input } from '@angular/core';
-
-@Component({ selector: 'tm-instructor-help-students-section', template: '' })
-class InstructorHelpStudentsSectionStubComponent {
-  @Input() key: string = '';
-}
-@Component({ selector: 'tm-instructor-help-courses-section', template: '' })
-class InstructorHelpCoursesSectionStubComponent {
-  @Input() key: string = '';
-}
-@Component({ selector: 'tm-instructor-help-sessions-section', template: '' })
-class InstructorHelpSessionsSectionStubComponent {
-  @Input() key: string = '';
-}
-@Component({ selector: 'tm-instructor-help-questions-section', template: '' })
-class InstructorHelpQuestionsSectionStubComponent {
-  @Input() key: string = '';
-}
+import { InstructorHelpPageModule } from './instructor-help-page.module';
+import { PanelChevronModule } from '../../components/panel-chevron/panel-chevron.module';
 
 describe('InstructorHelpPageComponent', () => {
   let component: InstructorHelpPageComponent;
   let fixture: ComponentFixture<InstructorHelpPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [InstructorHelpPageComponent, InstructorHelpCoursesSectionStubComponent,
-        InstructorHelpStudentsSectionStubComponent, InstructorHelpSessionsSectionStubComponent,
-        InstructorHelpQuestionsSectionStubComponent],
-      imports: [FormsModule, NgbModule, RouterTestingModule],
+      imports: [
+        FormsModule,
+        NgbModule,
+        PanelChevronModule,
+        RouterTestingModule,
+        InstructorHelpPageModule,
+        NoopAnimationsModule,
+        NgxPageScrollCoreModule,
+        HttpClientTestingModule],
     })
     .compileComponents();
   }));

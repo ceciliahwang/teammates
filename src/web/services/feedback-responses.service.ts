@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { HttpRequestService } from './http-request.service';
+import {
+  InstructorSessionResultSectionType,
+} from '../app/pages-instructor/instructor-session-result-page/instructor-session-result-section-type.enum';
+import { ResourceEndpoints } from '../types/api-const';
 import {
   FeedbackConstantSumResponseDetails,
   FeedbackContributionResponseDetails,
@@ -9,11 +14,14 @@ import {
   FeedbackQuestionType,
   FeedbackRankOptionsResponseDetails,
   FeedbackRankRecipientsResponseDetails,
+  FeedbackResponseDetails,
   FeedbackResponse,
-  FeedbackResponseDetails, FeedbackRubricResponseDetails,
+  FeedbackResponses,
+  FeedbackRubricResponseDetails,
   FeedbackTextResponseDetails,
+  ResponseOutput,
 } from '../types/api-output';
-import { FeedbackResponseCreateRequest, FeedbackResponseUpdateRequest } from '../types/api-request';
+import { FeedbackResponsesRequest, Intent } from '../types/api-request';
 import {
   DEFAULT_CONSTSUM_RESPONSE_DETAILS,
   DEFAULT_CONTRIBUTION_RESPONSE_DETAILS,
@@ -31,7 +39,13 @@ import {
   RANK_OPTIONS_ANSWER_NOT_SUBMITTED,
   RANK_RECIPIENTS_ANSWER_NOT_SUBMITTED, RUBRIC_ANSWER_NOT_CHOSEN,
 } from '../types/feedback-response-details';
-import { HttpRequestService } from './http-request.service';
+
+/**
+ * A collection of feedback responses.
+ */
+export interface FeedbackResponsesResponse {
+  responses: FeedbackResponse[];
+}
 
 /**
  * Handles feedback response settings provision.
@@ -78,64 +92,113 @@ export class FeedbackResponsesService {
    */
   isFeedbackResponseDetailsEmpty(questionType: FeedbackQuestionType, details: FeedbackResponseDetails): boolean {
     switch (questionType) {
-      case FeedbackQuestionType.TEXT:
+      case FeedbackQuestionType.TEXT: {
         const textDetails: FeedbackTextResponseDetails = details as FeedbackTextResponseDetails;
         return textDetails.answer.length === 0;
-      case FeedbackQuestionType.RANK_OPTIONS:
+      }
+      case FeedbackQuestionType.RANK_OPTIONS: {
         const rankOptionsDetails: FeedbackRankOptionsResponseDetails = details as FeedbackRankOptionsResponseDetails;
         const numberOfOptionsRanked: number = rankOptionsDetails.answers
-            .filter((rank: number) => rank !== RANK_OPTIONS_ANSWER_NOT_SUBMITTED).length;
+            .filter((rank: number) => rank !== RANK_OPTIONS_ANSWER_NOT_SUBMITTED && rank != null).length;
         return numberOfOptionsRanked === 0;
-      case FeedbackQuestionType.RANK_RECIPIENTS:
+      }
+      case FeedbackQuestionType.RANK_RECIPIENTS: {
         const rankRecipientsDetails: FeedbackRankRecipientsResponseDetails =
             details as FeedbackRankRecipientsResponseDetails;
-        return rankRecipientsDetails.answer === RANK_RECIPIENTS_ANSWER_NOT_SUBMITTED;
-      case FeedbackQuestionType.CONTRIB:
+        return rankRecipientsDetails.answer === RANK_RECIPIENTS_ANSWER_NOT_SUBMITTED
+            || rankRecipientsDetails.answer == null;
+      }
+      case FeedbackQuestionType.CONTRIB: {
         const contributionDetails: FeedbackContributionResponseDetails = details as FeedbackContributionResponseDetails;
-        return contributionDetails.answer === CONTRIBUTION_POINT_NOT_SUBMITTED;
-      case FeedbackQuestionType.NUMSCALE:
+        return contributionDetails.answer === CONTRIBUTION_POINT_NOT_SUBMITTED
+            || contributionDetails.answer == null;
+      }
+      case FeedbackQuestionType.NUMSCALE: {
         const numScaleDetails: FeedbackNumericalScaleResponseDetails = details as FeedbackNumericalScaleResponseDetails;
-        return numScaleDetails.answer === NUMERICAL_SCALE_ANSWER_NOT_SUBMITTED;
-      case FeedbackQuestionType.MCQ:
+        return numScaleDetails.answer === NUMERICAL_SCALE_ANSWER_NOT_SUBMITTED
+            || numScaleDetails.answer == null;
+      }
+      case FeedbackQuestionType.MCQ: {
         const mcqDetails: FeedbackMcqResponseDetails = details as FeedbackMcqResponseDetails;
         return mcqDetails.answer.length === 0 && !mcqDetails.isOther;
-      case FeedbackQuestionType.MSQ:
+      }
+      case FeedbackQuestionType.MSQ: {
         const msqDetails: FeedbackMsqResponseDetails = details as FeedbackMsqResponseDetails;
         return msqDetails.answers.length === 0 && !msqDetails.isOther;
-      case FeedbackQuestionType.RUBRIC:
+      }
+      case FeedbackQuestionType.RUBRIC: {
         const rubricDetails: FeedbackRubricResponseDetails = details as FeedbackRubricResponseDetails;
         return rubricDetails.answer.length === 0
             || rubricDetails.answer.every((val: number) => val === RUBRIC_ANSWER_NOT_CHOSEN);
-      case FeedbackQuestionType.CONSTSUM_OPTIONS:
-        const constumDetails: FeedbackConstantSumResponseDetails = details as FeedbackConstantSumResponseDetails;
-        return constumDetails.answers.length === 0;
-      case FeedbackQuestionType.CONSTSUM_RECIPIENTS:
-        const constumRecipientsDetails: FeedbackConstantSumResponseDetails =
+      }
+      case FeedbackQuestionType.CONSTSUM_OPTIONS: {
+        const constsumDetails: FeedbackConstantSumResponseDetails = details as FeedbackConstantSumResponseDetails;
+        return constsumDetails.answers.length === 0;
+      }
+      case FeedbackQuestionType.CONSTSUM_RECIPIENTS: {
+        const constsumRecipientsDetails: FeedbackConstantSumResponseDetails =
             details as FeedbackConstantSumResponseDetails;
-        return constumRecipientsDetails.answers.length === 0;
+        return constsumRecipientsDetails.answers.length === 0;
+      }
       default:
         return true;
     }
   }
 
   /**
-   * Creates a feedback response by calling API.
+   * Determines whether responses should be displayed based on the selected section.
    */
-  createFeedbackResponse(questionId: string, additionalParams: { [key: string]: string } = {},
-                         request: FeedbackResponseCreateRequest): Observable<FeedbackResponse> {
-    return this.httpRequestService.post('/response', {
-      questionid: questionId,
-      ...additionalParams,
-    }, request);
+  isFeedbackResponsesDisplayedOnSection(response: ResponseOutput, section: string,
+      sectionType: InstructorSessionResultSectionType): boolean {
+
+    let isDisplayed: boolean = true;
+
+    if (section) {
+      switch (sectionType) {
+        case InstructorSessionResultSectionType.EITHER:
+          isDisplayed = response.giverSection === section || response.recipientSection === section;
+          break;
+        case InstructorSessionResultSectionType.GIVER:
+          isDisplayed = response.giverSection === section;
+          break;
+        case InstructorSessionResultSectionType.EVALUEE:
+          isDisplayed = response.recipientSection === section;
+          break;
+        case InstructorSessionResultSectionType.BOTH:
+          isDisplayed = response.giverSection === section && response.recipientSection === section;
+          break;
+        default:
+      }
+    }
+
+    return isDisplayed;
   }
 
   /**
-   * Updates a feedback response by calling API.
+   * Retrieves a feedback response by calling API.
    */
-  updateFeedbackResponse(responseId: string, additionalParams: { [key: string]: string } = {},
-                         request: FeedbackResponseUpdateRequest): Observable<FeedbackResponse> {
-    return this.httpRequestService.put('/response', {
-      responseid: responseId,
+  getFeedbackResponse(queryParams: {
+    questionId: string,
+    intent: Intent,
+    key: string,
+    moderatedPerson: string,
+  }): Observable<FeedbackResponsesResponse> {
+    const paramMap: Record<string, string> = {
+      questionid: queryParams.questionId,
+      intent: queryParams.intent,
+      key: queryParams.key,
+      moderatedperson: queryParams.moderatedPerson,
+    };
+    return this.httpRequestService.get(ResourceEndpoints.RESPONSES, paramMap);
+  }
+
+  /**
+   * Submits a list of feedback responses for a feedback question by calling API.
+   */
+  submitFeedbackResponses(questionId: string, request: FeedbackResponsesRequest,
+                          additionalParams: { [key: string]: string } = {}): Observable<FeedbackResponses> {
+    return this.httpRequestService.put(ResourceEndpoints.RESPONSES, {
+      questionid: questionId,
       ...additionalParams,
     }, request);
   }

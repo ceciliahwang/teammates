@@ -1,15 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ResponseModerationButtonComponent } from './response-moderation-button.component';
+import { TeammatesRouterModule } from '../../../components/teammates-router/teammates-router.module';
 
 describe('ResponseModerationButtonComponent', () => {
   let component: ResponseModerationButtonComponent;
   let fixture: ComponentFixture<ResponseModerationButtonComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ResponseModerationButtonComponent],
-      imports: [RouterTestingModule.withRoutes([])],
+      imports: [RouterTestingModule.withRoutes([]), TeammatesRouterModule],
     })
     .compileComponents();
   }));

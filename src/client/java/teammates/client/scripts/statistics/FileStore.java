@@ -31,63 +31,27 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import teammates.common.util.Config;
+import teammates.common.util.Const;
 import teammates.common.util.StringHelper;
-import teammates.test.driver.FileHelper;
+import teammates.test.FileHelper;
 
 /**
  * File storage service that saves stats/cache to encrypted/unencrypted files.
  */
-public class FileStore {
+public final class FileStore {
 
     private static final String BASE_URI = "src/client/java/teammates/client/scripts/statistics/data/";
 
-    /*
-     * Creates the folder that will contain the stored data.
-     */
+    // Creates the folder that will contain the stored data.
     static {
         new File(BASE_URI).mkdir();
     }
 
-    private static final String COURSE_TO_INSTITUTE_CACHE_FILEPATH = BASE_URI + "CourseToInstituteCache.encrypted";
     private static final String INSTITUTES_STATS_FILEPATH = BASE_URI + "InstitutesStats.encrypted";
     private static final String INSTITUTES_STATS_METADATA_FILEPATH = BASE_URI + "InstitutesStatsMetadata.json";
 
     private FileStore() {
         // utility class
-    }
-
-    /**
-     * Gets the cache service.
-     *
-     * <p>If the cache is persisted to the disk, decrypts and parses it to warm up the cache.
-     */
-    public static CourseToInstituteCache getCourseToInstituteCacheFromFileIfPossible() throws Exception {
-        // parse courseToInstituteCacheFile
-        File courseToInstituteCacheFile = new File(COURSE_TO_INSTITUTE_CACHE_FILEPATH);
-        CourseToInstituteCache courseToInstituteCache = new CourseToInstituteCache();
-        if (courseToInstituteCacheFile.isFile()) {
-            courseToInstituteCache = parseEncryptedJsonFile(COURSE_TO_INSTITUTE_CACHE_FILEPATH,
-                    jsonReader -> {
-                        CourseToInstituteCache cache = new CourseToInstituteCache();
-                        jsonReader.beginObject();
-                        while (jsonReader.hasNext()) {
-                            cache.populate(jsonReader.nextName(), jsonReader.nextString());
-                        }
-                        jsonReader.endObject();
-                        return cache;
-                    });
-        }
-
-        return courseToInstituteCache;
-    }
-
-    /**
-     * Encrypts and persists the cache to a file in disk.
-     */
-    public static void saveCourseToInstituteCacheToFile(CourseToInstituteCache courseToInstituteCache)
-            throws Exception {
-        saveEncryptedJsonToFile(COURSE_TO_INSTITUTE_CACHE_FILEPATH, courseToInstituteCache.asMap(),
-                new TypeToken<Map<String, String>>(){}.getType());
     }
 
     /**
@@ -133,7 +97,6 @@ public class FileStore {
                 new TypeToken<Map<String, StatisticsBundle.InstituteStats>>(){}.getType());
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod") // false positive
     private static <T> void saveEncryptedJsonToFile(String fileName, T object, Type typeOfObject) throws Exception {
         SecretKeySpec sks = new SecretKeySpec(StringHelper.hexStringToByteArray(Config.ENCRYPTION_KEY), "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -141,7 +104,7 @@ public class FileStore {
 
         try (OutputStream os = Files.newOutputStream(Paths.get(fileName))) {
             CipherOutputStream out = new CipherOutputStream(os, cipher);
-            JsonWriter writer = new JsonWriter(new OutputStreamWriter(out));
+            JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, Const.ENCODING));
             getSerializer().toJson(object, typeOfObject, writer);
             writer.close();
             out.close();
@@ -155,7 +118,7 @@ public class FileStore {
 
         try (InputStream is = Files.newInputStream(Paths.get(fileName))) {
             CipherInputStream in = new CipherInputStream(is, cipher);
-            JsonReader reader = new JsonReader(new InputStreamReader(in));
+            JsonReader reader = new JsonReader(new InputStreamReader(in, Const.ENCODING));
             T result = parser.apply(reader);
             reader.close();
             in.close();
@@ -172,7 +135,7 @@ public class FileStore {
     /**
      * An adapter for Gson to serialize {@link Instant} type.
      */
-    private static class InstantAdapter implements JsonSerializer<Instant>, JsonDeserializer<Instant> {
+    private static final class InstantAdapter implements JsonSerializer<Instant>, JsonDeserializer<Instant> {
 
         @Override
         public JsonElement serialize(Instant instant, Type type, JsonSerializationContext context) {

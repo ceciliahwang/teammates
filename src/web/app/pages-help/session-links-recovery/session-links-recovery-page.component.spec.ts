@@ -1,22 +1,22 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material';
 import { NgxCaptchaModule } from 'ngx-captcha';
 import { SessionLinksRecoveryPageComponent } from './session-links-recovery-page.component';
+import { AjaxLoadingModule } from '../../components/ajax-loading/ajax-loading.module';
 
 describe('SessionLinksRecoveryPageComponent', () => {
   let component: SessionLinksRecoveryPageComponent;
   let fixture: ComponentFixture<SessionLinksRecoveryPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [SessionLinksRecoveryPageComponent],
       imports: [
         ReactiveFormsModule,
         HttpClientTestingModule,
         NgxCaptchaModule,
-        MatSnackBarModule,
+        AjaxLoadingModule,
       ],
     })
         .compileComponents();

@@ -1,25 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import {
-  GqrRqgViewResponsesModule,
-} from '../../components/question-responses/gqr-rqg-view-responses/gqr-rqg-view-responses.module';
-import {
-  GrqRgqViewResponsesModule,
-} from '../../components/question-responses/grq-rgq-view-responses/grq-rgq-view-responses.module';
-import {
-  PerQuestionViewResponsesModule,
-} from '../../components/question-responses/per-question-view-responses/per-question-view-responses.module';
-import { QuestionTextWithInfoModule } from '../../components/question-text-with-info/question-text-with-info.module';
-import { InstructorSessionNoResponsePanelComponent } from './instructor-session-no-response-panel.component';
-import { InstructorSessionResultGqrViewComponent } from './instructor-session-result-gqr-view.component';
-import { InstructorSessionResultGrqViewComponent } from './instructor-session-result-grq-view.component';
+import { RouterModule, Routes } from '@angular/router';
+import { NgbCollapseModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+
 import { InstructorSessionResultPageComponent } from './instructor-session-result-page.component';
-import { InstructorSessionResultQuestionViewComponent } from './instructor-session-result-question-view.component';
-import { InstructorSessionResultRgqViewComponent } from './instructor-session-result-rgq-view.component';
-import { InstructorSessionResultRqgViewComponent } from './instructor-session-result-rqg-view.component';
+import { InstructorSessionResultViewModule } from './instructor-session-result-view.module';
+import { SectionTypeDescriptionModule } from './section-type-description.module';
+import { AjaxLoadingModule } from '../../components/ajax-loading/ajax-loading.module';
+import { LoadingRetryModule } from '../../components/loading-retry/loading-retry.module';
+import { LoadingSpinnerModule } from '../../components/loading-spinner/loading-spinner.module';
+import {
+  PreviewSessionResultPanelModule,
+} from '../../components/preview-session-result-panel/preview-session-result-panel.module';
+import { TeammatesCommonModule } from '../../components/teammates-common/teammates-common.module';
+import { TeammatesRouterModule } from '../../components/teammates-router/teammates-router.module';
+import { ViewResultsPanelModule } from '../../components/view-results-panel/view-results-panel.module';
+
+const routes: Routes = [
+  {
+    path: '',
+    component: InstructorSessionResultPageComponent,
+  },
+];
 
 /**
  * Module for instructor sessions result page.
@@ -27,12 +30,6 @@ import { InstructorSessionResultRqgViewComponent } from './instructor-session-re
 @NgModule({
   declarations: [
     InstructorSessionResultPageComponent,
-    InstructorSessionResultQuestionViewComponent,
-    InstructorSessionResultRgqViewComponent,
-    InstructorSessionResultGrqViewComponent,
-    InstructorSessionResultRqgViewComponent,
-    InstructorSessionResultGqrViewComponent,
-    InstructorSessionNoResponsePanelComponent,
   ],
   exports: [
     InstructorSessionResultPageComponent,
@@ -40,12 +37,18 @@ import { InstructorSessionResultRqgViewComponent } from './instructor-session-re
   imports: [
     CommonModule,
     FormsModule,
-    NgbModule,
-    RouterModule,
-    QuestionTextWithInfoModule,
-    PerQuestionViewResponsesModule,
-    GqrRqgViewResponsesModule,
-    GrqRgqViewResponsesModule,
+    NgbCollapseModule,
+    NgbTooltipModule,
+    TeammatesCommonModule,
+    RouterModule.forChild(routes),
+    InstructorSessionResultViewModule,
+    LoadingSpinnerModule,
+    AjaxLoadingModule,
+    LoadingRetryModule,
+    TeammatesRouterModule,
+    ViewResultsPanelModule,
+    SectionTypeDescriptionModule,
+    PreviewSessionResultPanelModule,
   ],
 })
 export class InstructorSessionResultPageModule { }

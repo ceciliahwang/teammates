@@ -1,3 +1,7 @@
+<frontmatter>
+  title: "Best Practices: UI Design"
+</frontmatter>
+
 # UI Design Best Practices
 
 The goal is to make the user guide unnecessary.
@@ -24,11 +28,15 @@ User convenience is **far** more important than developer convenience, e.g.
 * Use defaults so that users are not forced to enter values for each field. This applies to sorting as well (i.e. sort by default using the most likely sorting order).
 * If only one option is available, choose it by default.
 
-## Take user point of view
+## Take the user's point of view
 
 * Use terms from user domain.
 * Use terms that show 'user intent' rather than mechanism, e.g. 'leave this course' instead of 'delete'.
 
 ## Be consistent
 
-Use consistent naming guidelines for link, page name, page title.
+* Keep a neutral color scheme across the site.
+* Where possible, use Bootstrap CSS classes instead of custom CSS.
+* Use Bootstrap color utility classes meaningfully (e.g. `warning` color for user warnings).
+* Use consistent naming guidelines for links, page names and page titles.
+* Use consistent styles for components (e.g. buttons, links) that have the same behavior.

@@ -4,11 +4,24 @@ exports[`QuestionTextWithInfoComponent should not show control link and question
 <tm-question-text-with-info
   FeedbackQuestionType={[Function Object]}
   additionalInfoIsExpanded="false"
+  downloadQuestionResultEvent={[Function EventEmitter_]}
   questionDetails={[Function Object]}
   questionNumber="0"
 >
-  Question 0: Text question details
-  
+  <span
+    class="d-flex flex-column flex-sm-row align-items-sm-center"
+  >
+    <h2
+      class="question-number"
+    >
+       Question 0: 
+    </h2>
+    <span
+      class="question-text mx-sm-2"
+    >
+      Text question details
+    </span>
+  </span>
 </tm-question-text-with-info>
 `;
 
@@ -16,18 +29,29 @@ exports[`QuestionTextWithInfoComponent should show control link when question ty
 <tm-question-text-with-info
   FeedbackQuestionType={[Function Object]}
   additionalInfoIsExpanded="false"
+  downloadQuestionResultEvent={[Function EventEmitter_]}
   questionDetails={[Function Object]}
   questionNumber="0"
 >
-  Question 0: MCQ question details
-  <a
-    href="/"
-    ng-reflect-query-params-handling="merge"
-    queryparamshandling="merge"
+  <span
+    class="d-flex flex-column flex-sm-row align-items-sm-center"
   >
-     [more]
-  
-  </a>
+    <h2
+      class="question-number"
+    >
+       Question 0: 
+    </h2>
+    <span
+      class="question-text mx-sm-2"
+    >
+      MCQ question details
+    </span>
+    <button
+      class="additional-info-button info-font-size me-auto border-0 p-0 bg-transparent text-primary"
+    >
+       [more] 
+    </button>
+  </span>
 </tm-question-text-with-info>
 `;
 
@@ -35,46 +59,42 @@ exports[`QuestionTextWithInfoComponent should show question detail when click co
 <tm-question-text-with-info
   FeedbackQuestionType={[Function Object]}
   additionalInfoIsExpanded={[Function Boolean]}
+  downloadQuestionResultEvent={[Function EventEmitter_]}
   questionDetails={[Function Object]}
   questionNumber="0"
 >
-  Question 0: MCQ question details
-  <a
-    href="/"
-    ng-reflect-query-params-handling="merge"
-    queryparamshandling="merge"
+  <span
+    class="d-flex flex-column flex-sm-row align-items-sm-center"
   >
-     [less]
-  
-  </a><div>
-    
-    
-    
-    <tm-mcq-question-additional-info
-      ng-reflect-question-details="[object Object]"
+    <h2
+      class="question-number"
     >
+       Question 0: 
+    </h2>
+    <span
+      class="question-text mx-sm-2"
+    >
+      MCQ question details
+    </span>
+    <button
+      class="additional-info-button info-font-size me-auto border-0 p-0 bg-transparent text-primary"
+    >
+       [less] 
+    </button>
+  </span><div
+    class="additional-info info-font-size"
+  >
+    <tm-mcq-question-additional-info>
       Multiple-choice (single answer) question options:
-  
-      
-      
       <ul>
-        
         <li>
           a
         </li>
         <li>
           b
         </li>
-        
       </ul>
     </tm-mcq-question-additional-info>
-    
-    
-    
-    
-    
-    
-    
   </div>
 </tm-question-text-with-info>
 `;

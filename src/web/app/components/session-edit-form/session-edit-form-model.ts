@@ -6,6 +6,7 @@ import {
   FeedbackSessionSubmissionStatus,
   ResponseVisibleSetting, SessionVisibleSetting,
 } from '../../../types/api-output';
+import { DateFormat, TimeFormat } from '../../../types/datetime-const';
 
 /**
  * The mode of operation for session edit form.
@@ -61,21 +62,6 @@ export interface SessionEditFormModel {
 
   isSaving: boolean;
   isEditable: boolean;
-}
-
-/**
- * The time format.
- */
-export interface TimeFormat {
-  hour: number;
-  minute: number;
-}
-
-/**
- * The date format.
- */
-export interface DateFormat {
-  year: number;
-  month: number;
-  day: number;
+  isDeleting: boolean;
+  isCopying: boolean;
 }

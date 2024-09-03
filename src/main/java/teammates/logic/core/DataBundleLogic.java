@@ -3,38 +3,39 @@ package teammates.logic.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 
 import teammates.common.datatransfer.AttributesDeletionQuery;
 import teammates.common.datatransfer.DataBundle;
 import teammates.common.datatransfer.InstructorPrivileges;
 import teammates.common.datatransfer.attributes.AccountAttributes;
+import teammates.common.datatransfer.attributes.AccountRequestAttributes;
 import teammates.common.datatransfer.attributes.CourseAttributes;
+import teammates.common.datatransfer.attributes.DeadlineExtensionAttributes;
+import teammates.common.datatransfer.attributes.EntityAttributes;
 import teammates.common.datatransfer.attributes.FeedbackQuestionAttributes;
 import teammates.common.datatransfer.attributes.FeedbackResponseAttributes;
 import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
 import teammates.common.datatransfer.attributes.FeedbackSessionAttributes;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.NotificationAttributes;
 import teammates.common.datatransfer.attributes.StudentAttributes;
-import teammates.common.datatransfer.attributes.StudentProfileAttributes;
 import teammates.common.exception.InvalidParametersException;
-import teammates.common.util.Assumption;
+import teammates.common.exception.SearchServiceException;
 import teammates.common.util.Const;
 import teammates.common.util.StringHelper;
+import teammates.storage.api.AccountRequestsDb;
 import teammates.storage.api.AccountsDb;
 import teammates.storage.api.CoursesDb;
+import teammates.storage.api.DeadlineExtensionsDb;
 import teammates.storage.api.FeedbackQuestionsDb;
 import teammates.storage.api.FeedbackResponseCommentsDb;
 import teammates.storage.api.FeedbackResponsesDb;
 import teammates.storage.api.FeedbackSessionsDb;
 import teammates.storage.api.InstructorsDb;
-import teammates.storage.api.ProfilesDb;
+import teammates.storage.api.NotificationsDb;
 import teammates.storage.api.StudentsDb;
 
 /**
@@ -44,19 +45,19 @@ import teammates.storage.api.StudentsDb;
  */
 public final class DataBundleLogic {
 
-    private static final AccountsDb accountsDb = new AccountsDb();
-    private static final ProfilesDb profilesDb = new ProfilesDb();
-    private static final CoursesDb coursesDb = new CoursesDb();
-    private static final StudentsDb studentsDb = new StudentsDb();
-    private static final InstructorsDb instructorsDb = new InstructorsDb();
-    private static final FeedbackSessionsDb fbDb = new FeedbackSessionsDb();
-    private static final FeedbackQuestionsDb fqDb = new FeedbackQuestionsDb();
-    private static final FeedbackResponsesDb frDb = new FeedbackResponsesDb();
-    private static final FeedbackResponseCommentsDb fcDb = new FeedbackResponseCommentsDb();
+    private static final DataBundleLogic instance = new DataBundleLogic();
 
-    private static final FeedbackQuestionsLogic fqLogic = FeedbackQuestionsLogic.inst();
-
-    private static DataBundleLogic instance = new DataBundleLogic();
+    private final AccountsDb accountsDb = AccountsDb.inst();
+    private final AccountRequestsDb accountRequestsDb = AccountRequestsDb.inst();
+    private final CoursesDb coursesDb = CoursesDb.inst();
+    private final DeadlineExtensionsDb deadlineExtensionsDb = DeadlineExtensionsDb.inst();
+    private final StudentsDb studentsDb = StudentsDb.inst();
+    private final InstructorsDb instructorsDb = InstructorsDb.inst();
+    private final FeedbackSessionsDb fbDb = FeedbackSessionsDb.inst();
+    private final FeedbackQuestionsDb fqDb = FeedbackQuestionsDb.inst();
+    private final FeedbackResponsesDb frDb = FeedbackResponsesDb.inst();
+    private final FeedbackResponseCommentsDb fcDb = FeedbackResponseCommentsDb.inst();
+    private final NotificationsDb nfDb = NotificationsDb.inst();
 
     private DataBundleLogic() {
         // prevent initialization
@@ -67,25 +68,24 @@ public final class DataBundleLogic {
     }
 
     /**
-     * Persists data in the given {@link DataBundle} to the Datastore, including
-     * accounts, courses, instructors, students, sessions, questions, responses, and comments.
+     * Persists data in the given {@link DataBundle} to the database, including
+     * accounts, account requests, courses, deadline extensions, instructors, students, sessions,
+     * questions, responses, and comments.
      *
      * <p>Accounts are generated for students and instructors with Google IDs
      * if the corresponding accounts are not found in the data bundle.
      * For question ID injection in responses and comments to work properly, all questions
      * referenced by responses and comments must be included in the data bundle.
-     * For session respondent lists to be properly populated, all instructors, questions and responses
-     * relevant to each session must be included in the data bundle.</p>
      *
      * @throws InvalidParametersException if invalid data is encountered.
      */
-    public void persistDataBundle(DataBundle dataBundle) throws InvalidParametersException {
+    public DataBundle persistDataBundle(DataBundle dataBundle) throws InvalidParametersException {
         if (dataBundle == null) {
             throw new InvalidParametersException("Null data bundle");
         }
 
         Collection<AccountAttributes> accounts = dataBundle.accounts.values();
-        Collection<StudentProfileAttributes> profiles = dataBundle.profiles.values();
+        Collection<AccountRequestAttributes> accountRequests = dataBundle.accountRequests.values();
         Collection<CourseAttributes> courses = dataBundle.courses.values();
         Collection<InstructorAttributes> instructors = dataBundle.instructors.values();
         Collection<StudentAttributes> students = dataBundle.students.values();
@@ -93,162 +93,128 @@ public final class DataBundleLogic {
         Collection<FeedbackQuestionAttributes> questions = dataBundle.feedbackQuestions.values();
         Collection<FeedbackResponseAttributes> responses = dataBundle.feedbackResponses.values();
         Collection<FeedbackResponseCommentAttributes> responseComments = dataBundle.feedbackResponseComments.values();
+        Collection<DeadlineExtensionAttributes> deadlineExtensions = dataBundle.deadlineExtensions.values();
+        Collection<NotificationAttributes> notifications = dataBundle.notifications.values();
 
         // For ensuring only one account per Google ID is created
         Map<String, AccountAttributes> googleIdAccountMap = new HashMap<>();
+        for (AccountAttributes account : accounts) {
+            googleIdAccountMap.put(account.getGoogleId(), account);
+        }
 
-        // For updating the student and instructor respondent lists in sessions before they are persisted
-        SetMultimap<String, InstructorAttributes> courseInstructorsMap = HashMultimap.create();
-        SetMultimap<String, FeedbackQuestionAttributes> sessionQuestionsMap = HashMultimap.create();
-        SetMultimap<String, FeedbackResponseAttributes> sessionResponsesMap = HashMultimap.create();
+        processInstructors(instructors, googleIdAccountMap);
+        processStudents(students, googleIdAccountMap);
+        processQuestions(questions);
 
-        processAccountsAndPopulateAccountsMap(accounts, googleIdAccountMap);
-        processInstructorsAndPopulateMapAndAccounts(instructors, courseInstructorsMap, googleIdAccountMap);
-        processStudentsAndPopulateAccounts(students, googleIdAccountMap);
-        processQuestionsAndPopulateMap(questions, sessionQuestionsMap);
-        processResponsesAndPopulateMap(responses, sessionResponsesMap);
-        processSessionsAndUpdateRespondents(sessions, courseInstructorsMap, sessionQuestionsMap, sessionResponsesMap);
+        List<AccountAttributes> newAccounts = accountsDb.putEntities(googleIdAccountMap.values());
+        List<AccountRequestAttributes> newAccountRequests = accountRequestsDb.putEntities(accountRequests);
 
-        accountsDb.putEntities(googleIdAccountMap.values());
-        profilesDb.putEntities(profiles);
-        coursesDb.putEntities(courses);
-        instructorsDb.putEntities(instructors);
-        studentsDb.putEntities(students);
-        fbDb.putEntities(sessions);
+        List<CourseAttributes> newCourses = coursesDb.putEntities(courses);
+        List<InstructorAttributes> newInstructors = instructorsDb.putEntities(instructors);
+        List<StudentAttributes> newStudents = studentsDb.putEntities(students);
+        List<FeedbackSessionAttributes> newFeedbackSessions = fbDb.putEntities(sessions);
+        List<DeadlineExtensionAttributes> newDeadlineExtensions = deadlineExtensionsDb.putEntities(deadlineExtensions);
 
         List<FeedbackQuestionAttributes> createdQuestions = fqDb.putEntities(questions);
         injectRealIds(responses, responseComments, createdQuestions);
 
-        frDb.putEntities(responses);
-        fcDb.putEntities(responseComments);
+        List<FeedbackResponseAttributes> newFeedbackResponses = frDb.putEntities(responses);
+        List<FeedbackResponseCommentAttributes> newFeedbackResponseComments = fcDb.putEntities(responseComments);
+        List<NotificationAttributes> newNotifications = nfDb.putEntities(notifications);
+
+        updateDataBundleValue(newAccounts, dataBundle.accounts);
+        updateDataBundleValue(newAccountRequests, dataBundle.accountRequests);
+        updateDataBundleValue(newCourses, dataBundle.courses);
+        updateDataBundleValue(newDeadlineExtensions, dataBundle.deadlineExtensions);
+        updateDataBundleValue(newInstructors, dataBundle.instructors);
+        updateDataBundleValue(newStudents, dataBundle.students);
+        updateDataBundleValue(newFeedbackSessions, dataBundle.feedbackSessions);
+        updateDataBundleValue(createdQuestions, dataBundle.feedbackQuestions);
+        updateDataBundleValue(newFeedbackResponses, dataBundle.feedbackResponses);
+        updateDataBundleValue(newFeedbackResponseComments, dataBundle.feedbackResponseComments);
+        updateDataBundleValue(newNotifications, dataBundle.notifications);
+
+        return dataBundle;
+
+    }
+
+    private <T extends EntityAttributes<?>> void updateDataBundleValue(List<T> newValues, Map<String, T> oldValues) {
+        Map<T, Integer> newValuesMap = new HashMap<>();
+        Map<String, T> values = new LinkedHashMap<>();
+
+        for (int i = 0; i < newValues.size(); i++) {
+            newValuesMap.put(newValues.get(i), i);
+        }
+
+        for (Map.Entry<String, T> entry : oldValues.entrySet()) {
+            String key = entry.getKey();
+            T value = entry.getValue();
+
+            if (newValuesMap.containsKey(value)) {
+                int index = newValuesMap.get(value);
+                values.put(key, newValues.get(index));
+            }
+        }
+
+        oldValues.clear();
+        oldValues.putAll(values);
     }
 
     /**
      * Creates document for entities that have document, i.e. searchable.
      */
-    public void putDocuments(DataBundle dataBundle) {
+    public void putDocuments(DataBundle dataBundle) throws SearchServiceException {
         // query the entity in db first to get the actual data and create document for actual entity
 
         Map<String, StudentAttributes> students = dataBundle.students;
         for (StudentAttributes student : students.values()) {
-            StudentAttributes studentInDb = studentsDb.getStudentForEmail(student.course, student.email);
+            StudentAttributes studentInDb = studentsDb.getStudentForEmail(student.getCourse(), student.getEmail());
             studentsDb.putDocument(studentInDb);
         }
 
         Map<String, InstructorAttributes> instructors = dataBundle.instructors;
         for (InstructorAttributes instructor : instructors.values()) {
             InstructorAttributes instructorInDb =
-                    instructorsDb.getInstructorForEmail(instructor.courseId, instructor.email);
+                    instructorsDb.getInstructorForEmail(instructor.getCourseId(), instructor.getEmail());
             instructorsDb.putDocument(instructorInDb);
         }
 
-        Map<String, FeedbackResponseCommentAttributes> responseComments = dataBundle.feedbackResponseComments;
-        for (FeedbackResponseCommentAttributes responseComment : responseComments.values()) {
-            FeedbackResponseCommentAttributes fcInDb = fcDb.getFeedbackResponseComment(
-                    responseComment.courseId, responseComment.createdAt, responseComment.commentGiver);
-            fcDb.putDocument(fcInDb);
+        Map<String, AccountRequestAttributes> accountRequests = dataBundle.accountRequests;
+        for (AccountRequestAttributes accountRequest : accountRequests.values()) {
+            AccountRequestAttributes accountRequestInDb =
+                    accountRequestsDb.getAccountRequest(accountRequest.getEmail(), accountRequest.getInstitute());
+            accountRequestsDb.putDocument(accountRequestInDb);
         }
     }
 
-    private void processAccountsAndPopulateAccountsMap(Collection<AccountAttributes> accounts,
-            Map<String, AccountAttributes> googleIdAccountMap) {
-        for (AccountAttributes account : accounts) {
-            googleIdAccountMap.put(account.googleId, account);
-        }
-    }
-
-    private void processInstructorsAndPopulateMapAndAccounts(Collection<InstructorAttributes> instructors,
-            SetMultimap<String, InstructorAttributes> courseInstructorsMap,
-            Map<String, AccountAttributes> googleIdAccountMap) {
+    private void processInstructors(
+            Collection<InstructorAttributes> instructors, Map<String, AccountAttributes> googleIdAccountMap) {
         for (InstructorAttributes instructor : instructors) {
             validateInstructorPrivileges(instructor);
 
-            courseInstructorsMap.put(instructor.courseId, instructor);
-
-            if (!StringHelper.isEmpty(instructor.googleId)) {
-                googleIdAccountMap.putIfAbsent(instructor.googleId, makeAccount(instructor));
+            // create adhoc account to maintain data integrity
+            if (!StringHelper.isEmpty(instructor.getGoogleId())) {
+                googleIdAccountMap.putIfAbsent(instructor.getGoogleId(), makeAccount(instructor));
             }
         }
     }
 
-    private void processStudentsAndPopulateAccounts(Collection<StudentAttributes> students,
-            Map<String, AccountAttributes> googleIdAccountMap) {
+    private void processStudents(
+            Collection<StudentAttributes> students, Map<String, AccountAttributes> googleIdAccountMap) {
         for (StudentAttributes student : students) {
             populateNullSection(student);
 
-            if (!StringHelper.isEmpty(student.googleId)) {
-                googleIdAccountMap.putIfAbsent(student.googleId, makeAccount(student));
+            // create adhoc account to maintain data integrity
+            if (!StringHelper.isEmpty(student.getGoogleId())) {
+                googleIdAccountMap.putIfAbsent(student.getGoogleId(), makeAccount(student));
             }
         }
     }
 
-    private void processQuestionsAndPopulateMap(Collection<FeedbackQuestionAttributes> questions,
-            SetMultimap<String, FeedbackQuestionAttributes> sessionQuestionsMap) {
+    private void processQuestions(Collection<FeedbackQuestionAttributes> questions) {
         for (FeedbackQuestionAttributes question : questions) {
             question.removeIrrelevantVisibilityOptions();
-
-            String sessionKey = makeSessionKey(question.feedbackSessionName, question.courseId);
-            sessionQuestionsMap.put(sessionKey, question);
         }
-    }
-
-    private void processResponsesAndPopulateMap(Collection<FeedbackResponseAttributes> responses,
-            SetMultimap<String, FeedbackResponseAttributes> sessionResponsesMap) {
-        for (FeedbackResponseAttributes response : responses) {
-            String sessionKey = makeSessionKey(response.feedbackSessionName, response.courseId);
-            sessionResponsesMap.put(sessionKey, response);
-        }
-    }
-
-    private void processSessionsAndUpdateRespondents(Collection<FeedbackSessionAttributes> sessions,
-            SetMultimap<String, InstructorAttributes> courseInstructorsMap,
-            SetMultimap<String, FeedbackQuestionAttributes> sessionQuestionsMap,
-            SetMultimap<String, FeedbackResponseAttributes> sessionResponsesMap) {
-        for (FeedbackSessionAttributes session : sessions) {
-            String sessionKey = makeSessionKey(session.getFeedbackSessionName(), session.getCourseId());
-
-            Set<InstructorAttributes> courseInstructors = courseInstructorsMap.get(session.getCourseId());
-            Set<FeedbackQuestionAttributes> sessionQuestions = sessionQuestionsMap.get(sessionKey);
-            Set<FeedbackResponseAttributes> sessionResponses = sessionResponsesMap.get(sessionKey);
-
-            updateRespondents(session, courseInstructors, sessionQuestions, sessionResponses);
-        }
-    }
-
-    private void updateRespondents(FeedbackSessionAttributes session,
-            Set<InstructorAttributes> courseInstructors,
-            Set<FeedbackQuestionAttributes> sessionQuestions,
-            Set<FeedbackResponseAttributes> sessionResponses) {
-        String sessionKey = makeSessionKey(session.getFeedbackSessionName(), session.getCourseId());
-
-        SetMultimap<String, String> instructorQuestionKeysMap = HashMultimap.create();
-        for (InstructorAttributes instructor : courseInstructors) {
-            List<FeedbackQuestionAttributes> questionsForInstructor =
-                    fqLogic.getFeedbackQuestionsForInstructor(
-                            new ArrayList<>(sessionQuestions), session.isCreator(instructor.email));
-
-            List<String> questionKeys = makeQuestionKeys(questionsForInstructor, sessionKey);
-            instructorQuestionKeysMap.putAll(instructor.email, questionKeys);
-        }
-
-        Set<String> respondingInstructors = new HashSet<>();
-        Set<String> respondingStudents = new HashSet<>();
-
-        for (FeedbackResponseAttributes response : sessionResponses) {
-            String respondent = response.giver;
-            String responseQuestionNumber = response.feedbackQuestionId; // contains question number before injection
-            String responseQuestionKey = makeQuestionKey(sessionKey, responseQuestionNumber);
-
-            Set<String> instructorQuestionKeys = instructorQuestionKeysMap.get(respondent);
-            if (instructorQuestionKeys.contains(responseQuestionKey)) {
-                respondingInstructors.add(respondent);
-            } else {
-                respondingStudents.add(respondent);
-            }
-        }
-
-        session.setRespondingInstructorList(respondingInstructors);
-        session.setRespondingStudentList(respondingStudents);
     }
 
     private void injectRealIds(
@@ -263,8 +229,8 @@ public final class DataBundleLogic {
     private Map<String, String> makeQuestionIdMap(List<FeedbackQuestionAttributes> createdQuestions) {
         Map<String, String> questionIdMap = new HashMap<>();
         for (FeedbackQuestionAttributes createdQuestion : createdQuestions) {
-            String sessionKey = makeSessionKey(createdQuestion.feedbackSessionName, createdQuestion.courseId);
-            String questionKey = makeQuestionKey(sessionKey, createdQuestion.questionNumber);
+            String sessionKey = makeSessionKey(createdQuestion.getFeedbackSessionName(), createdQuestion.getCourseId());
+            String questionKey = makeQuestionKey(sessionKey, createdQuestion.getQuestionNumber());
             questionIdMap.put(questionKey, createdQuestion.getId());
         }
         return questionIdMap;
@@ -284,14 +250,14 @@ public final class DataBundleLogic {
         for (FeedbackResponseAttributes response : responses) {
             int questionNumber;
             try {
-                questionNumber = Integer.parseInt(response.feedbackQuestionId);
+                questionNumber = Integer.parseInt(response.getFeedbackQuestionId());
             } catch (NumberFormatException e) {
                 // question ID already injected
                 continue;
             }
-            String sessionKey = makeSessionKey(response.feedbackSessionName, response.courseId);
+            String sessionKey = makeSessionKey(response.getFeedbackSessionName(), response.getCourseId());
             String questionKey = makeQuestionKey(sessionKey, questionNumber);
-            response.feedbackQuestionId = questionIdMap.get(questionKey);
+            response.setFeedbackQuestionId(questionIdMap.get(questionKey));
         }
     }
 
@@ -310,18 +276,19 @@ public final class DataBundleLogic {
         for (FeedbackResponseCommentAttributes comment : responseComments) {
             int questionNumber;
             try {
-                questionNumber = Integer.parseInt(comment.feedbackQuestionId);
+                questionNumber = Integer.parseInt(comment.getFeedbackQuestionId());
             } catch (NumberFormatException e) {
                 // question ID already injected
                 continue;
             }
-            String sessionKey = makeSessionKey(comment.feedbackSessionName, comment.courseId);
+            String sessionKey = makeSessionKey(comment.getFeedbackSessionName(), comment.getCourseId());
             String questionKey = makeQuestionKey(sessionKey, questionNumber);
-            comment.feedbackQuestionId = questionIdMap.get(questionKey);
+            comment.setFeedbackQuestionId(questionIdMap.get(questionKey));
 
             // format of feedbackResponseId: questionNumber%giverEmail%recipient
-            String[] responseIdParam = comment.feedbackResponseId.split("%", 3);
-            comment.feedbackResponseId = comment.feedbackQuestionId + "%" + responseIdParam[1] + "%" + responseIdParam[2];
+            String[] responseIdParam = comment.getFeedbackResponseId().split("%", 3);
+            comment.setFeedbackResponseId(comment.getFeedbackQuestionId() + "%" + responseIdParam[1]
+                    + "%" + responseIdParam[2]);
         }
     }
 
@@ -338,68 +305,55 @@ public final class DataBundleLogic {
             return;
         }
 
-        InstructorPrivileges privileges = instructor.privileges;
+        InstructorPrivileges privileges = instructor.getPrivileges();
 
         switch (instructor.getRole()) {
 
         case Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_COOWNER:
-            Assumption.assertTrue(privileges.hasCoownerPrivileges());
+            assert privileges.hasCoownerPrivileges();
             break;
 
         case Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_MANAGER:
-            Assumption.assertTrue(privileges.hasManagerPrivileges());
+            assert privileges.hasManagerPrivileges();
             break;
 
         case Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_OBSERVER:
-            Assumption.assertTrue(privileges.hasObserverPrivileges());
+            assert privileges.hasObserverPrivileges();
             break;
 
         case Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_TUTOR:
-            Assumption.assertTrue(privileges.hasTutorPrivileges());
+            assert privileges.hasTutorPrivileges();
             break;
 
         case Const.InstructorPermissionRoleNames.INSTRUCTOR_PERMISSION_ROLE_CUSTOM:
             break;
 
         default:
-            Assumption.fail("Invalid instructor permission role name");
+            assert false : "Invalid instructor permission role name";
             break;
         }
     }
 
     private void populateNullSection(StudentAttributes student) {
-        student.section = student.section == null ? "None" : student.section;
+        student.setSection(student.getSection() == null ? "None" : student.getSection());
     }
 
     private AccountAttributes makeAccount(InstructorAttributes instructor) {
-        return AccountAttributes.builder(instructor.googleId)
-                .withName(instructor.name)
-                .withEmail(instructor.email)
-                .withInstitute("TEAMMATES Test Institute 1")
-                .withIsInstructor(true)
+        return AccountAttributes.builder(instructor.getGoogleId())
+                .withName(instructor.getName())
+                .withEmail(instructor.getEmail())
                 .build();
     }
 
     private AccountAttributes makeAccount(StudentAttributes student) {
-        return AccountAttributes.builder(student.googleId)
-                .withName(student.name)
-                .withEmail(student.email)
-                .withInstitute("TEAMMATES Test Institute 1")
-                .withIsInstructor(false)
+        return AccountAttributes.builder(student.getGoogleId())
+                .withName(student.getName())
+                .withEmail(student.getEmail())
                 .build();
     }
 
     private String makeSessionKey(String feedbackSessionName, String courseId) {
         return feedbackSessionName + "%" + courseId;
-    }
-
-    private List<String> makeQuestionKeys(List<FeedbackQuestionAttributes> questions, String sessionKey) {
-        List<String> questionKeys = new ArrayList<>();
-        for (FeedbackQuestionAttributes question : questions) {
-            String questionKey = makeQuestionKey(sessionKey, question.questionNumber);
-            questionKeys.add(questionKey);
-        }
-        return questionKeys;
     }
 
     private String makeQuestionKey(String sessionKey, int questionNumber) {
@@ -410,17 +364,23 @@ public final class DataBundleLogic {
         return sessionKey + "%" + questionNumber;
     }
 
+    /**
+     * Removes the items in the data bundle from the database.
+     */
     public void removeDataBundle(DataBundle dataBundle) {
 
-        // Questions and responses will be deleted automatically.
+        // Questions, responses and deadline extensions will be deleted automatically.
         // We don't attempt to delete them again, to save time.
         deleteCourses(dataBundle.courses.values());
 
         dataBundle.accounts.values().forEach(account -> {
             accountsDb.deleteAccount(account.getGoogleId());
         });
-        dataBundle.profiles.values().forEach(profile -> {
-            profilesDb.deleteStudentProfile(profile.googleId);
+        dataBundle.accountRequests.values().forEach(accountRequest -> {
+            accountRequestsDb.deleteAccountRequest(accountRequest.getEmail(), accountRequest.getInstitute());
+        });
+        dataBundle.notifications.values().forEach(notification -> {
+            nfDb.deleteNotification(notification.getNotificationId());
         });
     }
 
@@ -440,6 +400,7 @@ public final class DataBundleLogic {
                 fbDb.deleteFeedbackSessions(query);
                 studentsDb.deleteStudents(query);
                 instructorsDb.deleteInstructors(query);
+                deadlineExtensionsDb.deleteDeadlineExtensions(query);
 
                 coursesDb.deleteCourse(courseId);
             });

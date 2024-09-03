@@ -1,67 +1,11 @@
 {
-  "accounts": {
-    "alice.b.tmms": {
-      "googleId": "alice.b.tmms.sampleData",
-      "name": "Alice Betsy",
-      "isInstructor": false,
-      "email": "alice.b.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 2"
-    },
-    "benny.c.tmms": {
-      "googleId": "benny.c.tmms.sampleData",
-      "name": "Benny Charles",
-      "isInstructor": false,
-      "email": "benny.c.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 3"
-    },
-    "danny.e.tmms": {
-      "googleId": "danny.e.tmms.sampleData",
-      "name": "Danny Engrid",
-      "isInstructor": false,
-      "email": "danny.e.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 4"
-    },
-    "emma.f.tmms": {
-      "googleId": "emma.f.tmms.sampleData",
-      "name": "Emma Farrell",
-      "isInstructor": false,
-      "email": "emma.f.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 5"
-    },
-    "charlie.d.tmms": {
-      "googleId": "charlie.d.tmms.sampleData",
-      "name": "Charlie Davis",
-      "isInstructor": false,
-      "email": "charlie.d.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 5"
-    },
-    "teammates.demo.instructor@demo.course": {
-      "googleId": "teammates.demo.instructor",
-      "name": "Demo_Instructor",
-      "isInstructor": false,
-      "email": "teammates.demo.instructor@demo.course",
-      "institute": "TEAMMATES Test Institute 1"
-    },
-    "francis.g.tmms@demo.course": {
-      "googleId": "francis.g.tmms.sampleData",
-      "name": "Francis Gabriel",
-      "isInstructor": false,
-      "email": "francis.g.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 1"
-    },
-    "gene.h.tmms@demo.course": {
-      "googleId": "gene.h.tmms.sampleData",
-      "name": "Gene Hudson",
-      "isInstructor": false,
-      "email": "gene.h.tmms@gmail.tmt",
-      "institute": "TEAMMATES Test Institute 6"
-    }
-  },
+  "accounts": {},
   "courses": {
     "Demo Course": {
       "id": "demo.course",
       "name": "Sample Course 101",
-      "timeZone": "UTC"
+      "institute": "demo.institute",
+      "timeZone": "demo.timezone"
     }
   },
   "instructors": {
@@ -74,14 +18,14 @@
       "displayedName": "Instructor",
       "privileges": {
         "courseLevel": {
-          "canviewstudentinsection": true,
-          "cansubmitsessioninsection": true,
-          "canmodifysessioncommentinsection": true,
-          "canmodifycourse": true,
-          "canviewsessioninsection": true,
-          "canmodifysession": true,
-          "canmodifystudent": true,
-          "canmodifyinstructor": true
+          "canViewStudentInSections": true,
+          "canSubmitSessionInSections": true,
+          "canModifySessionCommentsInSections": true,
+          "canModifyCourse": true,
+          "canViewSessionInSections": true,
+          "canModifySession": true,
+          "canModifyStudent": true,
+          "canModifyInstructor": true
         },
         "sectionLevel": {},
         "sessionLevel": {}
@@ -90,7 +34,7 @@
   },
   "students": {
     "alice.b.tmms@demo.course": {
-      "googleId": "alice.b.tmms.sampleData",
+      "googleId": "",
       "email": "alice.b.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Alice Betsy",
@@ -99,7 +43,7 @@
       "section": "Tutorial Group 1"
     },
     "benny.c.tmms@demo.course": {
-      "googleId": "benny.c.tmms.sampleData",
+      "googleId": "",
       "email": "benny.c.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Benny Charles",
@@ -108,7 +52,7 @@
       "section": "Tutorial Group 1"
     },
     "danny.e.tmms@demo.course": {
-      "googleId": "danny.e.tmms.sampleData",
+      "googleId": "",
       "email": "danny.e.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Danny Engrid",
@@ -117,7 +61,7 @@
       "section": "Tutorial Group 1"
     },
     "emma.f.tmms@demo.course": {
-      "googleId": "emma.f.tmms.sampleData",
+      "googleId": "",
       "email": "emma.f.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Emma Farrell",
@@ -126,7 +70,7 @@
       "section": "Tutorial Group 1"
     },
     "charlie.d.tmms@demo.course": {
-      "googleId": "charlie.d.tmms.sampleData",
+      "googleId": "",
       "email": "charlie.d.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Charlie Davis",
@@ -135,7 +79,7 @@
       "section": "Tutorial Group 2"
     },
     "teammates.demo.instructor@demo.course": {
-      "googleId": "teammates.demo.instructor",
+      "googleId": "",
       "email": "teammates.demo.instructor@demo.course",
       "course": "demo.course",
       "name": "Demo_Instructor",
@@ -144,7 +88,7 @@
       "section": "Tutorial Group 2"
     },
     "francis.g.tmms@demo.course": {
-      "googleId": "francis.g.tmms.sampleData",
+      "googleId": "",
       "email": "francis.g.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Francis Gabriel",
@@ -153,7 +97,7 @@
       "section": "Tutorial Group 2"
     },
     "gene.h.tmms@demo.course": {
-      "googleId": "gene.h.tmms.sampleData",
+      "googleId": "",
       "email": "gene.h.tmms@gmail.tmt",
       "course": "demo.course",
       "name": "Gene Hudson",
@@ -177,60 +121,69 @@
       "courseId": "demo.course",
       "creatorEmail": "teammates.demo.instructor@demo.course",
       "instructions": "Please give your feedback based on the following questions.",
-      "createdTime": "2012-04-01T23:59:00Z",
-      "startTime": "2012-04-01T15:59:00Z",
-      "endTime": "2012-04-02T15:59:00Z",
-      "sessionVisibleFromTime": "2012-04-01T15:59:00Z",
-      "resultsVisibleFromTime": "2012-05-01T15:59:00Z",
-      "timeZone": "Asia/Singapore",
+      "createdTime": "demo.date1T00:00:00Z",
+      "startTime": "demo.date1T00:00:00Z",
+      "endTime": "demo.date2T00:00:00Z",
+      "sessionVisibleFromTime": "demo.date1T00:00:00Z",
+      "resultsVisibleFromTime": "demo.date3T00:00:00Z",
+      "timeZone": "demo.timezone",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
-      "sentClosingEmail": false,
-      "sentClosedEmail": false,
+      "sentClosingEmail": true,
+      "sentClosedEmail": true,
       "sentPublishedEmail": true,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "demo.course:Second Session": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "creatorEmail": "teammates.demo.instructor@demo.course",
       "instructions": "Please give your feedback based on the following questions.",
-      "createdTime": "2012-04-01T23:59:00Z",
-      "startTime": "2012-04-01T15:59:00Z",
-      "endTime": "2012-04-02T15:59:00Z",
-      "sessionVisibleFromTime": "2012-04-01T15:59:00Z",
-      "resultsVisibleFromTime": "2012-05-01T15:59:00Z",
-      "timeZone": "Asia/Singapore",
+      "createdTime": "demo.date1T00:00:00Z",
+      "startTime": "demo.date1T00:00:00Z",
+      "endTime": "demo.date2T00:00:00Z",
+      "sessionVisibleFromTime": "demo.date1T00:00:00Z",
+      "resultsVisibleFromTime": "demo.date3T00:00:00Z",
+      "timeZone": "demo.timezone",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
-      "sentClosingEmail": false,
-      "sentClosedEmail": false,
+      "sentClosingEmail": true,
+      "sentClosedEmail": true,
       "sentPublishedEmail": true,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     },
     "demo.course:Third Session": {
-      "feedbackSessionName": "Second team feedback session",
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "creatorEmail": "teammates.demo.instructor@demo.course",
       "instructions": "Please give your feedback based on the following questions.",
-      "createdTime": "2012-04-01T23:59:00Z",
-      "startTime": "2012-04-01T15:59:00Z",
-      "endTime": "2037-04-02T15:59:00Z",
-      "sessionVisibleFromTime": "2012-04-01T15:59:00Z",
+      "createdTime": "demo.date1T00:00:00Z",
+      "startTime": "demo.date1T00:00:00Z",
+      "endTime": "demo.date4T00:00:00Z",
+      "sessionVisibleFromTime": "demo.date1T00:00:00Z",
       "resultsVisibleFromTime": "1970-01-01T00:00:00Z",
-      "timeZone": "Asia/Singapore",
+      "timeZone": "demo.timezone",
       "gracePeriod": 10,
+      "sentOpeningSoonEmail": true,
       "sentOpenEmail": true,
       "sentClosingEmail": false,
       "sentClosedEmail": false,
-      "sentPublishedEmail": true,
+      "sentPublishedEmail": false,
       "isOpeningEmailEnabled": true,
       "isClosingEmailEnabled": true,
-      "isPublishedEmailEnabled": true
+      "isPublishedEmailEnabled": true,
+      "studentDeadlines": {},
+      "instructorDeadlines": {}
     }
   },
   "feedbackQuestions": {
@@ -388,7 +341,6 @@
       "feedbackSessionName": "Session with different question types",
       "courseId": "demo.course",
       "questionDetails": {
-        "numOfMcqChoices": 2,
         "mcqChoices": [
           "Group 1",
           "Group 2"
@@ -444,7 +396,6 @@
         "distributeToRecipients": false,
         "pointsPerOption": false,
         "questionText": "How important are the following factors to you? Give points accordingly.",
-        "numOfConstSumOptions": 2,
         "questionType": "CONSTSUM",
         "points": 100,
         "constSumOptions": [
@@ -476,7 +427,6 @@
         "distributeToRecipients": true,
         "pointsPerOption": true,
         "questionText": "Split points among your team members and yourself, according to how much you think each member has contributed.",
-        "numOfConstSumOptions": 0,
         "questionType": "CONSTSUM",
         "points": 100,
         "constSumOptions": []
@@ -532,8 +482,6 @@
           "This student has tried his/her best."
         ],
         "questionText": "Please choose the best choice for the following sub-questions.",
-        "numOfRubricChoices": 2,
-        "numOfRubricSubQuestions": 2,
         "questionType": "RUBRIC",
         "rubricChoices": [
           "Yes",
@@ -624,10 +572,10 @@
       ]
     },
     "qn1InSession2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "questionDetails": {
-        "questionText": "Please rate the estimated contribution of your team members and yourself.",
+        "questionText": "How much work did each team member contribute to the presentation? (response will be shown anonymously to each team member).",
         "questionType": "CONTRIB"
       },
       "questionNumber": 1,
@@ -649,11 +597,11 @@
       ]
     },
     "qn2InSession2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Comments about your contribution (shown to other teammates)"
+        "questionText": "What contributions did you make to the team? (response will be shown to each team member)."
       },
       "questionNumber": 2,
       "giverType": "STUDENTS",
@@ -679,11 +627,11 @@
       ]
     },
     "qn3InSession2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Your comments about this teammate (confidential and only shown to instructor)"
+        "questionText": "What comments do you have regarding each of your team members? (response is confidential and will only be shown to the instructor)."
       },
       "questionNumber": 3,
       "giverType": "STUDENTS",
@@ -700,11 +648,11 @@
       ]
     },
     "qn4InSession2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Comments about team dynamics (confidential and only shown to instructor)"
+        "questionText": "How are the team dynamics thus far? (response is confidential and will only be to the instructor)."
       },
       "questionNumber": 4,
       "giverType": "STUDENTS",
@@ -721,11 +669,11 @@
       ]
     },
     "qn5InSession2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Your feedback to this teammate (shown anonymously to the teammate)"
+        "questionText": "What feedback do you have for each of your team members? (response will be shown anonymously to each team member)."
       },
       "questionNumber": 5,
       "giverType": "STUDENTS",
@@ -744,20 +692,23 @@
       ]
     },
     "qn1InSession3": {
-      "feedbackSessionName": "Second team feedback session",
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "questionDetails": {
-        "questionText": "Please rate the estimated contribution of your team members and yourself.",
-        "questionType": "CONTRIB"
+        "distributeToRecipients": true,
+        "pointsPerOption": true,
+        "questionText": "Distribute points among team members based on their contributions on the user documentation so far.",
+        "questionType": "CONSTSUM",
+        "points": 100,
+        "constSumOptions": []
       },
+      "questionDescription": "If a team member did an equal share of the work, give 100 points. If a team member did about 10% more than an equal share of the work, give 110 points, and so on.",
       "questionNumber": 1,
       "giverType": "STUDENTS",
       "recipientType": "OWN_TEAM_MEMBERS_INCLUDING_SELF",
       "numberOfEntitiesToGiveFeedbackTo": -100,
       "showResponsesTo": [
         "RECEIVER",
-        "OWN_TEAM_MEMBERS",
-        "RECEIVER_TEAM_MEMBERS",
         "INSTRUCTORS"
       ],
       "showGiverNameTo": [
@@ -769,11 +720,11 @@
       ]
     },
     "qn2InSession3": {
-      "feedbackSessionName": "Second team feedback session",
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Comments about your contribution (shown to other teammates)"
+        "questionText": "What contributions did you make to the team? (response will be shown to each team member)."
       },
       "questionNumber": 2,
       "giverType": "STUDENTS",
@@ -799,11 +750,11 @@
       ]
     },
     "qn3InSession3": {
-      "feedbackSessionName": "Second team feedback session",
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Your comments about this teammate (confidential and only shown to instructor)"
+        "questionText": "What comments do you have regarding each of your team members? (response is confidential and will only be shown to the instructor)."
       },
       "questionNumber": 3,
       "giverType": "STUDENTS",
@@ -820,11 +771,11 @@
       ]
     },
     "qn4InSession3": {
-      "feedbackSessionName": "Second team feedback session",
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Comments about team dynamics (confidential and only shown to instructor)"
+        "questionText": "How are the team dynamics thus far? (response is confidential and will only be shown to the instructor)."
       },
       "questionNumber": 4,
       "giverType": "STUDENTS",
@@ -841,11 +792,11 @@
       ]
     },
     "qn5InSession3": {
-      "feedbackSessionName": "Second team feedback session",
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "questionDetails": {
         "questionType": "TEXT",
-        "questionText": "Your feedback to this teammate (shown anonymously to the teammate)"
+        "questionText": "What feedback do you have for each of your team members? (response will be shown anonymously to each team member)."
       },
       "questionNumber": 5,
       "giverType": "STUDENTS",
@@ -885,7 +836,7 @@
       "giver": "alice.b.tmms@gmail.tmt",
       "recipient": "teammates.demo.instructor@demo.course",
       "giverSection": "Tutorial Group 1",
-      "recipientSection": "Tutorial Group 2",
+      "recipientSection": "No specific section",
       "responseDetails": {
         "answer": 4,
         "questionType": "NUMSCALE"
@@ -1192,8 +1143,8 @@
       "feedbackQuestionId": "14",
       "giver": "alice.b.tmms@gmail.tmt",
       "recipient": "alice.b.tmms@gmail.tmt",
-      "giverSection": "Tutorial Group 2",
-      "recipientSection": "Tutorial Group 2",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
       "responseDetails": {
         "answers": [
           1,
@@ -1224,7 +1175,7 @@
       "giver": "charlie.d.tmms@gmail.tmt",
       "recipient": "teammates.demo.instructor@demo.course",
       "giverSection": "Tutorial Group 2",
-      "recipientSection": "Tutorial Group 2",
+      "recipientSection": "No specific section",
       "responseDetails": {
         "answer": 5,
         "questionType": "NUMSCALE"
@@ -1543,7 +1494,7 @@
       }
     },
     "FS2.Q1.Alice.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -1556,7 +1507,7 @@
       }
     },
     "FS2.Q1.Alice.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -1569,7 +1520,7 @@
       }
     },
     "FS2.Q1.Alice.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -1582,7 +1533,7 @@
       }
     },
     "FS2.Q1.Alice.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -1595,7 +1546,7 @@
       }
     },
     "FS2.Q1.Benny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -1608,7 +1559,7 @@
       }
     },
     "FS2.Q1.Benny.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -1621,7 +1572,7 @@
       }
     },
     "FS2.Q1.Benny.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -1634,7 +1585,7 @@
       }
     },
     "FS2.Q1.Benny.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -1647,7 +1598,7 @@
       }
     },
     "FS2.Q1.Danny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -1660,7 +1611,7 @@
       }
     },
     "FS2.Q1.Danny.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -1673,7 +1624,7 @@
       }
     },
     "FS2.Q1.Danny.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -1686,7 +1637,7 @@
       }
     },
     "FS2.Q1.Danny.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -1699,7 +1650,7 @@
       }
     },
     "FS2.Q1.Emma.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -1712,7 +1663,7 @@
       }
     },
     "FS2.Q1.Emma.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -1725,7 +1676,7 @@
       }
     },
     "FS2.Q1.Emma.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -1738,7 +1689,7 @@
       }
     },
     "FS2.Q1.Emma.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -1751,7 +1702,7 @@
       }
     },
     "FS2.Q1.Charlie.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -1764,7 +1715,7 @@
       }
     },
     "FS2.Q1.Charlie.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -1777,7 +1728,7 @@
       }
     },
     "FS2.Q1.Charlie.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -1790,7 +1741,7 @@
       }
     },
     "FS2.Q1.Charlie.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -1803,7 +1754,7 @@
       }
     },
     "FS2.Q1.Inst.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "teammates.demo.instructor@demo.course",
@@ -1816,7 +1767,7 @@
       }
     },
     "FS2.Q1.Inst.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "teammates.demo.instructor@demo.course",
@@ -1829,7 +1780,7 @@
       }
     },
     "FS2.Q1.Inst.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "teammates.demo.instructor@demo.course",
@@ -1842,7 +1793,7 @@
       }
     },
     "FS2.Q1.Inst.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "teammates.demo.instructor@demo.course",
@@ -1855,7 +1806,7 @@
       }
     },
     "FS2.Q1.Francis.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -1868,7 +1819,7 @@
       }
     },
     "FS2.Q1.Francis.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -1881,7 +1832,7 @@
       }
     },
     "FS2.Q1.Francis.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -1894,7 +1845,7 @@
       }
     },
     "FS2.Q1.Francis.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -1907,7 +1858,7 @@
       }
     },
     "FS2.Q1.Gene.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -1920,7 +1871,7 @@
       }
     },
     "FS2.Q1.Gene.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -1933,7 +1884,7 @@
       }
     },
     "FS2.Q1.Gene.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -1946,7 +1897,7 @@
       }
     },
     "FS2.Q1.Gene.4": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "1",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -1959,7 +1910,7 @@
       }
     },
     "FS2.Q2.Alice.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -1972,7 +1923,7 @@
       }
     },
     "FS2.Q2.Inst.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "teammates.demo.instructor@demo.course",
@@ -1985,7 +1936,7 @@
       }
     },
     "FS2.Q2.Emma.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -1998,7 +1949,7 @@
       }
     },
     "FS2.Q2.Benny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2011,7 +1962,7 @@
       }
     },
     "FS2.Q2.Francis.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2024,7 +1975,7 @@
       }
     },
     "FS2.Q2.Danny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2037,7 +1988,7 @@
       }
     },
     "FS2.Q2.Charlie.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2050,7 +2001,7 @@
       }
     },
     "FS2.Q2.Gene.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "2",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2063,7 +2014,7 @@
       }
     },
     "FS2.Q3.Alice.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2076,7 +2027,7 @@
       }
     },
     "FS2.Q3.Alice.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2089,7 +2040,7 @@
       }
     },
     "FS2.Q3.Alice.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2102,7 +2053,7 @@
       }
     },
     "FS2.Q3.Benny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2115,7 +2066,7 @@
       }
     },
     "FS2.Q3.Benny.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2128,7 +2079,7 @@
       }
     },
     "FS2.Q3.Benny.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2141,7 +2092,7 @@
       }
     },
     "FS2.Q3.Charlie.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2154,7 +2105,7 @@
       }
     },
     "FS2.Q3.Charlie.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2167,7 +2118,7 @@
       }
     },
     "FS2.Q3.Charlie.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2180,7 +2131,7 @@
       }
     },
     "FS2.Q3.Danny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2193,7 +2144,7 @@
       }
     },
     "FS2.Q3.Danny.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2206,7 +2157,7 @@
       }
     },
     "FS2.Q3.Danny.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2219,7 +2170,7 @@
       }
     },
     "FS2.Q3.Emma.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2232,7 +2183,7 @@
       }
     },
     "FS2.Q3.Emma.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2245,7 +2196,7 @@
       }
     },
     "FS2.Q3.Emma.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2258,7 +2209,7 @@
       }
     },
     "FS2.Q3.Inst.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2271,7 +2222,7 @@
       }
     },
     "FS2.Q3.Inst.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2284,7 +2235,7 @@
       }
     },
     "FS2.Q3.Inst.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2297,7 +2248,7 @@
       }
     },
     "FS2.Q3.Francis.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2306,11 +2257,11 @@
       "recipientSection": "Tutorial Group 2",
       "responseDetails": {
         "questionType": "TEXT",
-        "answer": "Demo_Instructor was the project lead. He put a lot of effort in this project."
+        "answer": "Demo_Instructor was the project lead who put a lot of effort in this project."
       }
     },
     "FS2.Q3.Francis.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2323,7 +2274,7 @@
       }
     },
     "FS2.Q3.Francis.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2336,7 +2287,7 @@
       }
     },
     "FS2.Q3.Gene.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2345,11 +2296,11 @@
       "recipientSection": "Tutorial Group 2",
       "responseDetails": {
         "questionType": "TEXT",
-        "answer": "Demo_Instructor was our team leader. He helped us a lot, especially Charlie."
+        "answer": "Demo_Instructor was our team leader. Demo_Instructor helped us a lot, especially Charlie."
       }
     },
     "FS2.Q3.Gene.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2362,7 +2313,7 @@
       }
     },
     "FS2.Q3.Gene.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "3",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2375,7 +2326,7 @@
       }
     },
     "FS2.Q4.Inst.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2388,7 +2339,7 @@
       }
     },
     "FS2.Q4.Emma.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2401,7 +2352,7 @@
       }
     },
     "FS2.Q4.Benny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2414,7 +2365,7 @@
       }
     },
     "FS2.Q4.Francis.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2427,7 +2378,7 @@
       }
     },
     "FS2.Q4.Danny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2440,7 +2391,7 @@
       }
     },
     "FS2.Q4.Charlie.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2453,7 +2404,7 @@
       }
     },
     "FS2.Q4.Alice.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2466,7 +2417,7 @@
       }
     },
     "FS2.Q4.Gene.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "4",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2479,7 +2430,7 @@
       }
     },
     "FS2.Q5.Alice.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2492,7 +2443,7 @@
       }
     },
     "FS2.Q5.Alice.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2505,7 +2456,7 @@
       }
     },
     "FS2.Q5.Alice.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "alice.b.tmms@gmail.tmt",
@@ -2518,7 +2469,7 @@
       }
     },
     "FS2.Q5.Benny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2531,7 +2482,7 @@
       }
     },
     "FS2.Q5.Benny.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2544,7 +2495,7 @@
       }
     },
     "FS2.Q5.Benny.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "benny.c.tmms@gmail.tmt",
@@ -2557,7 +2508,7 @@
       }
     },
     "FS2.Q5.Charlie.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2570,7 +2521,7 @@
       }
     },
     "FS2.Q5.Charlie.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2583,7 +2534,7 @@
       }
     },
     "FS2.Q5.Charlie.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "charlie.d.tmms@gmail.tmt",
@@ -2596,7 +2547,7 @@
       }
     },
     "FS2.Q5.Danny.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2609,7 +2560,7 @@
       }
     },
     "FS2.Q5.Danny.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2622,7 +2573,7 @@
       }
     },
     "FS2.Q5.Danny.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "danny.e.tmms@gmail.tmt",
@@ -2635,7 +2586,7 @@
       }
     },
     "FS2.Q5.Inst.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2648,7 +2599,7 @@
       }
     },
     "FS2.Q5.Inst.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2661,7 +2612,7 @@
       }
     },
     "FS2.Q5.Inst.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "teammates.demo.instructor@demo.course",
@@ -2674,7 +2625,7 @@
       }
     },
     "FS2.Q5.Emma.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2687,7 +2638,7 @@
       }
     },
     "FS2.Q5.Emma.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2700,7 +2651,7 @@
       }
     },
     "FS2.Q5.Emma.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "emma.f.tmms@gmail.tmt",
@@ -2713,7 +2664,7 @@
       }
     },
     "FS2.Q5.Francis.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2726,7 +2677,7 @@
       }
     },
     "FS2.Q5.Francis.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2739,7 +2690,7 @@
       }
     },
     "FS2.Q5.Francis.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "francis.g.tmms@gmail.tmt",
@@ -2752,7 +2703,7 @@
       }
     },
     "FS2.Q5.Gene.1": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2765,7 +2716,7 @@
       }
     },
     "FS2.Q5.Gene.2": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2778,7 +2729,1319 @@
       }
     },
     "FS2.Q5.Gene.3": {
-      "feedbackSessionName": "First team feedback session",
+      "feedbackSessionName": "First team feedback session (percentage-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Nice designs Francis. Good work!"
+      }
+    },
+    "FS3.Q1.Alice.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          80
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Alice.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Alice.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Alice.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          120
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Benny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          80
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Benny.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Benny.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Benny.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          120
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Danny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Danny.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Danny.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Danny.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Emma.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          60
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Emma.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Emma.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Emma.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "answers": [
+          140
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Charlie.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Charlie.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          120
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Charlie.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          80
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Charlie.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Inst.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Inst.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Inst.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Inst.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Francis.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          60
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Francis.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          140
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Francis.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Francis.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Gene.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Gene.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Gene.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q1.Gene.4": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "1",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "answers": [
+          100
+        ],
+        "questionType": "CONSTSUM"
+      }
+    },
+    "FS3.Q2.Alice.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I did all a portion of the backend."
+      }
+    },
+    "FS3.Q2.Inst.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I was the project lead. I designed the application architecture and managed the project to ensure we deliver the product on time."
+      }
+    },
+    "FS3.Q2.Emma.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I worked with Alice to build the application backend."
+      }
+    },
+    "FS3.Q2.Benny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I did all the UI work."
+      }
+    },
+    "FS3.Q2.Francis.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I was the designer. I did all the UI work."
+      }
+    },
+    "FS3.Q2.Danny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I designed the software architecture and led the project."
+      }
+    },
+    "FS3.Q2.Charlie.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I am a bit slow compared to my team mates, but the members helped me to catch up."
+      }
+    },
+    "FS3.Q2.Gene.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "2",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I am the programmer for the team. I did most of the coding."
+      }
+    },
+    "FS3.Q3.Alice.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Benny did all the UI work of the application. He contributed a lot."
+      }
+    },
+    "FS3.Q3.Alice.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Emma is a strong programmer. She contributed to the backend with me."
+      }
+    },
+    "FS3.Q3.Alice.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Danny is the project lead. He managed the project and designed the software architecture."
+      }
+    },
+    "FS3.Q3.Benny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Alice built part of the application backend."
+      }
+    },
+    "FS3.Q3.Benny.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Emma programmed the application backend."
+      }
+    },
+    "FS3.Q3.Benny.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Danny led the project. He did a good job."
+      }
+    },
+    "FS3.Q3.Charlie.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Francis is the designer. I like his work!"
+      }
+    },
+    "FS3.Q3.Charlie.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Gene is a good coder. She codes a large amount of our application."
+      }
+    },
+    "FS3.Q3.Charlie.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Demo_Instructor is a patient and good project lead."
+      }
+    },
+    "FS3.Q3.Danny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Alice built a portion of the application backend. Her work is solid."
+      }
+    },
+    "FS3.Q3.Danny.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Benny built the user interface. He is very productive."
+      }
+    },
+    "FS3.Q3.Danny.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Emma also built the application backend. She completes her tasks promptly."
+      }
+    },
+    "FS3.Q3.Emma.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Danny is our team leader. He is very responsible."
+      }
+    },
+    "FS3.Q3.Emma.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Alice helped to build the application backend. She is a good programmer."
+      }
+    },
+    "FS3.Q3.Emma.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Benny designed and made the user interface. He is very creative."
+      }
+    },
+    "FS3.Q3.Inst.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Francis is the designer of the project. He did a good job!"
+      }
+    },
+    "FS3.Q3.Inst.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "A bit weak in terms of technical skills. He spent lots of time in picking up the skills. Although a bit slow in development, his attitude is good."
+      }
+    },
+    "FS3.Q3.Inst.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Gene is the programmer for our team. She put in a lot of effort in coding a significant portion of the project."
+      }
+    },
+    "FS3.Q3.Francis.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Demo_Instructor was the project lead who put a lot of effort in this project."
+      }
+    },
+    "FS3.Q3.Francis.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Charlie was a bit weak. Demo_Instructor spent lots of time helping him."
+      }
+    },
+    "FS3.Q3.Francis.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Gene is the programmer for our team. She is a very good coder."
+      }
+    },
+    "FS3.Q3.Gene.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Demo_Instructor was our team leader. Demo_Instructor helped us a lot, especially Charlie."
+      }
+    },
+    "FS3.Q3.Gene.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Charlie has a lot of room for improvements. He puts in effort to learn new things."
+      }
+    },
+    "FS3.Q3.Gene.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "3",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Francis is a very good designer. He made a very nice UI."
+      }
+    },
+    "FS3.Q4.Inst.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "Team 2",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I had a great time with this team. Thanks for all the support from the members."
+      }
+    },
+    "FS3.Q4.Emma.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "Team 1",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "The team work is great and I learnt a lot from this project."
+      }
+    },
+    "FS3.Q4.Benny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "Team 1",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I like the team and I learned a lot from my team mates."
+      }
+    },
+    "FS3.Q4.Francis.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "Team 2",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "The team is nice. Everybody learnt a lot from this project."
+      }
+    },
+    "FS3.Q4.Danny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "Team 1",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "The team dynamics was very good. I enjoy it a lot."
+      }
+    },
+    "FS3.Q4.Charlie.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "Team 2",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I like the team. I learned my good software engineering practices from the members."
+      }
+    },
+    "FS3.Q4.Alice.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "Team 1",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I had a great time in doing this project."
+      }
+    },
+    "FS3.Q4.Gene.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "4",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "Team 2",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "This is a great team. I am sure we learnt a lot from each other."
+      }
+    },
+    "FS3.Q5.Alice.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Good job Benny! Thanks for the hard work for making the application pretty!"
+      }
+    },
+    "FS3.Q5.Alice.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "You are the best Emma! Without you, our application will not be running."
+      }
+    },
+    "FS3.Q5.Alice.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "alice.b.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Thank you Danny! You taught me many useful skills in this project."
+      }
+    },
+    "FS3.Q5.Benny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Thank you for all the effort in building the application backend. Cool!"
+      }
+    },
+    "FS3.Q5.Benny.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I really appreciate your effort in the project. One of the best programmer among us!."
+      }
+    },
+    "FS3.Q5.Benny.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "benny.c.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I really enjoy doing project with you. :)"
+      }
+    },
+    "FS3.Q5.Charlie.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I really like your design Francis!"
+      }
+    },
+    "FS3.Q5.Charlie.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I really appreciate all the coding you have done in the project!"
+      }
+    },
+    "FS3.Q5.Charlie.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "charlie.d.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Thank you Demo_Instructor for all the help in the project."
+      }
+    },
+    "FS3.Q5.Danny.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Nice work Alice! You are a very good coder! :)"
+      }
+    },
+    "FS3.Q5.Danny.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Good job Benny. You are really gifted in design!"
+      }
+    },
+    "FS3.Q5.Danny.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "danny.e.tmms@gmail.tmt",
+      "recipient": "emma.f.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Great job Emma. You are a great programmer!"
+      }
+    },
+    "FS3.Q5.Inst.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "francis.g.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Nice work Francis!"
+      }
+    },
+    "FS3.Q5.Inst.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Good try Charlie! Thanks for showing great effort in picking up the skills."
+      }
+    },
+    "FS3.Q5.Inst.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "teammates.demo.instructor@demo.course",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Keep up the good work Gene!"
+      }
+    },
+    "FS3.Q5.Emma.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "danny.e.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Best team leader I ever had. I would love to be on your team again :)"
+      }
+    },
+    "FS3.Q5.Emma.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "alice.b.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "It has been a very enjoyable experience working with you on the backend!"
+      }
+    },
+    "FS3.Q5.Emma.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "emma.f.tmms@gmail.tmt",
+      "recipient": "benny.c.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 1",
+      "recipientSection": "Tutorial Group 1",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "I liked your design a lot! Great job!"
+      }
+    },
+    "FS3.Q5.Francis.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Thank you Demo_Instructor for all the hardwork!"
+      }
+    },
+    "FS3.Q5.Francis.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Nice job Charlie! You learnt pretty fast"
+      }
+    },
+    "FS3.Q5.Francis.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "francis.g.tmms@gmail.tmt",
+      "recipient": "gene.h.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Thank you Gene for all the code you have written for us!"
+      }
+    },
+    "FS3.Q5.Gene.1": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "teammates.demo.instructor@demo.course",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Thank you Demo_Instructor for being such a good team leader!"
+      }
+    },
+    "FS3.Q5.Gene.2": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
+      "courseId": "demo.course",
+      "feedbackQuestionId": "5",
+      "giver": "gene.h.tmms@gmail.tmt",
+      "recipient": "charlie.d.tmms@gmail.tmt",
+      "giverSection": "Tutorial Group 2",
+      "recipientSection": "Tutorial Group 2",
+      "responseDetails": {
+        "questionType": "TEXT",
+        "answer": "Keep it up Charlie! You are improving very fast!"
+      }
+    },
+    "FS3.Q5.Gene.3": {
+      "feedbackSessionName": "Second team feedback session (point-based)",
       "courseId": "demo.course",
       "feedbackQuestionId": "5",
       "giver": "gene.h.tmms@gmail.tmt",
@@ -2815,9 +4078,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:17:00Z",
+      "createdAt": "demo.date5T21:17:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:17:00Z",
+      "lastEditedAt": "demo.date5T21:17:00Z",
       "commentText": "<p>Alice, good to know that you liked applying software engineering skills in the project. Don’t forget to use the project to practice communication skills too.</p>"
     },
     "comment1FromT1C1ToR1Q5S1C1": {
@@ -2841,9 +4104,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:20:00Z",
+      "createdAt": "demo.date5T21:20:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:20:00Z",
+      "lastEditedAt": "demo.date5T21:20:00Z",
       "commentText": "<p>Completely agree, the application does look pretty.</p>"
     },
     "comment1FromT1C1ToR3Q5S1C1": {
@@ -2867,9 +4130,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:23:00Z",
+      "createdAt": "demo.date5T21:23:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:23:00Z",
+      "lastEditedAt": "demo.date5T21:23:00Z",
       "commentText": "<p>Alice, He's one of the best designers in our institute and always amazes everyone with his work.</p>"
     },
     "comment1FromT1C1ToR2Q2S1C1": {
@@ -2893,9 +4156,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:26:00Z",
+      "createdAt": "demo.date5T21:26:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:26:00Z",
+      "lastEditedAt": "demo.date5T21:26:00Z",
       "commentText": "<p>Hoping you keep using them on future projects.</p>"
     },
     "comment1FromT1C1ToR1Q2S2C1": {
@@ -2923,9 +4186,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:29:00Z",
+      "createdAt": "demo.date5T21:29:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:29:00Z",
+      "lastEditedAt": "demo.date5T21:29:00Z",
       "commentText": "<p>Nice work Alice, Impressed by clean, portable and well-documented code.</p>"
     },
     "comment1FromT1C1ToR2Q2S2C1": {
@@ -2953,9 +4216,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:33:00Z",
+      "createdAt": "demo.date5T21:33:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:33:00Z",
+      "lastEditedAt": "demo.date5T21:33:00Z",
       "commentText": "<p>Although there are some loopholes in UI, But overall looks good.</p>"
     },
     "comment1FromT1C1ToR5Q2S2C1": {
@@ -2983,9 +4246,9 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:36:00Z",
+      "createdAt": "demo.date5T21:36:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:36:00Z",
+      "lastEditedAt": "demo.date5T21:36:00Z",
       "commentText": "<p>Well, Being your first team project always takes some time. I hope you had nice experience working with the team.</p>"
     },
     "comment1FromT1C1ToR6Q2S2C1": {
@@ -3013,62 +4276,10 @@
       "commentGiverType": "INSTRUCTORS",
       "isVisibilityFollowingFeedbackQuestion": false,
       "isCommentFromFeedbackParticipant": false,
-      "createdAt": "2012-04-30T21:39:00Z",
+      "createdAt": "demo.date5T21:39:00Z",
       "lastEditorEmail": "teammates.demo.instructor@demo.course",
-      "lastEditedAt": "2012-04-30T21:39:00Z",
+      "lastEditedAt": "demo.date5T21:39:00Z",
       "commentText": "<p>Design could have been more interactive.</p>"
-    }
-  },
-  "profiles": {
-    "alice.b.tmms": {
-      "googleId": "alice.b.tmms.sampleData",
-      "shortName": "Alice",
-      "email": "alice@b.tmt",
-      "institute": "TEAMMATES Test Institute 5",
-      "nationality": "Chinese",
-      "gender": "FEMALE",
-      "moreInfo": "I am Alice from TEAMMATES Test Institute 1 and am here at Cambridge for exchange. My Major in TEAMMATES Test Institute 5 is Art History with Minor in Business Administration. I really look forward to a great and fruitful semester ahead!",
-      "pictureKey": ""
-    },
-    "danny.e.tmms": {
-      "googleId": "danny.e.tmms.sampleData",
-      "shortName": "Danny",
-      "email": "danny@e.tmt",
-      "institute": "TEAMMATES Test Institute 7",
-      "nationality": "Singaporean",
-      "gender": "MALE",
-      "moreInfo": "",
-      "pictureKey": ""
-    },
-    "emma.f.tmms": {
-      "googleId": "emma.f.tmms.sampleData",
-      "shortName": "Emm",
-      "email": "emma@f.tmt",
-      "institute": "TEAMMATES Test Institute 8",
-      "nationality": "Indian",
-      "gender": "FEMALE",
-      "moreInfo": "I am Emma from TEAMMATES Test Institute 8 India and am here at TEAMMATES Test Institute 5 for exchange. ",
-      "pictureKey": ""
-    },
-    "charlie.d.tmms": {
-      "googleId": "charlie.d.tmms.sampleData",
-      "shortName": "Char",
-      "email": "charlie@d.tmt",
-      "institute": "TEAMMATES Test Institute 8",
-      "nationality": "American",
-      "gender": "MALE",
-      "moreInfo": "I am Charlie - an exchange student",
-      "pictureKey": ""
-    },
-    "gene.h.tmms@demo.course": {
-      "googleId": "gene.h.tmms.sampleData",
-      "shortName": "Gene",
-      "email": "gene@h.tmt",
-      "institute": "TEAMMATES Test Institute 5",
-      "nationality": "Nigerian",
-      "gender": "FEMALE",
-      "moreInfo": "",
-      "pictureKey": ""
     }
   }
 }

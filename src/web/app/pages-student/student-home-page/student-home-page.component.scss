@@ -1,19 +1,12 @@
-.align-center {
-  text-align: center;
+.margin-0 {
+  margin: 0;
 }
 
-.white {
-  background-color: white;
-}
-
-.card {
-  margin-top: 2.4em;
-}
-
-.btn-left {
-  margin-right: 10px;
-}
-
-.button {
-  border: 1px solid #CCC;
+// applies only to mobile screens
+@media (width <= 768px) {
+  .custom-button {
+    width: 100px;
+    margin-bottom: 5px;
+    margin-right: 0;
+  }
 }

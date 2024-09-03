@@ -1,9 +1,12 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
-import { FeedbackMsqQuestionDetails, FeedbackParticipantType } from '../../../../types/api-output';
+import { QuestionEditDetailsFormComponent } from './question-edit-details-form.component';
+import {
+  FeedbackMsqQuestionDetails,
+  FeedbackParticipantType,
+} from '../../../../types/api-output';
 import { DEFAULT_MSQ_QUESTION_DETAILS } from '../../../../types/default-question-structs';
 import { NO_VALUE } from '../../../../types/feedback-response-details';
-import { QuestionEditDetailsFormComponent } from './question-edit-details-form.component';
 
 /**
  * Question details edit form component for Msq question.
@@ -11,14 +14,28 @@ import { QuestionEditDetailsFormComponent } from './question-edit-details-form.c
 @Component({
   selector: 'tm-msq-question-edit-details-form',
   templateUrl: './msq-question-edit-details-form.component.html',
-  styleUrls: ['./msq-question-edit-details-form.component.scss'],
+  styleUrls: ['./msq-question-edit-details-form.component.scss', './cdk-drag-drop.scss'],
 })
 export class MsqQuestionEditDetailsFormComponent
     extends QuestionEditDetailsFormComponent<FeedbackMsqQuestionDetails> {
 
-  readonly PARTICIPANT_TYPES: string[] = [FeedbackParticipantType.STUDENTS,
-    FeedbackParticipantType.STUDENTS_EXCLUDING_SELF, FeedbackParticipantType.TEAMS,
-    FeedbackParticipantType.TEAMS_EXCLUDING_SELF, FeedbackParticipantType.INSTRUCTORS];
+  readonly PARTICIPANT_TYPES: string[] = [
+    FeedbackParticipantType.STUDENTS,
+    FeedbackParticipantType.STUDENTS_EXCLUDING_SELF,
+    FeedbackParticipantType.TEAMS,
+    FeedbackParticipantType.TEAMS_EXCLUDING_SELF,
+    FeedbackParticipantType.OWN_TEAM_MEMBERS_INCLUDING_SELF,
+    FeedbackParticipantType.OWN_TEAM_MEMBERS,
+    FeedbackParticipantType.INSTRUCTORS,
+  ];
+
+  // Used to store and restore user input when user toggles generate option
+  storageModel: FeedbackMsqQuestionDetails = {
+    ...DEFAULT_MSQ_QUESTION_DETAILS(),
+    msqChoices: ['', ''],
+    minSelectableChoices: NO_VALUE,
+    maxSelectableChoices: NO_VALUE,
+  };
 
   constructor() {
     super(DEFAULT_MSQ_QUESTION_DETAILS());
@@ -135,16 +152,21 @@ export class MsqQuestionEditDetailsFormComponent
    * Assigns a default value to generateOptionsFor when checkbox is clicked.
    */
   triggerGeneratedOptionsChange(checked: boolean): void {
-    this.triggerModelChangeBatch({
-      generateOptionsFor: checked ? FeedbackParticipantType.STUDENTS : FeedbackParticipantType.NONE,
-      msqChoices: checked ? [] : ['', ''],
-      otherEnabled: false,
-      hasAssignedWeights: false,
-      msqWeights: [],
-      msqOtherWeight: 0,
-      minSelectableChoices: NO_VALUE,
-      maxSelectableChoices: NO_VALUE,
-    });
+    if (checked) {
+      this.storageModel = this.model;
+      this.triggerModelChangeBatch({
+        generateOptionsFor: FeedbackParticipantType.STUDENTS,
+        msqChoices: [],
+        otherEnabled: false,
+        hasAssignedWeights: false,
+        msqWeights: [],
+        msqOtherWeight: 0,
+      });
+    } else {
+      // Exclude maxSelectableChoices and minSelectableChoices because the checkbox shouldn't affect them
+      const { maxSelectableChoices, minSelectableChoices, ...others }: FeedbackMsqQuestionDetails = this.storageModel;
+      this.triggerModelChangeBatch(others);
+    }
   }
 
   /**

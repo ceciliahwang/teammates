@@ -50,6 +50,12 @@ export interface QuestionEditFormModel {
   commonVisibilitySettingName?: string;
   isUsingOtherVisibilitySetting?: boolean;
 
+  isDuplicating: boolean;
+  isDeleting: boolean;
   isEditable: boolean;
   isSaving: boolean;
+  isCollapsed: boolean;
+  isVisibilityChanged: boolean;
+  isFeedbackPathChanged: boolean;
+  isQuestionDetailsChanged: boolean;
 }

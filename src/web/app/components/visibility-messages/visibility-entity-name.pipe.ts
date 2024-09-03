@@ -27,7 +27,7 @@ export class VisibilityEntityNamePipe implements PipeTransform {
             numberOfEntitiesToGiveFeedbackToSetting?: NumberOfEntitiesToGiveFeedbackToSetting,
             customNumberOfEntitiesToGiveFeedbackTo?: number): string {
     switch (visibilityType) {
-      case FeedbackVisibilityType.RECIPIENT:
+      case FeedbackVisibilityType.RECIPIENT: {
         // get entity name
         let recipientEntityName: string = '';
         switch (questionRecipientType) {
@@ -35,11 +35,15 @@ export class VisibilityEntityNamePipe implements PipeTransform {
             recipientEntityName = 'instructor';
             break;
           case FeedbackParticipantType.STUDENTS:
+          case FeedbackParticipantType.STUDENTS_EXCLUDING_SELF:
+          case FeedbackParticipantType.STUDENTS_IN_SAME_SECTION:
           case FeedbackParticipantType.OWN_TEAM_MEMBERS:
           case FeedbackParticipantType.OWN_TEAM_MEMBERS_INCLUDING_SELF:
             recipientEntityName = 'student';
             break;
           case FeedbackParticipantType.TEAMS:
+          case FeedbackParticipantType.TEAMS_EXCLUDING_SELF:
+          case FeedbackParticipantType.TEAMS_IN_SAME_SECTION:
           case FeedbackParticipantType.OWN_TEAM:
             recipientEntityName = 'team';
             break;
@@ -47,7 +51,9 @@ export class VisibilityEntityNamePipe implements PipeTransform {
             return 'unknown';
         }
 
-        if ([FeedbackParticipantType.INSTRUCTORS, FeedbackParticipantType.STUDENTS, FeedbackParticipantType.TEAMS]
+        if ([FeedbackParticipantType.INSTRUCTORS, FeedbackParticipantType.STUDENTS,
+          FeedbackParticipantType.STUDENTS_EXCLUDING_SELF, FeedbackParticipantType.TEAMS,
+          FeedbackParticipantType.TEAMS_EXCLUDING_SELF]
             .includes(questionRecipientType)) {
           // if questionRecipientType is one of certain participant type, add the plural form
           if (numberOfEntitiesToGiveFeedbackToSetting === NumberOfEntitiesToGiveFeedbackToSetting.UNLIMITED
@@ -59,6 +65,7 @@ export class VisibilityEntityNamePipe implements PipeTransform {
         }
 
         return `The receiving ${recipientEntityName}`;
+      }
       case FeedbackVisibilityType.GIVER_TEAM_MEMBERS:
         return 'Your team members';
       case FeedbackVisibilityType.INSTRUCTORS:

@@ -2,14 +2,46 @@
   padding: 0;
 }
 
-.course-tab-header {
-  cursor: pointer;
+.btn-toolbar {
+  white-space: nowrap;
+  margin-top: 5px;
+  margin-bottom: 2px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
-.margin-bottom-15px {
-  margin-bottom: 15px;
+.course-header {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
-.padding-right-10px {
-  padding-right: 10px;
+.dropdown-item {
+  border: none;
+}
+
+.no-border {
+  border: none;
+}
+
+.text-color-lightgray {
+  color: lightgray;
+}
+
+@media (width <= 450px) {
+  .card-header {
+    display: block;
+  }
+
+  .card-header-btn-toolbar {
+    text-align: right;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  tm-panel-chevron {
+    margin-left: auto;
+  }
 }

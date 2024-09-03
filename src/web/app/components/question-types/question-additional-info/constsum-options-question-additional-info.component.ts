@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
+import { QuestionAdditionalInfo } from './question-additional-info';
 import { FeedbackConstantSumQuestionDetails } from '../../../../types/api-output';
 import { DEFAULT_CONSTSUM_OPTIONS_QUESTION_DETAILS } from '../../../../types/default-question-structs';
-import { QuestionAdditionalInfo } from './question-additional-info';
 
 /**
  * Additional info for constsum options questions.
@@ -18,4 +18,10 @@ export class ConstsumOptionsQuestionAdditionalInfoComponent
     super(DEFAULT_CONSTSUM_OPTIONS_QUESTION_DETAILS());
   }
 
+  /**
+   * Returns the label for the number of points.
+   */
+  getPointsLabel(): string {
+    return this.questionDetails.pointsPerOption ? 'Points per option' : 'Total points';
+  }
 }

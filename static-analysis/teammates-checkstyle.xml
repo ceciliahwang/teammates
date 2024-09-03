@@ -115,59 +115,43 @@
             <property name="tokens" value="PARAMETER_DEF,VARIABLE_DEF,METHOD_DEF"/>
         </module>
         <module name="ConstantName">
-            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log|logic|.*(Db|Logic)|dataBundle|gaeSimulation|dummySessionToken)$"/>
+            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log|instance)$"/>
         </module>
         <module name="RegexpSinglelineJava">
             <property name="format" value="\s+$"/>
             <property name="message" value="Line has trailing whitespaces."/>
         </module>
-        <module name="LineLength">
-            <property name="ignorePattern" value="https?://"/>
-            <property name="max" value="125"/>
-            <property name="tabWidth" value="4"/>
-        </module>
         <module name="SingleSpaceSeparator">
             <property name="validateComments" value="true"/>
         </module>
         <module name="JavadocMethod">
-            <property name="allowedAnnotations" value="Test, Override, BeforeClass, BeforeTest, BeforeMethod, AfterClass, AfterTest, AfterMethod, PerformanceTest, BeforeGroups"/>
-            <property name="validateThrows" value="true"/>
-            <property name="scope" value="public"/>
-            <property name="allowUndeclaredRTE" value="true"/>
             <property name="allowMissingParamTags" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
-            <property name="allowMissingPropertyJavadoc" value="true"/>
-            <property name="suppressLoadErrors" value="true"/>
-            <property name="tokens" value="METHOD_DEF"/>
-            <property name="ignoreMethodNamesRegex" value="main"/>
         </module>
         <module name="JavadocParagraph"/>
         <module name="JavadocStyle">
             <property name="checkEmptyJavadoc" value="true"/>
         </module>
         <module name="NonEmptyAtclauseDescription"/>
-        <module name="JavadocType">
-            <property name="scope" value="package"/>
-        </module>
+        <module name="JavadocType"/>
         <module name="AtclauseOrder"/>
         <module name="JavadocTagContinuationIndentation">
             <property name="offset" value="8"/>
         </module>
         <module name="SingleLineJavadoc"/>
         <module name="JavadocVariable">
-            <property name="scope" value="public"/>
+            <property name="scope" value="protected"/>
         </module>
         <module name="CommentsIndentation"/>
         <module name="ImportOrder">
             <property name="option" value="top"/>
-            <property name="groups" value="java,javax,org,com,teammates"/>
+            <property name="groups" value="java,jakarta,javax,org,com,teammates"/>
             <property name="separated" value="true"/>
             <property name="sortStaticImportsAlphabetically" value="true"/>
         </module>
         <module name="IllegalImport">
-            <property name="illegalPkgs" value="sun,com.google.appengine.repackaged,com.google.appengine.labs.repackaged"/>
-            <property name="illegalClasses" value="org.testng.Assert,org.testng.AssertJUnit,java.util.Date,java.util.Calendar"/>
+            <property name="illegalPkgs" value="sun"/>
+            <property name="illegalClasses" value="org.testng.Assert,org.testng.AssertJUnit,org.junit.Assert,java.util.Date,java.util.Calendar,org.junit.Test,org.junit.jupiter.api.Test"/>
         </module>
         <module name="NoLineWrap"/>
         <module name="SuppressionCommentFilter">
@@ -184,13 +168,39 @@
         <module name="InterfaceIsType"/>
         <module name="IllegalType"/>
         <module name="InnerTypeLast"/>
+        <module name="UnnecessarySemicolonAfterTypeMemberDeclaration"/>
+        <module name="UnnecessarySemicolonAfterOuterTypeDeclaration"/>
+        <module name="UnnecessarySemicolonInTryWithResources"/>
+        <module name="UnnecessarySemicolonInEnumeration"/>
+        <module name="JavadocBlockTagLocation"/>
+        <module name="InvalidJavadocPosition"/>
+        <module name="MissingJavadocPackage"/>
+        <module name="MissingJavadocType">
+            <property name="scope" value="package"/>
+        </module>
+        <module name="MissingJavadocMethod">
+            <property name="allowedAnnotations" value="Test, Override, BeforeSuite, BeforeClass, BeforeTest, BeforeMethod, AfterSuite, AfterClass, AfterTest, AfterMethod"/>
+            <property name="scope" value="protected"/>
+            <property name="allowMissingPropertyJavadoc" value="true"/>
+            <property name="tokens" value="METHOD_DEF"/>
+            <property name="ignoreMethodNamesRegex" value="main|inst|build|(with.+)"/>
+        </module>
+        <module name="JavadocContentLocationCheck"/>
+        <module name="JavadocMissingWhitespaceAfterAsteriskCheck"/>
+        <module name="AvoidDoubleBraceInitialization"/>
+        <module name="NoCodeInFile"/>
     </module>
     <module name="FileTabCharacter"/>
     <module name="NewlineAtEndOfFile">
         <property name="lineSeparator" value="lf_cr_crlf"/>
     </module>
     <module name="SuppressionFilter">
-        <property name="file" value="${basedir}/static-analysis/teammates-checkstyle-suppressions.xml"/>
+        <property name="file" value="${suppressions}"/>
     </module>
     <module name="JavadocPackage"/>
+    <module name="LineLength">
+        <property name="ignorePattern" value="https?://"/>
+        <property name="max" value="125"/>
+        <property name="tabWidth" value="4"/>
+    </module>
 </module>

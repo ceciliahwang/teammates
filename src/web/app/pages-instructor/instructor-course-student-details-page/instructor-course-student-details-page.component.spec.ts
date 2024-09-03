@@ -1,56 +1,42 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatSnackBarModule } from '@angular/material';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Gender } from '../../../types/gender';
-import { StudentAttributes } from '../student-profile/student-attributes';
-import { StudentProfile } from '../student-profile/student-profile';
 import {
   InstructorCourseStudentDetailsPageComponent,
 } from './instructor-course-student-details-page.component';
+import { JoinState, Student } from '../../../types/api-output';
+import { LoadingRetryModule } from '../../components/loading-retry/loading-retry.module';
+import { LoadingSpinnerModule } from '../../components/loading-spinner/loading-spinner.module';
 
-@Component({ selector: 'tm-student-profile', template: '' })
-class StudentProfileStubComponent {
-  @Input() studentProfile: StudentProfile | undefined;
-  @Input() studentName: string = '';
-  @Input() photoUrl: string = '/assets/images/profile_picture_default.png';
-  @Input() hideMoreInfo: boolean = false;
-}
 @Component({ selector: 'tm-course-related-info', template: '' })
 class CourseRelatedInfoStubComponent {
-  @Input() student: StudentAttributes = {
+  @Input() student: Student = {
     email: '',
-    course: '',
+    courseId: '',
     name: '',
-    lastName: '',
     comments: '',
-    team: '',
-    section: '',
+    teamName: '',
+    sectionName: '',
+    joinState: JoinState.JOINED,
   };
-}
-@Component({ selector: 'tm-more-info', template: '' })
-class MoreInfoStubComponent {
-  @Input() studentName: string = '';
-  @Input() moreInfoText: string = '';
 }
 
 describe('InstructorCourseStudentDetailsPageComponent', () => {
   let component: InstructorCourseStudentDetailsPageComponent;
   let fixture: ComponentFixture<InstructorCourseStudentDetailsPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         InstructorCourseStudentDetailsPageComponent,
-        StudentProfileStubComponent,
         CourseRelatedInfoStubComponent,
-        MoreInfoStubComponent,
       ],
       imports: [
         HttpClientTestingModule,
         RouterTestingModule,
-        MatSnackBarModule,
+        LoadingSpinnerModule,
+        LoadingRetryModule,
       ],
     })
     .compileComponents();
@@ -73,21 +59,12 @@ describe('InstructorCourseStudentDetailsPageComponent', () => {
   it('should snap with populated student', () => {
     component.student = {
       email: 'studentEmail@email.com',
-      course: 'CS3281',
+      courseId: 'CS3281',
       name: 'firstName',
-      lastName: 'lastName',
       comments: 'This is a comment',
-      team: 'myTeam',
-      section: 'mySection',
-    };
-    component.studentProfile = {
-      shortName: 'shortName',
-      email: 'profileEmail@email.com',
-      institute: 'NUS',
-      nationality: 'Indian',
-      gender: Gender.MALE,
-      moreInfo: 'I have more info here',
-      pictureKey: 'pictureKey',
+      teamName: 'myTeam',
+      sectionName: 'mySection',
+      joinState: JoinState.JOINED,
     };
     fixture.detectChanges();
     expect(fixture).toMatchSnapshot();

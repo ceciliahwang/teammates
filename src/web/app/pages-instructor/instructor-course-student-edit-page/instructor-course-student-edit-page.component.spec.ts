@@ -1,24 +1,25 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
-import {
-  InstructorCourseStudentEditPageComponent,
-} from './instructor-course-student-edit-page.component';
+import { InstructorCourseStudentEditPageComponent } from './instructor-course-student-edit-page.component';
+import { JoinState } from '../../../types/api-output';
+import { LoadingRetryModule } from '../../components/loading-retry/loading-retry.module';
+import { LoadingSpinnerModule } from '../../components/loading-spinner/loading-spinner.module';
 
 describe('InstructorCourseStudentEditPageComponent', () => {
   let component: InstructorCourseStudentEditPageComponent;
   let fixture: ComponentFixture<InstructorCourseStudentEditPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [InstructorCourseStudentEditPageComponent],
       imports: [
         RouterTestingModule,
         ReactiveFormsModule,
         HttpClientTestingModule,
-        MatSnackBarModule,
+        LoadingSpinnerModule,
+        LoadingRetryModule,
       ],
     })
     .compileComponents();
@@ -41,20 +42,27 @@ describe('InstructorCourseStudentEditPageComponent', () => {
   it('should snap with student details', () => {
     component.student = {
       email: 'jake@gmail.com',
-      course: 'Crime101',
+      courseId: 'Crime101',
       name: 'Jake Peralta',
-      lastName: 'Santiago',
       comments: 'Cool cool cool.',
-      team: 'Team A',
-      section: 'Section A',
+      teamName: 'Team A',
+      sectionName: 'Section A',
+      joinState: JoinState.JOINED,
     };
-    component.editForm = new FormGroup({
-      studentname: new FormControl('Jake Peralta'),
-      sectionname: new FormControl('Section A'),
-      teamname: new FormControl('Team A'),
-      newstudentemail: new FormControl('jake@gmail.com'),
-      comments: new FormControl('Cool cool cool.'),
+    component.editForm = new UntypedFormGroup({
+      'student-name': new UntypedFormControl('Jake Peralta'),
+      'section-name': new UntypedFormControl('Section A'),
+      'team-name': new UntypedFormControl('Team A'),
+      'new-student-email': new UntypedFormControl('jake@gmail.com'),
+      comments: new UntypedFormControl('Cool cool cool.'),
     });
+    component.isStudentLoading = false;
+    fixture.detectChanges();
+    expect(fixture).toMatchSnapshot();
+  });
+
+  it('should snap when student is still loading', () => {
+    component.isStudentLoading = true;
     fixture.detectChanges();
     expect(fixture).toMatchSnapshot();
   });

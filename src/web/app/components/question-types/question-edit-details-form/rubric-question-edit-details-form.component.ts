@@ -1,11 +1,10 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { FeedbackRubricQuestionDetails } from '../../../../types/api-output';
-import {
-  DEFAULT_RUBRIC_QUESTION_DETAILS,
-} from '../../../../types/default-question-structs';
+import { Component } from '@angular/core';
 import { QuestionEditDetailsFormComponent } from './question-edit-details-form.component';
+import { SimpleModalService } from '../../../../services/simple-modal.service';
+import { FeedbackRubricQuestionDetails } from '../../../../types/api-output';
+import { DEFAULT_RUBRIC_QUESTION_DETAILS } from '../../../../types/default-question-structs';
+import { SimpleModalType } from '../../simple-modal/simple-modal-type';
 
 /**
  * Question details edit form component for rubric question.
@@ -16,16 +15,13 @@ import { QuestionEditDetailsFormComponent } from './question-edit-details-form.c
   styleUrls: ['./rubric-question-edit-details-form.component.scss'],
 })
 export class RubricQuestionEditDetailsFormComponent
-    extends QuestionEditDetailsFormComponent<FeedbackRubricQuestionDetails> implements OnInit {
+    extends QuestionEditDetailsFormComponent<FeedbackRubricQuestionDetails> {
 
   rowToHighlight: number = -1;
   columnToHighlight: number = -1;
 
-  constructor(private modalService: NgbModal) {
+  constructor(private simpleModalService: SimpleModalService) {
     super(DEFAULT_RUBRIC_QUESTION_DETAILS());
-  }
-
-  ngOnInit(): void {
   }
 
   /**
@@ -83,19 +79,18 @@ export class RubricQuestionEditDetailsFormComponent
     newSubQuestions.push('');
 
     const newDescriptions: string[][] = this.model.rubricDescriptions.map((arr: string[]) => arr.slice());
-    newDescriptions.push(Array(this.model.numOfRubricChoices).fill(''));
+    newDescriptions.push(Array(this.model.rubricChoices.length).fill(''));
 
     // update weights
     let newWeightsForEachCell: number[][] = [];
     if (this.model.hasAssignedWeights) {
       newWeightsForEachCell = this.model.rubricWeightsForEachCell.map((arr: number[]) => arr.slice());
-      newWeightsForEachCell.push(Array(this.model.numOfRubricChoices).fill(0));
+      newWeightsForEachCell.push(Array(this.model.rubricChoices.length).fill(0));
     }
 
     this.triggerModelChangeBatch({
       rubricSubQuestions: newSubQuestions,
       rubricDescriptions: newDescriptions,
-      numOfRubricSubQuestions: this.model.numOfRubricSubQuestions + 1,
       rubricWeightsForEachCell: newWeightsForEachCell,
     });
   }
@@ -125,7 +120,6 @@ export class RubricQuestionEditDetailsFormComponent
     this.triggerModelChangeBatch({
       rubricChoices: newChoices,
       rubricDescriptions: newDescriptions,
-      numOfRubricChoices: this.model.numOfRubricChoices + 1,
       rubricWeightsForEachCell: newWeightsForEachCell,
     });
   }
@@ -162,69 +156,69 @@ export class RubricQuestionEditDetailsFormComponent
   /**
    * Deletes a sub question.
    */
-  deleteSubQuestion(index: number, confirmModal: any): void {
-    if (this.model.numOfRubricSubQuestions === 1 || !this.isEditable) {
+  deleteSubQuestion(index: number): void {
+    if (this.model.rubricSubQuestions.length === 1 || !this.isEditable) {
       // ignore deletion
       return;
     }
 
-    this.modalService.open(confirmModal).result.then(() => {
+    this.simpleModalService.openConfirmationModal('Delete the row?', SimpleModalType.WARNING,
+        'Are you sure you want to clear the row?').result.then(() => {
 
-      const newSubQuestions: string[] = this.model.rubricSubQuestions.slice();
-      newSubQuestions.splice(index, 1);
+          const newSubQuestions: string[] = this.model.rubricSubQuestions.slice();
+          newSubQuestions.splice(index, 1);
 
-      const newDescriptions: string[][] = this.model.rubricDescriptions.map((arr: string[]) => arr.slice());
-      newDescriptions.splice(index, 1);
+          const newDescriptions: string[][] = this.model.rubricDescriptions.map((arr: string[]) => arr.slice());
+          newDescriptions.splice(index, 1);
 
       // update weights
-      let newWeightsForEachCell: number[][] = [];
-      if (this.model.hasAssignedWeights) {
-        newWeightsForEachCell = this.model.rubricWeightsForEachCell.map((arr: number[]) => arr.slice());
+          let newWeightsForEachCell: number[][] = [];
+          if (this.model.hasAssignedWeights) {
+            newWeightsForEachCell = this.model.rubricWeightsForEachCell.map((arr: number[]) => arr.slice());
 
-        newWeightsForEachCell.splice(index, 1);
-      }
+            newWeightsForEachCell.splice(index, 1);
+          }
 
-      this.triggerModelChangeBatch({
-        rubricSubQuestions: newSubQuestions,
-        rubricDescriptions: newDescriptions,
-        numOfRubricSubQuestions: this.model.numOfRubricSubQuestions - 1,
-        rubricWeightsForEachCell: newWeightsForEachCell,
-      });
+          this.triggerModelChangeBatch({
+            rubricSubQuestions: newSubQuestions,
+            rubricDescriptions: newDescriptions,
+            rubricWeightsForEachCell: newWeightsForEachCell,
+          });
 
-    }, () => {});
+        }, () => {});
   }
 
   /**
    * Deletes a choice.
    */
-  deleteChoice(index: number, confirmModal: any): void {
-    this.modalService.open(confirmModal).result.then(() => {
-      const newChoices: string[] = this.model.rubricChoices.slice();
-      newChoices.splice(index, 1);
+  deleteChoice(index: number): void {
+    this.simpleModalService.openConfirmationModal('Delete the column?', SimpleModalType.WARNING,
+        'Are you sure you want to clear the column?').result.then(() => {
+          const newChoices: string[] = this.model.rubricChoices.slice();
+          newChoices.splice(index, 1);
 
-      const newDescriptions: string[][] = this.model.rubricDescriptions.map((arr: string[]) => {
-        const newArr: string[] = arr.slice();
-        newArr.splice(index, 1);
-        return newArr;
-      });
+          const newDescriptions: string[][] = this.model.rubricDescriptions.map((arr: string[]) => {
+            const newArr: string[] = arr.slice();
+            newArr.splice(index, 1);
+            return newArr;
+          });
 
       // update weights
-      let newWeightsForEachCell: number[][] = [];
-      if (this.model.hasAssignedWeights) {
-        newWeightsForEachCell = this.model.rubricWeightsForEachCell.map((arr: number[]) => {
-          const newArr: number[] = arr.slice();
-          newArr.splice(index, 1);
-          return newArr;
-        });
-      }
+          let newWeightsForEachCell: number[][] = [];
+          if (this.model.hasAssignedWeights) {
+            newWeightsForEachCell = this.model.rubricWeightsForEachCell.map((arr: number[]) => {
+              const newArr: number[] = arr.slice();
+              newArr.splice(index, 1);
+              return newArr;
+            });
+          }
 
-      this.triggerModelChangeBatch({
-        rubricChoices: newChoices,
-        numOfRubricChoices: this.model.numOfRubricChoices - 1,
-        rubricDescriptions: newDescriptions,
-        rubricWeightsForEachCell: newWeightsForEachCell,
-      });
-    }, () => {});
+          this.triggerModelChangeBatch({
+            rubricChoices: newChoices,
+            rubricDescriptions: newDescriptions,
+            rubricWeightsForEachCell: newWeightsForEachCell,
+          });
+        }, () => {});
   }
 
   /**
@@ -235,6 +229,30 @@ export class RubricQuestionEditDetailsFormComponent
       hasAssignedWeights: isEnabled,
       rubricWeightsForEachCell:
           isEnabled ? this.model.rubricDescriptions.map((arr: string[]) => arr.map(() => 0)) : [],
+    });
+  }
+
+  /**
+   * Moves a row.
+   */
+  moveRow(from: number, to: number): void {
+    const newSubQuestions: string[] = this.model.rubricSubQuestions.slice();
+    moveItemInArray(newSubQuestions, from, to);
+
+    const newDescriptions: string[][] = this.model.rubricDescriptions.slice();
+    moveItemInArray(newDescriptions, from, to);
+
+    // update weights
+    let newWeights: number[][] = [];
+    if (this.model.hasAssignedWeights) {
+      newWeights = this.model.rubricWeightsForEachCell.slice();
+      moveItemInArray(newWeights, from, to);
+    }
+
+    this.triggerModelChangeBatch({
+      rubricSubQuestions: newSubQuestions,
+      rubricDescriptions: newDescriptions,
+      rubricWeightsForEachCell: newWeights,
     });
   }
 }

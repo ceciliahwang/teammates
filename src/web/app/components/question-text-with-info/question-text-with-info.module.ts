@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+
+import { QuestionTextWithInfoComponent } from './question-text-with-info.component';
 import {
   QuestionAdditionalInfoModule,
 } from '../question-types/question-additional-info/question-additional-info.module';
-import { QuestionTextWithInfoComponent } from './question-text-with-info.component';
+import { TeammatesRouterModule } from '../teammates-router/teammates-router.module';
 
 /**
  * Module for question text with toggle-able additional info.
@@ -18,8 +20,9 @@ import { QuestionTextWithInfoComponent } from './question-text-with-info.compone
   ],
   imports: [
     CommonModule,
-    RouterModule,
     QuestionAdditionalInfoModule,
+    NgbTooltipModule,
+    TeammatesRouterModule,
   ],
 })
 export class QuestionTextWithInfoModule { }

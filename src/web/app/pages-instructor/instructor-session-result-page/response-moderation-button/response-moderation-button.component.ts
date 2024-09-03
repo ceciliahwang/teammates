@@ -1,5 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ANONYMOUS_PREFIX } from '../../../../types/feedback-response-details';
+import { Component, Input } from '@angular/core';
+import {
+  FeedbackSession, FeedbackSessionPublishStatus,
+  FeedbackSessionSubmissionStatus,
+  ResponseVisibleSetting,
+  SessionVisibleSetting,
+} from '../../../../types/api-output';
 
 /**
  * Button for instructor moderating responses.
@@ -9,10 +14,27 @@ import { ANONYMOUS_PREFIX } from '../../../../types/feedback-response-details';
   templateUrl: './response-moderation-button.component.html',
   styleUrls: ['./response-moderation-button.component.scss'],
 })
-export class ResponseModerationButtonComponent implements OnInit {
+export class ResponseModerationButtonComponent {
 
   @Input()
-  session: any = {};
+  session: FeedbackSession = {
+    courseId: '',
+    timeZone: '',
+    feedbackSessionName: '',
+    instructions: '',
+    submissionStartTimestamp: 0,
+    submissionEndTimestamp: 0,
+    gracePeriod: 0,
+    sessionVisibleSetting: SessionVisibleSetting.AT_OPEN,
+    responseVisibleSetting: ResponseVisibleSetting.AT_VISIBLE,
+    submissionStatus: FeedbackSessionSubmissionStatus.OPEN,
+    publishStatus: FeedbackSessionPublishStatus.NOT_PUBLISHED,
+    isClosingEmailEnabled: true,
+    isPublishedEmailEnabled: true,
+    createdAtTimestamp: 0,
+    studentDeadlines: {},
+    instructorDeadlines: {},
+  };
 
   @Input()
   relatedGiverEmail: string = '';
@@ -20,14 +42,10 @@ export class ResponseModerationButtonComponent implements OnInit {
   @Input()
   moderatedQuestionId: string = '';
 
-  constructor() { }
+  @Input()
+  isGiverInstructor: boolean = false;
 
-  ngOnInit(): void { }
+  @Input()
+  btnStyle: 'PRIMARY' | 'LIGHT' = 'LIGHT';
 
-  /**
-   * Check if email starts with anonymous.
-   */
-  isAnonymousEmail(email: string): boolean {
-    return email.startsWith(ANONYMOUS_PREFIX);
-  }
 }

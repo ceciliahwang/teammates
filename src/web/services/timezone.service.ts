@@ -1,24 +1,12 @@
 import { Injectable } from '@angular/core';
 import moment from 'moment-timezone';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { default as timezone } from '../data/timezone.json';
+
 import { HttpRequestService } from './http-request.service';
-
-import { LocalDateTimeAmbiguityStatus, LocalDateTimeInfo } from '../types/api-output';
-
-/**
- * The date time format used in date time resolution.
- */
-export const LOCAL_DATE_TIME_FORMAT: string = 'YYYY-MM-DD HH:mm';
-
-/**
- * The resolving result of a local data time.
- */
-export interface TimeResolvingResult {
-  timestamp: number;
-  message: string;
-}
+import { default as timezone } from '../data/timezone.json';
+import { ResourceEndpoints } from '../types/api-const';
+import { TimeZones } from '../types/api-output';
+import { DateFormat, TimeFormat } from '../types/datetime-const';
 
 /**
  * Handles timezone information provision.
@@ -29,23 +17,27 @@ export interface TimeResolvingResult {
 export class TimezoneService {
 
   tzVersion: string = '';
-  tzOffsets: { [key: string]: number } = {};
+  tzOffsets: Record<string, number> = {};
+  guessedTimezone: string = '';
 
   // These short timezones are not supported by Java
-  private readonly badZones: { [key: string]: boolean } = {
-    EST: true, 'GMT+0': true, 'GMT-0': true, HST: true, MST: true, ROC: true,
+  private readonly badZones: Record<string, boolean> = {
+    EST: true, 'GMT+0': true, 'GMT-0': true, HST: true, MST: true, 'US/Pacific-New': true, ROC: true,
   };
 
   constructor(private httpRequestService: HttpRequestService) {
     const d: Date = new Date();
     moment.tz.load(timezone);
-    this.tzVersion = moment.tz.dataVersion;
+    this.tzVersion = (moment.tz as any).dataVersion;
     moment.tz.names()
         .filter((tz: string) => !this.isBadZone(tz))
         .forEach((tz: string) => {
-          const offset: number = moment.tz.zone(tz).utcOffset(d) * -1;
-          this.tzOffsets[tz] = offset;
+          const zone: moment.MomentZone | null = moment.tz.zone(tz);
+          if (zone) {
+            this.tzOffsets[tz] = zone.utcOffset(d.getTime()) * -1;
+          }
         });
+    this.guessedTimezone = moment.tz.guess();
   }
 
   /**
@@ -58,8 +50,15 @@ export class TimezoneService {
   /**
    * Gets the mapping of time zone ID to offset values.
    */
-  getTzOffsets(): { [key: string]: number } {
+  getTzOffsets(): Record<string, number> {
     return this.tzOffsets;
+  }
+
+  /**
+   * Guesses the timezone based on the web browser's settings.
+   */
+  guessTimezone(): string {
+    return this.guessedTimezone;
   }
 
   /**
@@ -69,43 +68,45 @@ export class TimezoneService {
     return this.badZones[tz];
   }
 
-  /**
-   * Gets the resolved UNIX timestamp from a local data time with time zone.
-   */
-  getResolvedTimestamp(localDateTime: string, timeZone: string, fieldName: string): Observable<TimeResolvingResult> {
-    const params: { [key: string]: string } = { localdatetime: localDateTime, timezone: timeZone };
-    return this.httpRequestService.get('/localdatetime', params).pipe(
-        map((info: LocalDateTimeInfo) => {
-          const resolvingResult: TimeResolvingResult = {
-            timestamp: info.resolvedTimestamp,
-            message: '',
-          };
-
-          const DATE_FORMAT_WITHOUT_ZONE_INFO: any = 'ddd, DD MMM, YYYY hh:mm A';
-          const DATE_FORMAT_WITH_ZONE_INFO: any = "ddd, DD MMM, YYYY hh:mm A z ('UTC'Z)";
-
-          switch (info.resolvedStatus) {
-            case LocalDateTimeAmbiguityStatus.UNAMBIGUOUS:
-              break;
-            case LocalDateTimeAmbiguityStatus.GAP:
-              resolvingResult.message =
-                  `The ${fieldName}, ${moment.format(DATE_FORMAT_WITHOUT_ZONE_INFO)},`
-                  + 'falls within the gap period when clocks spring forward at the start of DST. '
-                  + `It was resolved to ${moment(info.resolvedTimestamp).format(DATE_FORMAT_WITH_ZONE_INFO)}.`;
-              break;
-            case LocalDateTimeAmbiguityStatus.OVERLAP:
-              resolvingResult.message =
-                  `The ${fieldName}, ${moment.format(DATE_FORMAT_WITHOUT_ZONE_INFO)},`
-                  + 'falls within the overlap period when clocks fall back at the end of DST.'
-                  + `It can refer to ${moment(info.earlierInterpretationTimestamp).format(DATE_FORMAT_WITH_ZONE_INFO)}`
-                  + `or ${moment(info.laterInterpretationTimestamp).format(DATE_FORMAT_WITH_ZONE_INFO)}.`
-                  + 'It was resolved to %s.';
-              break;
-            default:
-          }
-
-          return resolvingResult;
-        }),
-    );
+  getTimeZone(): Observable<TimeZones> {
+    return this.httpRequestService.get(ResourceEndpoints.TIMEZONE);
   }
+
+  formatToString(timestamp: number, timeZone: string, format: string): string {
+    const inst: moment.Moment = moment(timestamp).tz(timeZone);
+    // Midnight time (00:00 AM) will be displayed as 11:59 PM of the previous day
+    if (inst.hour() === 0 && inst.minute() === 0) {
+      inst.subtract(1, 'minute');
+    }
+    return inst.format(format);
+  }
+
+  getMomentInstance(timestamp: number | null, timeZone: string): moment.Moment {
+    if (!timestamp) {
+      return moment.tz(timeZone);
+    }
+    return moment(timestamp).tz(timeZone);
+  }
+
+  /**
+   * Resolves the local date time to a UNIX timestamp.
+   */
+  resolveLocalDateTime(date: DateFormat, time: TimeFormat, timeZone?: string,
+      resolveMidnightTo0000: boolean = false): number {
+    const inst: moment.Moment = this.getMomentInstance(null, timeZone || this.guessTimezone());
+    inst.set('year', date.year);
+    inst.set('month', date.month - 1); // moment month is from 0-11
+    inst.set('date', date.day);
+    inst.set('hour', time.hour);
+    inst.set('minute', time.minute);
+    inst.set('second', 0);
+    inst.set('millisecond', 0);
+
+    if (resolveMidnightTo0000 && inst.hour() === 23 && inst.minute() === 59) {
+      inst.add(1, 'minute');
+    }
+
+    return inst.toDate().getTime();
+  }
+
 }

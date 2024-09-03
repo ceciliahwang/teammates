@@ -9,6 +9,9 @@
       "projectType": "application",
       "prefix": "tm",
       "schematics": {
+        "@schematics/angular:application": {
+          "strict": true
+        },
         "@schematics/angular:component": {
           "style": "scss"
         }
@@ -17,54 +20,21 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "src/main/webapp",
+            "outputPath": "src/web/dist",
             "index": "src/web/index.html",
             "main": "src/web/main.ts",
             "polyfills": "src/web/polyfills.ts",
-            "tsConfig": "src/web/tsconfig.app.json",
+            "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "moment-timezone"
+            ],
             "assets": [
               "src/web/assets/",
-              {
-                "glob": "**/*",
-                "input": "node_modules/tinymce/skins",
-                "output": "tinymce/skins"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/tinymce/plugins/emoticons/js",
-                "output": "plugins/emoticons/js"
-              }
+              "src/web/manifest.webmanifest",
+              "src/web/robots.txt"
             ],
             "styles": [
               "src/web/styles.scss"
-            ],
-            "scripts": [
-              "node_modules/tinymce/tinymce.min.js",
-              "node_modules/tinymce/themes/silver/theme.js",
-              "src/web/tinymce/placeholder-plugin.js",
-              "node_modules/tinymce/plugins/advlist/plugin.js",
-              "node_modules/tinymce/plugins/autolink/plugin.js",
-              "node_modules/tinymce/plugins/lists/plugin.js",
-              "node_modules/tinymce/plugins/link/plugin.js",
-              "node_modules/tinymce/plugins/image/plugin.js",
-              "node_modules/tinymce/plugins/charmap/plugin.js",
-              "node_modules/tinymce/plugins/print/plugin.js",
-              "node_modules/tinymce/plugins/hr/plugin.js",
-              "node_modules/tinymce/plugins/anchor/plugin.js",
-              "node_modules/tinymce/plugins/searchreplace/plugin.js",
-              "node_modules/tinymce/plugins/wordcount/plugin.js",
-              "node_modules/tinymce/plugins/visualblocks/plugin.js",
-              "node_modules/tinymce/plugins/visualchars/plugin.js",
-              "node_modules/tinymce/plugins/code/plugin.js",
-              "node_modules/tinymce/plugins/fullscreen/plugin.js",
-              "node_modules/tinymce/plugins/insertdatetime/plugin.js",
-              "node_modules/tinymce/plugins/nonbreaking/plugin.js",
-              "node_modules/tinymce/plugins/save/plugin.js",
-              "node_modules/tinymce/plugins/table/plugin.js",
-              "node_modules/tinymce/plugins/directionality/plugin.js",
-              "node_modules/tinymce/plugins/emoticons/plugin.js",
-              "node_modules/tinymce/plugins/paste/plugin.js",
-              "node_modules/tinymce/plugins/textpattern/plugin.js"
             ]
           },
           "configurations": {
@@ -73,62 +43,59 @@
                 {
                   "replace": "src/web/environments/environment.ts",
                   "with": "src/web/environments/environment.prod.ts"
-                },
-                {
-                  "replace": "src/web/index.html",
-                  "with": "src/web/index.prod.html"
                 }
               ],
-              "assets": [
-                "src/web/assets/",
-                {
-                  "glob": "**/*",
-                  "input": "node_modules/tinymce/skins",
-                  "output": "tinymce/skins"
+              "index": {
+                "input": "src/web/index.prod.html",
+                "output": "index.html"
+              },
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
                 },
-                {
-                  "glob": "**/*",
-                  "input": "node_modules/tinymce/plugins/emoticons/js",
-                  "output": "plugins/emoticons/js"
-                },
-                "src/web/BingSiteAuth.xml",
-                "src/web/google8c7ef1e995031e09.html",
-                "src/web/pulse.html",
-                "src/web/robots.txt",
-                "src/web/sitemap.xml",
-                "src/web/manifest.json"
-              ],
-              "optimization": true,
+                "fonts": true
+              },
               "outputHashing": "all",
-              "sourceMap": false,
-              "extractCss": true,
-              "namedChunks": true,
-              "aot": true,
-              "extractLicenses": false,
-              "vendorChunk": true,
               "subresourceIntegrity": true,
-              "buildOptimizer": true,
               "serviceWorker": true,
+              "ngswConfigPath": "ngsw-config.json",
               "budgets": [
                 {
                   "type": "initial",
                   "maximumWarning": "2mb",
                   "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
                 }
               ]
+            },
+            "development": {
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "buildOptimizer": false,
+              "sourceMap": true,
+              "optimization": false,
+              "namedChunks": true
             }
-          }
+          },
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "browserTarget": "teammates:build"
-          },
           "configurations": {
             "production": {
               "browserTarget": "teammates:build:production"
+            },
+            "development": {
+              "browserTarget": "teammates:build:development"
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
@@ -139,23 +106,25 @@
         "test": {
           "builder": "@angular-builders/jest:run",
           "options": {
-            "no-cache": true
+            "cache": false
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "src/web/tsconfig.app.json",
-              "src/web/tsconfig.tslint-spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
           }
         }
       }
     }
   },
-  "defaultProject": "teammates"
+  "cli": {
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ],
+    "analytics": false
+  }
 }

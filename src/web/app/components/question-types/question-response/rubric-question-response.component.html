@@ -6,18 +6,20 @@
         <th class="text-center" *ngFor="let choice of questionDetails.rubricChoices">{{ choice }}</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="rubric-answers">
       <tr *ngFor="let answer of answers; let i = index">
         <td>{{ questionDetails.rubricSubQuestions[i] }}</td>
         <td class="text-center" *ngFor="let choice of questionDetails.rubricChoices">
-          <i *ngIf="answer.answer === choice" class="fas fa-check"></i>
+          <span [attr.aria-label]="answer.answer === choice ? 'selected' : 'unselected'" role="img">
+            <i *ngIf="answer.answer === choice" class="fas fa-check"></i>
+          </span>
         </td>
       </tr>
     </tbody>
   </table>
 </div>
 <div *ngIf="!isStudentPage">
-  <ul>
-    <li *ngFor="let answer of answers">{{ answer.answer }} {{ answer.index ? '(Choice ' + answer.index + ')' : '' }}</li>
-  </ul>
+  <ol type="a">
+    <li *ngFor="let answer of answers">{{ answer.answer }} <span class="choice-index">{{ answer.index ? '(Choice ' + answer.index + ')' : '' }}</span></li>
+  </ol>
 </div>

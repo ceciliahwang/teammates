@@ -5,7 +5,7 @@ export const config: any = {
   /**
    * The application version.
    */
-  version: '7.0.0',
+  version: '8.0.0',
 
   /**
    * The URL of page to be loaded for the account request page.
@@ -23,4 +23,19 @@ export const config: any = {
    * e.g. "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" is a site key for test environments.
    */
   captchaSiteKey: '',
+
+  /**
+   * This flag determines if the system is in maintenance mode.
+   * Under maintenance mode, all requests to the front-end will be routed to the "under maintenance" page.
+   */
+  maintenance: false,
+
+  /**
+   * Set to true if Firebase login is to be supported.
+   * Note that the backend needs to be configured separately for Firebase login to be fully supported.
+   */
+  allowFirebaseLogin: false,
+
+  firebaseConfig: {},
+
 };

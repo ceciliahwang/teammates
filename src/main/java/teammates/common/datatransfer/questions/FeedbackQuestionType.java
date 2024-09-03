@@ -1,10 +1,9 @@
 package teammates.common.datatransfer.questions;
 
-import teammates.common.util.Logger;
-
 /**
  * Feedback Question Type Definitions.
  */
+// CHECKSTYLE.OFF:JavadocVariable enum names are self-documenting
 public enum FeedbackQuestionType {
     TEXT(FeedbackTextQuestionDetails.class, FeedbackTextResponseDetails.class),
     MCQ(FeedbackMcqQuestionDetails.class, FeedbackMcqResponseDetails.class),
@@ -13,7 +12,8 @@ public enum FeedbackQuestionType {
 
     CONSTSUM(FeedbackConstantSumQuestionDetails.class, FeedbackConstantSumResponseDetails.class),
 
-    // TODO: dummy enum, need to migrate CONSTSUM to either CONSTSUM_OPTIONS or CONSTSUM_RECIPIENTS
+    // In the back-end, only CONSTSUM and not its branched versions is recognized as a valid question type.
+    // The branching here is done to make it simpler for the front-end to render the right items.
     CONSTSUM_OPTIONS(FeedbackConstantSumQuestionDetails.class, FeedbackConstantSumResponseDetails.class),
     CONSTSUM_RECIPIENTS(FeedbackConstantSumQuestionDetails.class, FeedbackConstantSumResponseDetails.class),
 
@@ -21,8 +21,6 @@ public enum FeedbackQuestionType {
     RUBRIC(FeedbackRubricQuestionDetails.class, FeedbackRubricResponseDetails.class),
     RANK_OPTIONS(FeedbackRankOptionsQuestionDetails.class, FeedbackRankOptionsResponseDetails.class),
     RANK_RECIPIENTS(FeedbackRankRecipientsQuestionDetails.class, FeedbackRankRecipientsResponseDetails.class);
-
-    private static final Logger log = Logger.getLogger();
 
     private final Class<? extends FeedbackQuestionDetails> questionDetailsClass;
     private final Class<? extends FeedbackResponseDetails> responseDetailsClass;
@@ -55,14 +53,4 @@ public enum FeedbackQuestionType {
         return responseDetailsClass;
     }
 
-    /**
-     * Returns CONSTSUM if passed CONSTSUM_OPTION or CONSTSUM_RECIPIENT as argument.
-     * Any other string is returned as is.
-     */
-    public static String standardizeIfConstSum(String questionType) {
-        if ("CONSTSUM_OPTION".equals(questionType) || "CONSTSUM_RECIPIENT".equals(questionType)) {
-            return "CONSTSUM";
-        }
-        return questionType;
-    }
 }

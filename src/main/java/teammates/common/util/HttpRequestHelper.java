@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Holds {@link HttpServletRequest}-related helper functions.
@@ -21,59 +22,40 @@ public final class HttpRequestHelper {
     }
 
     /**
-     * Returns the first value for the key in the parameter map, or null if key not found.
-     *
-     * @param paramMap A parameter map (e.g., the kind found in HttpServletRequests)
+     * Gets the parameters of the given HTTP request as key-value (possibly multi-values) mapping.
      */
-    public static String getValueFromParamMap(Map<String, String[]> paramMap, String key) {
-        return paramMap.getOrDefault(key, new String[] { null })[0];
-    }
-
-    /**
-     * Gets the parameters of the given HTTP request as key-value (possibly multi-values) mapping string.
-     */
-    public static String getRequestParametersAsString(HttpServletRequest req) {
-        return getDisplayedJsonInOneLine(req.getParameterMap());
-    }
-
-    /**
-     * Gets the headers of the given HTTP request as key-value (possibly multi-values) mapping string.
-     */
-    public static String getRequestHeadersAsString(HttpServletRequest req) {
-        Map<String, String[]> headers = new HashMap<>();
-        Collections.list(req.getHeaderNames()).stream()
-                // Do not include cookie header in production for privacy reasons
-                .filter(headerName -> Config.isDevServer() || !"cookie".equalsIgnoreCase(headerName))
-                .forEach(headerName -> {
-                    headers.put(headerName,
-                            Collections.list(req.getHeaders(headerName)).toArray(new String[0]));
-                });
-
-        return getDisplayedJsonInOneLine(headers);
-    }
-
-    private static String getDisplayedJsonInOneLine(Map<String, String[]> map) {
-        Map<String, Object> transformed = new HashMap<>();
-        map.forEach((key, values) -> {
-            if (values.length != 0) {
-                transformed.put(key, values.length == 1 ? values[0] : values);
+    static Map<String, Object> getRequestParameters(HttpServletRequest req) {
+        Map<String, Object> params = new HashMap<>();
+        req.getParameterMap().forEach((key, values) -> {
+            if (values.length == 1) {
+                params.put(key, values[0]);
+            } else {
+                params.put(key, values);
             }
         });
-        return JsonUtils.toJson(transformed).replaceAll("([^,])\r?\n *", "$1")
-                .replaceAll(",\r?\n *", ", ");
+        return params;
     }
 
     /**
-     * Returns the URL used for the HTTP request but without the domain, e.g. "/page/studentHome?user=james"
+     * Gets the headers of the given HTTP request as key-value (possibly multi-values) mapping.
      */
-    public static String getRequestedUrl(HttpServletRequest req) {
-        String link = req.getRequestURI();
-        String query = req.getQueryString();
+    static Map<String, Object> getRequestHeaders(HttpServletRequest req) {
+        Map<String, Object> headers = new HashMap<>();
+        Collections.list(req.getHeaderNames()).stream()
+                // Do not include cookie header/secret keys in production for privacy reasons
+                .filter(headerName -> Config.IS_DEV_SERVER || !"cookie".equalsIgnoreCase(headerName))
+                .filter(headerName -> Config.IS_DEV_SERVER || !Const.HeaderNames.BACKDOOR_KEY.equalsIgnoreCase(headerName))
+                .filter(headerName -> Config.IS_DEV_SERVER || !Const.HeaderNames.CSRF_KEY.equalsIgnoreCase(headerName))
+                .forEach(headerName -> {
+                    List<String> headerValues = Collections.list(req.getHeaders(headerName));
+                    if (headerValues.size() == 1) {
+                        headers.put(headerName, headerValues.get(0));
+                    } else {
+                        headers.put(headerName, headerValues.toArray(new String[0]));
+                    }
+                });
 
-        if (query != null && !query.trim().isEmpty()) {
-            return link + "?" + query;
-        }
-        return link;
+        return headers;
     }
 
     /**

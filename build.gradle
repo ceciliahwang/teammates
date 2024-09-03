@@ -1,46 +1,55 @@
-apply plugin: "idea"
-
 apply plugin: "war"
-// apply plugin: "com.google.cloud.tools.appengine"
-// see https://github.com/GoogleCloudPlatform/app-gradle-plugin/issues/125
-project.pluginManager.apply com.google.cloud.tools.gradle.appengine.standard.AppEngineStandardPlugin
+apply plugin: "com.google.cloud.tools.appengine-appyaml"
 
 apply plugin: "checkstyle"
 apply plugin: "pmd"
 apply plugin: "com.github.spotbugs"
 apply plugin: "jacoco"
 apply plugin: "cz.habarta.typescript-generator"
+apply plugin: "org.liquibase.gradle"
 
-def appengineVersion = "1.9.+"
-def checkstyleVersion = "8.20"
-def pmdVersion = "6.14.0"
-def spotbugsVersion = "3.1.12"
-def jacocoVersion = "0.8.3"
+def checkstyleVersion = "10.15.0"
+def pmdVersion = "7.0.0"
+def spotbugsVersion = "4.8.4"
+def jacocoVersion = "0.8.12"
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath "com.google.cloud.tools:appengine-gradle-plugin:1.3.5"
-        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.9"
-        classpath "cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.14.505"
+        classpath "com.google.cloud.tools:appengine-gradle-plugin:2.8.0"
+        classpath "com.github.spotbugs.snom:spotbugs-gradle-plugin:6.0.12"
+        classpath("cz.habarta.typescript-generator:typescript-generator-gradle-plugin:3.2.1263") {
+            exclude group: "org.gradle"
+        }
+        classpath "com.google.guava:guava:33.1.0-jre"
+        classpath "org.liquibase:liquibase-gradle-plugin:2.2.1"
     }
 }
 
 configurations {
     staticAnalysis
+
+    liquibaseRuntime.extendsFrom testImplementation
+}
+
+// See https://github.com/checkstyle/checkstyle/issues/14211#issuecomment-1884129948
+configurations.all {
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
+        select("com.google.guava:guava:0")
+    }
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
-def objectify = "com.googlecode.objectify:objectify:5.1.22"
-def testng = "org.testng:testng:6.14.3"
+def objectify = "com.googlecode.objectify:objectify:6.0.7"
+def testng = "org.testng:testng:7.10.1"
 
 dependencies {
     staticAnalysis("com.puppycrawl.tools:checkstyle:${checkstyleVersion}")
@@ -50,51 +59,57 @@ dependencies {
 
     annotationProcessor(objectify)
 
-    compile("com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}")
-
-    // This dependency needs to be resolved individually
-    // because the main dependency (appengine-gcs-client) does not have its transitive dependencies up-to-date
-    compile("com.google.appengine.tools:appengine-gcs-client:0.8") {
-        // Use the newer servlet library instead
-        exclude group: "javax.servlet", module: "servlet-api"
-    }
-    compile("com.google.api-client:google-api-client-appengine:1.28.0") {
-        // Use the newer servlet library instead
-        exclude group: "javax.servlet", module: "servlet-api"
-    }
-    compile("com.google.apis:google-api-services-storage:v1-rev20190426-1.28.0")
-
-    compile("com.google.code.gson:gson:2.8.5")
-    compile("com.google.guava:guava:27.1-jre")
-    compile(objectify)
-    compile("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190503.1")
-    compile("com.mailjet:mailjet-client:4.2.1")
-    compile("com.sendgrid:sendgrid-java:4.3.0")
-    compile("com.sun.jersey:jersey-client:1.19.4")
-    compile("com.sun.jersey:jersey-core:1.19.4")
-    compile("com.sun.jersey.contribs:jersey-multipart:1.19.4")
-    compile("javax.servlet:javax.servlet-api:3.1.0")
-    compile("org.jsoup:jsoup:1.11.3")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.23.0")
+    implementation(platform("com.google.cloud:google-cloud-bom:0.218.0"))
+    implementation("com.google.cloud:google-cloud-datastore")
+    implementation("com.google.cloud:google-cloud-tasks")
+    implementation("com.google.cloud:google-cloud-logging")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.firebase:firebase-admin:9.2.0")
+    implementation("com.google.guava:guava:33.1.0-jre")
+    implementation(objectify)
+    implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20240325.1")
+    implementation("com.helger:ph-commons:9.5.5") // necessary to add SpotBugs suppression
+    implementation("com.mailjet:mailjet-client:5.2.5")
+    implementation("com.sendgrid:sendgrid-java:4.10.2")
+    implementation("com.sun.jersey:jersey-client:1.19.4")
+    implementation("com.sun.jersey:jersey-core:1.19.4")
+    implementation("com.sun.jersey.contribs:jersey-multipart:1.19.4")
+    implementation("org.apache.solr:solr-solrj:8.11.3")
+    implementation(platform("org.eclipse.jetty:jetty-bom:11.0.20"))
+    implementation("org.eclipse.jetty:jetty-slf4j-impl")
+    implementation("org.eclipse.jetty:jetty-server")
+    implementation("org.eclipse.jetty:jetty-webapp")
+    implementation("org.eclipse.jetty:jetty-annotations")
+    implementation("org.jsoup:jsoup:1.17.2")
+    implementation("org.hibernate.orm:hibernate-core:6.4.4.Final")
+    implementation("org.postgresql:postgresql:42.7.3")
+    implementation("org.hibernate:hibernate-hikaricp:6.4.4.Final")
 
     testAnnotationProcessor(testng)
 
-    testCompile("com.google.appengine:appengine-api-stubs:${appengineVersion}")
-    testCompile("com.google.appengine:appengine-remote-api:${appengineVersion}")
-    testCompile("com.google.appengine:appengine-testing:${appengineVersion}")
-    testCompile("com.tngtech.archunit:archunit:0.10.2")
-    testCompile("org.httpunit:httpunit:1.7.3")
-    testCompile("org.seleniumhq.selenium:selenium-java:3.141.59")
-    testCompile(testng)
-    // For access to Google APIs such as HTTP transport, authentication and JSON parsing
-    testCompile("com.google.api-client:google-api-client:1.28.0")
+    testImplementation("com.tngtech.archunit:archunit:0.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testImplementation("org.seleniumhq.selenium:selenium-java:4.19.1")
+    testImplementation("com.deque.html.axe-core:selenium:4.9.0")
+    testImplementation(testng)
+    testImplementation("org.testcontainers:postgresql:1.19.7")
+    testImplementation("org.liquibase:liquibase-core:4.27.0")
+    testImplementation("org.mockito:mockito-core:5.11.0")
     // For supporting authorization code flow locally
-    testCompile("com.google.oauth-client:google-oauth-client-jetty:1.28.0")
+    testImplementation("com.google.oauth-client:google-oauth-client-jetty:1.35.0")
     // For using Gmail API
-    testCompile("com.google.apis:google-api-services-gmail:v1-rev20190422-1.28.0")
+    testImplementation("com.google.apis:google-api-services-gmail:v1-rev20231218-2.0.0")
     // For using JMeter APIs
-    testCompile("org.apache.jmeter:ApacheJMeter_core:5.1.1")
-    testCompile("org.apache.jmeter:ApacheJMeter_http:5.1.1")
+    testImplementation("org.apache.jmeter:ApacheJMeter_core:5.6.2") {
+        exclude group: "org.apache.jmeter", module: "bom"
+    }
+    testImplementation("org.apache.jmeter:ApacheJMeter_http:5.6.2") {
+        exclude group: "org.apache.jmeter", module: "bom"
+    }
 
+    liquibaseRuntime("info.picocli:picocli:4.7.5")
+    liquibaseRuntime(sourceSets.main.output)
 }
 
 sourceSets {
@@ -112,22 +127,58 @@ sourceSets {
         java {
             srcDir "src/test/java"
             srcDir "src/e2e/java"
+            srcDir "src/lnp/java"
+            srcDir "src/it/java"
             srcDir "src/client/java"
             include "**/*.java"
         }
         resources {
             srcDir "src/test/resources"
             srcDir "src/e2e/resources"
+            srcDir "src/lnp/resources"
+            srcDir "src/it/resources"
             srcDir "src/client/resources"
             exclude "**/*.java"
         }
     }
 }
 
+if (!project.hasProperty("runList")) {
+    project.ext.set("runList", "main")
+}
+
+liquibase {
+    activities {
+        main {
+            searchPath "${projectDir}"
+            changeLogFile "src/main/resources/db/changelog/db.changelog-root.xml"
+            url project.properties['liquibaseDbUrl']
+            username project.properties['liquibaseUsername']
+            password project.properties['liquibasePassword']
+        }
+        snapshot {
+            url project.properties['liquibaseDbUrl']
+            username project.properties['liquibaseUsername']
+            password project.properties['liquibasePassword']
+            snapshotFormat "json"
+            outputFile "liquibase-snapshot.json"
+        }
+        diffMain {
+            searchPath "${projectDir}"
+            changeLogFile "src/main/resources/db/changelog/db.changelog-new.xml"
+            referenceUrl  project.properties['liquibaseDbUrl']
+            referenceUsername project.properties['liquibaseUsername']
+            referencePassword project.properties['liquibasePassword']
+            url "offline:postgresql?snapshot=liquibase-snapshot.json"
+        }
+    }
+    runList = project.ext.runList
+}
+
 tasks.withType(cz.habarta.typescript.generator.gradle.GenerateTask) {
     jsonLibrary = "jackson2"
     optionalAnnotations = [
-        "javax.annotation.Nullable"
+        "jakarta.annotation.Nullable"
     ]
     outputFileType = "implementationFile"
     outputKind = "module"
@@ -141,30 +192,61 @@ tasks.withType(cz.habarta.typescript.generator.gradle.GenerateTask) {
     ]
     mapEnum = "asEnum"
     nonConstEnums = true
+    noFileComment = true
 }
 
 task generateApiOutputFormat(type: cz.habarta.typescript.generator.gradle.GenerateTask) {
     classPatterns = [
-        "teammates.ui.webapi.output.**",
-        "teammates.common.datatransfer.questions.**"
+        "teammates.ui.output.**",
+        "teammates.common.datatransfer.questions.**",
+        "teammates.common.datatransfer.logs.**",
     ]
     removeTypeNameSuffix = "Data"
     outputFile = "src/web/types/api-output.ts"
+    excludeClassPatterns = [
+        "teammates.ui.output.**Builder"
+    ]
+    excludeClasses = [
+        "teammates.ui.output.SessionResultsData\$NameInfo"
+    ]
 }
 
 task generateApiRequestFormat(type: cz.habarta.typescript.generator.gradle.GenerateTask) {
     classPatterns = [
-        "teammates.ui.webapi.request.**"
+        "teammates.ui.request.**",
+        "teammates.common.util.EmailType"
+    ]
+    excludeClasses = [
+        "teammates.ui.request.InvalidHttpRequestBodyException"
     ]
     outputFile = "src/web/types/api-request.ts"
 }
 
+task generateApiConstants(type: cz.habarta.typescript.generator.gradle.GenerateTask) {
+    classPatterns = [
+        "teammates.ui.constants.**"
+    ]
+    jsonLibrary = 'jackson2'
+    outputFile = "src/web/types/api-const.ts"
+}
+
 generateApiOutputFormat.dependsOn classes
 generateApiRequestFormat.dependsOn classes
+generateApiConstants.dependsOn classes
 
 task generateTypes {
     dependsOn generateApiOutputFormat
     dependsOn generateApiRequestFormat
+    dependsOn generateApiConstants
+}
+
+task execScript(type: JavaExec) {
+    description "Run user defined scripts specified by project variable - userScript"
+
+    classpath = sourceSets.test.runtimeClasspath
+    if (project.hasProperty("userScript")) {
+        mainClass = "teammates.client.scripts.${project.property('userScript')}"
+    }
 }
 
 // SETUP TASKS
@@ -176,11 +258,13 @@ task createConfigs {
         def templatesToCopy = [
             "gradle.template.properties",
             "src/main/resources/build.template.properties",
+            "src/main/resources/build-dev.template.properties",
             "src/web/environments/config.template.ts",
             "src/test/resources/test.template.properties",
+            "src/lnp/resources/test.template.properties",
             "src/e2e/resources/test.template.properties",
             "src/client/resources/client.template.properties",
-            "src/main/webapp/WEB-INF/appengine-web.template.xml"
+            "src/main/appengine/app.template.yaml"
         ]
         templatesToCopy.findAll {
             !(new File(it.replace(".template", ""))).exists()
@@ -194,32 +278,15 @@ task createConfigs {
     }
 }
 
-// IDE SETUP TASKS (MAINTENANCE MODE ONLY)
-
-// Use a different buildDir for IntelliJ builds to avoid conflict with CLI builds.
-// IDE detection is achieved by checking `idea.paths.selector`, a system property that IntelliJ sets.
-// Note that this property is not documented and may change anytime.
-if (System.getProperty('idea.paths.selector') != null) {
-    // Nest the buildDir inside IntelliJ's default project compiler output directory
-    buildDir = new File(projectDir, 'out/build')
-}
-
-idea {
-    module {
-        // Exclude the CLI build directory
-        excludeDirs += [file('build')]
-    }
-}
-
 task downloadDependencies {
     doFirst {
-        configurations.compile.resolve()
+        configurations.compileClasspath.resolve()
     }
 }
 
 task downloadTestDependencies {
     doFirst {
-        configurations.testCompile.resolve()
+        configurations.testCompileClasspath.resolve()
     }
 }
 
@@ -234,14 +301,53 @@ task downloadLinters {
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+processTestResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+task explodeWar(type: Sync) {
+    dependsOn war
+    into "${buildDir}/exploded-teammates"
+    from project.zipTree(war.archiveFile)
+    outputs.upToDateWhen { false }
+}
+
+task copyDistToExplodedWar {
+    doLast {
+        copy {
+            from "src/web/dist"
+            into explodeWar.destinationDir
+        }
+        copy {
+            from "src/web/webtools"
+            into explodeWar.destinationDir
+        }
+    }
+    mustRunAfter explodeWar
+}
+
+task serverRun(type: JavaExec) {
+    classpath "${explodeWar.destinationDir}/WEB-INF/lib/*", "${explodeWar.destinationDir}/WEB-INF/classes/."
+    mainClass = "teammates.main.Application"
+    jvmArgs "-ea", "-Djava.util.logging.config.file=${explodeWar.destinationDir}/WEB-INF/logging-dev.properties",
+            "-Djava.time.zone.DefaultZoneRulesProvider=teammates.common.util.TzdbResourceZoneRulesProvider"
+    dependsOn explodeWar, copyDistToExplodedWar
+}
+
+task runDatastoreEmulator(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "teammates.storage.api.DatastoreEmulatorRunner"
+}
+
 appengine {
-    run {
-        port = 8080
-        jvmFlags = ["-Xss2m", "-Dfile.encoding=UTF-8",
-                // Absolute paths are not supported, the following is relative to the project directory
-                // These only specify the datastore/blobstore paths, but search indexes are still generated in WEB-INF/appengine-generated
-                "-Ddatastore.backing_store=../../appengine-generated/local_db.bin",
-                "-Dblobstore.backing_store=../../appengine-generated"]
+    tools {
+        if (project.properties['cloud.sdk.home'] != null) {
+            cloudSdkHome = project.properties['cloud.sdk.home']
+        }
     }
     deploy {
         String buildPropertiesPath = "${projectDir}/src/main/resources/build.properties"
@@ -252,17 +358,45 @@ appengine {
                 props.load(it)
             }
         }
-        project = propsExists ? props['app.id'] : null
+        projectId = propsExists ? props['app.id'] : null
         version = propsExists ? props['app.version'] : null
         stopPreviousVersion = false
         promote = false
     }
 }
 
-task appengineDeployAll {
-    description "Deploy an App Engine application and all its extended configurations"
-    group "App Engine Standard environment"
-    dependsOn appengineDeploy, appengineDeployIndex, appengineDeployCron, appengineDeployQueue
+task removeWarFromStagedApp {
+    doLast {
+        delete "${buildDir}/staged-app/${war.archiveFileName}"
+    }
+}
+
+task copyExplodedWarToStagedApp {
+    doLast {
+        copy {
+            from explodeWar.destinationDir
+            into "${buildDir}/staged-app"
+        }
+    }
+}
+
+task copyDistToStagedApp {
+    doLast {
+        copy {
+            from "src/web/dist"
+            into "${buildDir}/staged-app/dist"
+        }
+    }
+}
+
+appengineStage {
+    if (project.hasProperty("flex")) {
+        dependsOn explodeWar
+        finalizedBy removeWarFromStagedApp, copyExplodedWarToStagedApp, copyDistToStagedApp
+    } else {
+        dependsOn explodeWar, copyDistToExplodedWar
+        finalizedBy removeWarFromStagedApp, copyExplodedWarToStagedApp
+    }
 }
 
 // STATIC ANALYSIS TASKS
@@ -272,26 +406,29 @@ def isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
 checkstyle {
     toolVersion = checkstyleVersion
     configFile = file("static-analysis/teammates-checkstyle.xml")
+    configProperties = [
+        suppressions: file("static-analysis/teammates-checkstyle-suppressions.xml")
+    ]
 }
 
 pmd {
     toolVersion = pmdVersion
     consoleOutput = true
-    ruleSetFiles = files("static-analysis/teammates-pmd.xml", "static-analysis/teammates-pmd-6.14.0.xml", "static-analysis/teammates-pmdMain.xml")
+    ruleSetFiles = files("static-analysis/teammates-pmd.xml", "static-analysis/teammates-pmdMain.xml")
     ruleSets = []
 }
 
 spotbugs {
-    reportLevel = "low"
+    reportLevel = com.github.spotbugs.snom.Confidence.valueOf("LOW")
     toolVersion = spotbugsVersion
     includeFilter = file("$rootProject.projectDir/static-analysis/teammates-spotbugs.xml")
 }
 
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     reports {
-        xml.enabled = false
-        html.enabled = false
-        emacs.enabled = true
+        xml.required = false
+        html.required = false
+        text.required = true
     }
 }
 
@@ -301,10 +438,10 @@ spotbugsMain {
 
 task printSpotbugsMainViolations {
     onlyIf {
-        file("${buildDir}/reports/spotbugs/main.emacs").exists()
+        file("${buildDir}/reports/spotbugs/main.txt").exists()
     }
     doFirst {
-        print new File("${buildDir}/reports/spotbugs/main.emacs").getText("UTF-8")
+        print new File("${buildDir}/reports/spotbugs/main.txt").getText("UTF-8")
     }
 }
 
@@ -314,10 +451,10 @@ spotbugsTest {
 
 task printSpotbugsTestViolations {
     onlyIf {
-        file("${buildDir}/reports/spotbugs/test.emacs").exists()
+        file("${buildDir}/reports/spotbugs/test.txt").exists()
     }
     doFirst {
-        print new File("${buildDir}/reports/spotbugs/test.emacs").getText("UTF-8")
+        print new File("${buildDir}/reports/spotbugs/test.txt").getText("UTF-8")
     }
 }
 
@@ -339,15 +476,49 @@ def checkTestNgFailureClosure = { descriptor, result ->
     }
 }
 
+// Displays full exception; to be run after the test fails after the last retry
+def afterTestClosure = { descriptor, result ->
+    if (result.resultType == TestResult.ResultType.FAILURE && result.exception != null && result.exception.getMessage() != null) {
+        println ""
+
+        def msg = result.exception.getMessage()
+        def shouldDisplayAsDiff = msg.indexOf("<<[expected>") != -1
+        if (shouldDisplayAsDiff) {
+            def expectedFileName = "expected-${descriptor.getClassName()}"
+            def actualFileName = "actual-${descriptor.getClassName()}"
+            file("${expectedFileName}").text = msg[(msg.indexOf("<<[expected>") + 12)..(msg.indexOf("</expected]>>") - 1)]
+            file("${actualFileName}").text = msg[(msg.indexOf("<<[actual>") + 10)..(msg.indexOf("</actual]>>") - 1)]
+            def diffCommand = isWindows ? "FC" : "diff"
+            def process = "${diffCommand} ${expectedFileName} ${actualFileName}".execute()
+            println process.getText()
+            process.waitFor()
+            delete expectedFileName
+            delete actualFileName
+        } else {
+            println "${result.exception.getClass().getName()}: ${result.exception.getMessage()}"
+        }
+
+        for (StackTraceElement ste : result.exception.getStackTrace()) {
+            if (ste.getClassName().contains("NativeMethodAccessorImpl")) {
+                // Everything after this line is the internal workings of TestNG, not important for us
+                println "\t..."
+                break
+            }
+            println "\tat ${ste.getClassName()}.${ste.getMethodName()}(${ste.getFileName()}:${ste.getLineNumber()})"
+        }
+    }
+}
+
 task architectureTest(type: Test) {
     useTestNG()
     options.suites "src/test/resources/testng-architecture.xml"
     options.useDefaultListeners = true
     ignoreFailures false
     maxHeapSize = "1g"
-    reports.html.enabled = false
-    reports.junitXml.enabled = false
+    reports.html.required = false
+    reports.junitXml.required = false
     jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
+    afterTest afterTestClosure
     afterSuite checkTestNgFailureClosure
     testLogging {
         events "passed"
@@ -365,71 +536,17 @@ task lint {
 
 // TEST TASKS
 
-def numOfTestRetries = 3
-def isTravis = System.getenv("TRAVIS") != null
-def isAppVeyor = System.getenv("APPVEYOR") != null
-
-// Displays full exception; to be run after the test fails after the last retry
-// For HTML tests, the exception is displayed in diff form instead of the extremely verbose full exception message
-def afterTestClosure = { descriptor, result ->
-    if (result.resultType == TestResult.ResultType.FAILURE && result.exception != null && result.exception.getMessage() != null) {
-        println ""
-
-        def msg = result.exception.getMessage()
-        def shouldDisplayAsDiff = msg.indexOf("<<[expected>") != -1
-        if (shouldDisplayAsDiff) {
-            def expectedFileName = "expected-${descriptor.getClassName()}"
-            def actualFileName = "actual-${descriptor.getClassName()}"
-            file("${expectedFileName}").text = msg[(msg.indexOf("<<[expected>") + 12)..(msg.indexOf("</expected]>>") - 1)]
-            file("${actualFileName}").text = msg[(msg.indexOf("<<[actual>") + 10)..(msg.indexOf("</actual]>>") - 1)]
-            def diffCommand = isWindows ? "FC" : "diff"
-            def process = "${diffCommand} ${expectedFileName} ${actualFileName}".execute()
-            println process.getText()
-            process.waitFor()
-            if (!isAppVeyor && !isTravis) { // CI does not allow deleting files
-                def deleteCommand = isWindows ? "del" : "rm"
-                "${deleteCommand} ${expectedFileName}".execute()
-                "${deleteCommand} ${actualFileName}".execute()
-            }
-        } else {
-            println "${result.exception.getClass().getName()}: ${result.exception.getMessage()}"
-        }
-
-        for (StackTraceElement ste : result.exception.getStackTrace()) {
-            if (ste.getClassName().contains("NativeMethodAccessorImpl")) {
-                // Everything after this line is the internal workings of TestNG, not important for us
-                println "\t..."
-                break
-            }
-            println "\tat ${ste.getClassName()}.${ste.getMethodName()}(${ste.getFileName()}:${ste.getLineNumber()})"
-        }
-    }
-}
-
-test {
-    useTestNG()
-    options.useDefaultListeners = true
-    ignoreFailures false
-    maxHeapSize = "1g"
-    reports.html.enabled = false
-    reports.junitXml.enabled = false
-    jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
-    afterTest afterTestClosure
-    afterSuite checkTestNgFailureClosure
-    testLogging {
-        events "passed"
-    }
-}
+def numOfTestRetries = 4
 
 task lnpTests(type: Test) {
     systemProperty "random.testing.seed", new Random().nextInt() // re-run tests even if they are up-to-date
     useTestNG()
-    options.suites "src/e2e/resources/testng-lnp.xml"
+    options.suites "src/lnp/resources/testng-lnp.xml"
     options.useDefaultListeners = true
     ignoreFailures false
     maxHeapSize = "1g"
-    reports.html.enabled = false
-    reports.junitXml.enabled = false
+    reports.html.required = false
+    reports.junitXml.required = false
     jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
     afterTest afterTestClosure
     afterSuite checkTestNgFailureClosure
@@ -445,23 +562,23 @@ task lnpTests(type: Test) {
     }
     afterTest { TestDescriptor td ->
         if (outputCache.size() > 0) {
-            println()
             println(" L&P results for ${td.className}:")
             outputCache.each { print(" > $it") }
         }
     }
 }
 
-task failedTests(type: Test) {
+task unitTests(type: Test) {
+    description "Runs the full unit test suite."
+    group "Test"
     useTestNG()
-    options.suites "test-output/testng-failed.xml"
-    options.outputDirectory = file("build/reports/test-failed")
+    options.suites "src/test/resources/testng-component.xml"
     options.useDefaultListeners = true
     ignoreFailures false
     maxHeapSize = "1g"
-    reports.html.enabled = false
-    reports.junitXml.enabled = false
-    jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
+    reports.html.required = false
+    reports.junitXml.required = false
+    jvmArgs "-ea", "-Xss2m", "-Dfile.encoding=UTF-8"
     afterTest afterTestClosure
     afterSuite checkTestNgFailureClosure
     testLogging {
@@ -469,105 +586,140 @@ task failedTests(type: Test) {
     }
 }
 
-task componentTests {
-    description "Runs the full unit test suite and retries failed test up to ${numOfTestRetries} times."
+task integrationTests(type: Test) {
+    description "Runs the full integration test suite."
     group "Test"
+    useTestNG()
+    options.suites "src/it/resources/testng-it.xml"
+    options.useDefaultListeners = true
+    ignoreFailures false
+    maxHeapSize = "1g"
+    reports.html.required = false
+    reports.junitXml.required = false
+    jvmArgs "-ea", "-Xss2m", "-Dfile.encoding=UTF-8"
+    afterTest afterTestClosure
+    afterSuite checkTestNgFailureClosure
+    testLogging {
+        events "passed"
+    }
+}
+
+task componentTests(type: Test) {
+    description "Runs the full unit and integration test suite."
+    group "Test"
+    dependsOn unitTests, integrationTests
 }
 
 task e2eTests {
-    description "Runs the full E2E test suite and retries failed test up to ${numOfTestRetries} times."
+    description "Runs the E2E test suite and retries failed test up to ${numOfTestRetries} times."
     group "Test"
 }
 
 (1..numOfTestRetries + 1).each { id ->
     def isFirstTry = id == 1
     def isLastRetry = id == numOfTestRetries + 1
-    task "componentTestTry${id}"(type: Test) {
-        useTestNG()
-        options.suites isFirstTry ? "src/test/resources/testng-component.xml" : file("${buildDir}/reports/component-test-try-${id - 1}/testng-failed.xml")
-        options.outputDirectory = file("${buildDir}/reports/component-test-try-${id}")
-        options.useDefaultListeners = true
-        ignoreFailures = !isLastRetry
-        maxHeapSize = "1g"
-        reports.html.enabled = false
-        reports.junitXml.enabled = false
-        if (isTravis) {
-            jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8", "-Djava.io.tmpdir=" + System.getenv("TRAVIS_BUILD_DIR")
-        } else {
-            jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
-        }
-        testLogging {
-            events "passed"
-        }
-        if (isLastRetry) {
-            afterTest afterTestClosure
-        } else if (isFirstTry) {
-            afterSuite checkTestNgFailureClosure
-        }
-        onlyIf {
-            isFirstTry || file("${buildDir}/reports/component-test-try-${id - 1}/testng-failed.xml").exists()
-        }
-    }
-    componentTests.dependsOn "componentTestTry${id}"
+    def runUnstableTests = project.hasProperty('unstable')
+    def outputFileName = runUnstableTests ? "e2e-unstable-test-try-" : "e2e-test-try-"
 
     task "e2eTestTry${id}"(type: Test) {
         useTestNG()
-        options.suites isFirstTry ? "src/e2e/resources/testng-e2e.xml" : file("${buildDir}/reports/e2e-test-try-${id - 1}/testng-failed.xml")
-        options.outputDirectory = file("${buildDir}/reports/e2e-test-try-${id}")
+        options.suites isFirstTry
+                ? (runUnstableTests ? "src/e2e/resources/testng-unstable-e2e.xml" : "src/e2e/resources/testng-e2e.xml")
+                : file("${buildDir}/reports/${outputFileName}${id - 1}/testng-failed.xml")
+        options.outputDirectory = file("${buildDir}/reports/${outputFileName}${id}")
         options.useDefaultListeners = true
         ignoreFailures = !isLastRetry
         maxHeapSize = "1g"
-        reports.html.enabled = false
-        reports.junitXml.enabled = false
-        if (isTravis) {
-            jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8", "-Djava.io.tmpdir=" + System.getenv("TRAVIS_BUILD_DIR")
-        } else {
-            jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
-        }
+        reports.html.required = false
+        reports.junitXml.required = false
+        jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
         testLogging {
             events "passed"
         }
-        if (isLastRetry) {
-            afterTest afterTestClosure
-        } else if (isFirstTry) {
+        afterTest afterTestClosure
+        if (isFirstTry) {
             afterSuite checkTestNgFailureClosure
+        } else {
+            mustRunAfter "e2eTestTry${id - 1}"
         }
-        finalizedBy "killFirefox${id}", "killChromedriver${id}"
         onlyIf {
-            isFirstTry || file("${buildDir}/reports/e2e-test-try-${id - 1}/testng-failed.xml").exists()
+            isFirstTry || file("${buildDir}/reports/${outputFileName}${id - 1}/testng-failed.xml").exists()
         }
     }
     e2eTests.dependsOn "e2eTestTry${id}"
+}
 
-    task "killFirefox${id}"(type: Exec) {
-        doFirst {
-            if (isWindows) {
-                commandLine "taskkill", "/f", "/im", "firefox.exe"
-            } else {
-                commandLine "pkill", "firefox"
-            }
-            // Silence output for this task
-            standardOutput = new ByteArrayOutputStream()
-            errorOutput = standardOutput
-        }
-        ignoreExitValue = true
-        outputs.upToDateWhen { false }
-    }
+task e2eTestsSql {
+    description "Runs the E2E SQL test suite and retries failed test up to ${numOfTestRetries} times."
+    group "Test"
+}
 
-    task "killChromedriver${id}"(type: Exec) {
-        doFirst {
-            if (isWindows) {
-                commandLine "taskkill", "/f", "/im", "chromedriver.exe"
-            } else {
-                commandLine "pkill", "chromedriver"
-            }
-            // Silence output for this task
-            standardOutput = new ByteArrayOutputStream()
-            errorOutput = standardOutput
+(1..numOfTestRetries + 1).each { id ->
+    def isFirstTry = id == 1
+    def isLastRetry = id == numOfTestRetries + 1
+    def runUnstableTests = project.hasProperty('unstable')
+    def outputFileName = runUnstableTests ? "e2e-sql-unstable-test-try-" : "e2e-sql-test-try-"
+
+    task "e2eSqlTestTry${id}"(type: Test) {
+        useTestNG()
+        options.suites isFirstTry
+                ? (runUnstableTests ? "src/e2e/resources/testng-unstable-e2e-sql.xml" : "src/e2e/resources/testng-e2e-sql.xml")
+                : file("${buildDir}/reports/${outputFileName}${id - 1}/testng-failed.xml")
+        options.outputDirectory = file("${buildDir}/reports/${outputFileName}${id}")
+        options.useDefaultListeners = true
+        ignoreFailures = !isLastRetry
+        maxHeapSize = "1g"
+        reports.html.required = false
+        reports.junitXml.required = false
+        jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
+        testLogging {
+            events "passed"
         }
-        ignoreExitValue = true
-        outputs.upToDateWhen { false }
+        afterTest afterTestClosure
+        if (isFirstTry) {
+            afterSuite checkTestNgFailureClosure
+        } else {
+            mustRunAfter "e2eSqlTestTry${id - 1}"
+        }
+        onlyIf {
+            isFirstTry || file("${buildDir}/reports/${outputFileName}${id - 1}/testng-failed.xml").exists()
+        }
     }
+    e2eTestsSql.dependsOn "e2eSqlTestTry${id}"
+}
+
+task axeTests {
+    description "Runs the full accessibility test suite and retries failed tests once."
+    group "Test"
+}
+
+(1..2).each { id ->
+    def isFirstTry = id == 1
+
+    task "axeTestTry${id}"(type: Test) {
+        useTestNG()
+        options.suites isFirstTry ? "src/e2e/resources/testng-axe.xml" : file("${buildDir}/reports/axe-test-try-${id - 1}/testng-failed.xml")
+        options.outputDirectory = file("${buildDir}/reports/axe-test-try-${id}")
+        options.useDefaultListeners = true
+        ignoreFailures = isFirstTry
+        maxHeapSize = "1g"
+        reports.html.required = false
+        reports.junitXml.required = false
+        jvmArgs "-Xss2m", "-Dfile.encoding=UTF-8"
+        testLogging {
+            events "passed"
+        }
+        afterTest afterTestClosure
+        if (isFirstTry) {
+            afterSuite checkTestNgFailureClosure
+        } else {
+            mustRunAfter "axeTestTry${id - 1}"
+        }
+        onlyIf {
+            isFirstTry || file("${buildDir}/reports/axe-test-try-${id - 1}/testng-failed.xml").exists()
+        }
+    }
+    axeTests.dependsOn "axeTestTry${id}"
 }
 
 // COVERAGE TASKS
@@ -576,38 +728,19 @@ jacoco {
     toolVersion = jacocoVersion
 }
 
-task jacocoMerge(type: JacocoMerge) {
-    destinationFile = file("${buildDir}/jacocoMerge/jacocoMerge.exec")
-    executionData fileTree("${buildDir}/jacoco").files
-}
-
 task jacocoReport(type: JacocoReport) {
     description "Runs coverage session from available test run data."
     group "Test"
     sourceDirectories.from files(sourceSets.main.java.srcDirs)
     classDirectories.from files(sourceSets.main.output)
-    executionData jacocoMerge.destinationFile
+    executionData fileTree("${buildDir}/jacoco").files
     reports {
-        xml.enabled true
-        html.enabled true
+        xml.required = true
+        html.required = true
     }
     afterEvaluate {
         classDirectories.from files(classDirectories.files.collect {
             fileTree(dir: it, exclude: ["**/*.jar"])
         })
-    }
-    dependsOn jacocoMerge
-}
-
-// Helper methods
-import groovy.xml.StreamingMarkupBuilder
-import java.nio.charset.StandardCharsets
-
-void writeXmlToPath(Node xml, String pathToWrite) {
-    new File(pathToWrite).withWriter(StandardCharsets.UTF_8.name()) { out ->
-        out << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration() }
-        def xmlNodePrinter = new XmlNodePrinter(new PrintWriter(out))
-        xmlNodePrinter.preserveWhitespace = true
-        xmlNodePrinter.print(xml)
     }
 }

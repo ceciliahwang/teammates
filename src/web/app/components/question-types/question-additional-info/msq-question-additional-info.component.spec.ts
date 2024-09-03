@@ -1,19 +1,22 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
+import { MsqQuestionAdditionalInfoComponent } from './msq-question-additional-info.component';
 import {
   FeedbackMsqQuestionDetails,
   FeedbackParticipantType,
   FeedbackQuestionType,
 } from '../../../../types/api-output';
-import { MsqQuestionAdditionalInfoComponent } from './msq-question-additional-info.component';
+import { NO_VALUE } from '../../../../types/feedback-response-details';
+import { TeammatesCommonModule } from '../../teammates-common/teammates-common.module';
 
 describe('MsqQuestionAdditionalInfoComponent', () => {
   let component: MsqQuestionAdditionalInfoComponent;
   let fixture: ComponentFixture<MsqQuestionAdditionalInfoComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MsqQuestionAdditionalInfoComponent],
+      imports: [TeammatesCommonModule],
     })
     .compileComponents();
   }));
@@ -28,8 +31,8 @@ describe('MsqQuestionAdditionalInfoComponent', () => {
     msqChoices: ['1', '2', '3'],
     otherEnabled: false,
     generateOptionsFor: FeedbackParticipantType.NONE,
-    maxSelectableChoices: Number.MIN_VALUE,
-    minSelectableChoices: Number.MIN_VALUE,
+    maxSelectableChoices: NO_VALUE,
+    minSelectableChoices: NO_VALUE,
     hasAssignedWeights: false,
     msqWeights: [],
     msqOtherWeight: 0,
@@ -41,8 +44,8 @@ describe('MsqQuestionAdditionalInfoComponent', () => {
     msqChoices: ['1', '2', '3'],
     otherEnabled: false,
     generateOptionsFor: FeedbackParticipantType.STUDENTS,
-    maxSelectableChoices: Number.MIN_VALUE,
-    minSelectableChoices: Number.MIN_VALUE,
+    maxSelectableChoices: NO_VALUE,
+    minSelectableChoices: NO_VALUE,
     hasAssignedWeights: false,
     msqWeights: [],
     msqOtherWeight: 0,
@@ -54,8 +57,8 @@ describe('MsqQuestionAdditionalInfoComponent', () => {
     msqChoices: ['1', '2', '3'],
     otherEnabled: true,
     generateOptionsFor: FeedbackParticipantType.NONE,
-    maxSelectableChoices: Number.MIN_VALUE,
-    minSelectableChoices: Number.MIN_VALUE,
+    maxSelectableChoices: NO_VALUE,
+    minSelectableChoices: NO_VALUE,
     hasAssignedWeights: false,
     msqWeights: [],
     msqOtherWeight: 0,

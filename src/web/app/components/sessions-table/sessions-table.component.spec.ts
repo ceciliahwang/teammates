@@ -1,24 +1,27 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
+import { SessionsTableColumn, SessionsTableRowModel } from './sessions-table-model';
+import { SessionsTableComponent } from './sessions-table.component';
+import { SessionsTableModule } from './sessions-table.module';
 import {
   FeedbackSession,
   FeedbackSessionPublishStatus,
   FeedbackSessionSubmissionStatus,
-  InstructorPrivilege,
+  InstructorPermissionSet,
   ResponseVisibleSetting,
   SessionVisibleSetting,
 } from '../../../types/api-output';
-import { SessionsTableColumn, SessionsTableRowModel, SortBy } from './sessions-table-model';
-import { SessionsTableComponent } from './sessions-table.component';
-import { SessionsTableModule } from './sessions-table.module';
+import { TeammatesRouterModule } from '../teammates-router/teammates-router.module';
 
 describe('SessionsTableComponent', () => {
   let component: SessionsTableComponent;
   let fixture: ComponentFixture<SessionsTableComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [SessionsTableModule],
+      imports: [SessionsTableModule, HttpClientTestingModule, RouterTestingModule, TeammatesRouterModule],
     })
     .compileComponents();
   }));
@@ -52,6 +55,8 @@ describe('SessionsTableComponent', () => {
     isClosingEmailEnabled: true,
     isPublishedEmailEnabled: true,
     createdAtTimestamp: 1554967204,
+    studentDeadlines: {},
+    instructorDeadlines: {},
   };
 
   const feedbackSession2: FeedbackSession = {
@@ -69,9 +74,11 @@ describe('SessionsTableComponent', () => {
     isClosingEmailEnabled: false,
     isPublishedEmailEnabled: false,
     createdAtTimestamp: 1554967204,
+    studentDeadlines: {},
+    instructorDeadlines: {},
   };
 
-  const instructorCanEverything: InstructorPrivilege = {
+  const instructorCanEverything: InstructorPermissionSet = {
     canModifyCourse: true,
     canModifySession: true,
     canModifyStudent: true,
@@ -82,7 +89,7 @@ describe('SessionsTableComponent', () => {
     canSubmitSessionInSections: true,
   };
 
-  const instructorCannotEverything: InstructorPrivilege = {
+  const instructorCannotEverything: InstructorPermissionSet = {
     canModifyCourse: false,
     canModifySession: false,
     canModifyStudent: false,
@@ -109,7 +116,6 @@ describe('SessionsTableComponent', () => {
 
   it('should snap like in home page with 2 sessions sorted by start date', () => {
     component.columnsToShow = [SessionsTableColumn.START_DATE, SessionsTableColumn.END_DATE];
-    component.sessionsTableRowModelsSortBy = SortBy.START_DATE;
     component.sessionsTableRowModels = [sessionTable1, sessionTable2];
     fixture.detectChanges();
     expect(fixture).toMatchSnapshot();
@@ -117,7 +123,6 @@ describe('SessionsTableComponent', () => {
 
   it('should snap like in sessions page with 2 sessions sorted by session name', () => {
     component.columnsToShow = [SessionsTableColumn.COURSE_ID];
-    component.sessionsTableRowModelsSortBy = SortBy.FEEDBACK_SESSION_NAME;
     component.sessionsTableRowModels = [sessionTable1, sessionTable2];
     fixture.detectChanges();
     expect(fixture).toMatchSnapshot();

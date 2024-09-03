@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FeedbackQuestionsService, TemplateQuestion } from '../../../../services/feedback-questions.service';
 import { FeedbackQuestion } from '../../../../types/api-output';
 import {
   QuestionEditFormModel,
 } from '../../../components/question-edit-form/question-edit-form-model';
+import { collapseAnim } from '../../../components/teammates-common/collapse-anim';
 
 interface TemplateQuestionModel {
   description: string;
@@ -19,8 +20,9 @@ interface TemplateQuestionModel {
 @Component({
   templateUrl: './template-question-modal.component.html',
   styleUrls: ['./template-question-modal.component.scss'],
+  animations: [collapseAnim],
 })
-export class TemplateQuestionModalComponent implements OnInit {
+export class TemplateQuestionModalComponent {
 
   templateQuestionModels: TemplateQuestionModel[] = [];
 
@@ -51,13 +53,16 @@ export class TemplateQuestionModalComponent implements OnInit {
             showGiverNameTo: template.question.showGiverNameTo,
             showRecipientNameTo: template.question.showRecipientNameTo,
 
+            isDeleting: false,
+            isDuplicating: false,
             isEditable: false,
             isSaving: false,
+            isCollapsed: false,
+            isVisibilityChanged: false,
+            isFeedbackPathChanged: false,
+            isQuestionDetailsChanged: false,
           },
         }));
-  }
-
-  ngOnInit(): void {
   }
 
   get hasAnyTemplateQuestionSelected(): boolean {

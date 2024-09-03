@@ -1,21 +1,23 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AdminSessionsPageComponent } from './admin-sessions-page.component';
+import { LoadingSpinnerModule } from '../../components/loading-spinner/loading-spinner.module';
+import { PanelChevronModule } from '../../components/panel-chevron/panel-chevron.module';
 
 describe('AdminSessionsPageComponent', () => {
   let component: AdminSessionsPageComponent;
   let fixture: ComponentFixture<AdminSessionsPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NgbModule,
         FormsModule,
         HttpClientTestingModule,
-        MatSnackBarModule,
+        LoadingSpinnerModule,
+        PanelChevronModule,
       ],
       declarations: [AdminSessionsPageComponent],
     })

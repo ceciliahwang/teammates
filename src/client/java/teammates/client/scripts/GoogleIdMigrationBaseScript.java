@@ -3,22 +3,14 @@ package teammates.client.scripts;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
-import com.google.appengine.tools.cloudstorage.RetryParams;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.cmd.Query;
 
-import teammates.client.util.ClientProperties;
+import teammates.client.util.BackDoor;
+import teammates.common.datatransfer.DataBundle;
 import teammates.common.datatransfer.attributes.InstructorAttributes;
-import teammates.common.util.Config;
-import teammates.common.util.GoogleCloudStorageHelper;
-import teammates.storage.api.InstructorsDb;
 import teammates.storage.entity.Account;
 import teammates.storage.entity.CourseStudent;
 import teammates.storage.entity.Instructor;
-import teammates.storage.entity.StudentProfile;
 
 /**
  * Base script to migrate a googleId to a new googleId.
@@ -40,15 +32,13 @@ import teammates.storage.entity.StudentProfile;
  */
 public abstract class GoogleIdMigrationBaseScript extends DataMigrationEntitiesBaseScript<Account> {
 
-    private static InstructorsDb instructorsDb = new InstructorsDb();
-
     @Override
     protected Query<Account> getFilterQuery() {
         return ofy().load().type(Account.class);
     }
 
     @Override
-    protected boolean isMigrationNeeded(Account account) throws Exception {
+    protected boolean isMigrationNeeded(Account account) {
         if (!isMigrationOfGoogleIdNeeded(account)) {
             return false;
         }
@@ -64,10 +54,6 @@ public abstract class GoogleIdMigrationBaseScript extends DataMigrationEntitiesB
     protected void migrateEntity(Account oldAccount) throws Exception {
         String oldGoogleId = oldAccount.getGoogleId();
         String newGoogleId = generateNewGoogleId(oldAccount);
-
-        Key<Account> oldAccountKey = Key.create(Account.class, oldAccount.getGoogleId());
-        Key<StudentProfile> oldStudentProfileKey = Key.create(oldAccountKey, StudentProfile.class, oldGoogleId);
-        StudentProfile oldStudentProfile = ofy().load().key(oldStudentProfileKey).now();
 
         List<CourseStudent> oldStudents = ofy().load().type(CourseStudent.class)
                 .filter("googleId =", oldGoogleId).list();
@@ -85,11 +71,16 @@ public abstract class GoogleIdMigrationBaseScript extends DataMigrationEntitiesB
         if (!oldInstructors.isEmpty()) {
             oldInstructors.forEach(instructor -> instructor.setGoogleId(newGoogleId));
             ofy().save().entities(oldInstructors).now();
-            instructorsDb.putDocuments(
-                    oldInstructors.stream().map(InstructorAttributes::valueOf).collect(Collectors.toList()));
+
+            DataBundle bundle = new DataBundle();
+            oldInstructors.stream()
+                    .map(InstructorAttributes::valueOf)
+                    .collect(Collectors.toList())
+                    .forEach(instructor -> bundle.instructors.put(instructor.getEmail(), instructor));
+            BackDoor.getInstance().putDocuments(bundle);
         }
 
-        // recreate account and student profile
+        // recreate account
 
         oldAccount.setGoogleId(newGoogleId);
         if (ofy().load().type(Account.class).id(newGoogleId).now() == null) {
@@ -98,28 +89,6 @@ public abstract class GoogleIdMigrationBaseScript extends DataMigrationEntitiesB
             log(String.format("Skip creation of new account as account (%s) already exists", newGoogleId));
         }
         ofy().delete().type(Account.class).id(oldGoogleId).now();
-
-        if (oldStudentProfile != null) {
-            String pictureKey = oldStudentProfile.getPictureKey();
-
-            if (!ClientProperties.isTargetUrlDevServer()) {
-                try {
-                    GcsFilename oldGcsFilename = new GcsFilename(Config.PRODUCTION_GCS_BUCKETNAME, oldGoogleId);
-                    GcsFilename newGcsFilename = new GcsFilename(Config.PRODUCTION_GCS_BUCKETNAME, newGoogleId);
-                    GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
-                    gcsService.copy(oldGcsFilename, newGcsFilename);
-                    gcsService.delete(oldGcsFilename);
-                    pictureKey = GoogleCloudStorageHelper.createBlobKey(newGoogleId);
-                } catch (Exception e) {
-                    log("Profile picture not exist or error during copy: " + e.getMessage());
-                }
-            }
-
-            oldStudentProfile.setGoogleId(newGoogleId);
-            oldStudentProfile.setPictureKey(pictureKey);
-            ofy().save().entity(oldStudentProfile).now();
-            ofy().delete().key(oldStudentProfileKey).now();
-        }
 
         log(String.format("Complete migration for account with googleId %s. The new googleId is %s",
                 oldGoogleId, newGoogleId));

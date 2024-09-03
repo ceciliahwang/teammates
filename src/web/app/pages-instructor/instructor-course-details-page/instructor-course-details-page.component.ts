@@ -1,35 +1,36 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute } from '@angular/router';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { saveAs } from 'file-saver';
-import { ClipboardService } from 'ngx-clipboard';
-import { CourseService } from '../../../services/course.service';
-import { HttpRequestService } from '../../../services/http-request.service';
-import { NavigationService } from '../../../services/navigation.service';
+import { generate } from 'rxjs';
+import { concatMap, finalize, takeWhile } from 'rxjs/operators';
+import { CourseService, CourseStatistics } from '../../../services/course.service';
+import { InstructorService } from '../../../services/instructor.service';
+import { ProgressBarService } from '../../../services/progress-bar.service';
+import { SimpleModalService } from '../../../services/simple-modal.service';
 import { StatusMessageService } from '../../../services/status-message.service';
 import { StudentService } from '../../../services/student.service';
+import { TableComparatorService } from '../../../services/table-comparator.service';
 import {
   Course,
   Instructor,
+  InstructorPermissionSet,
   InstructorPrivilege,
   Instructors,
   MessageOutput,
   Student,
   Students,
 } from '../../../types/api-output';
+import { Intent } from '../../../types/api-request';
+import { SortBy, SortOrder } from '../../../types/sort-properties';
+import { SimpleModalType } from '../../components/simple-modal/simple-modal-type';
+import { JoinStatePipe } from '../../components/student-list/join-state.pipe';
+import { StudentListRowModel } from '../../components/student-list/student-list.component';
 import { ErrorMessageOutput } from '../../error-message-output';
-import { Intent } from '../../Intent';
-import { StudentListSectionData, StudentListStudentData } from '../student-list/student-list-section-data';
-
-interface CourseStats {
-  sectionsTotal: number;
-  teamsTotal: number;
-  studentsTotal: number;
-}
 
 interface CourseDetailsBundle {
   course: Course;
-  stats: CourseStats;
+  stats: CourseStatistics;
 }
 
 interface StudentIndexedData {
@@ -50,30 +51,38 @@ export class InstructorCourseDetailsPageComponent implements OnInit {
     course: {
       courseId: '',
       courseName: '',
+      institute: '',
       timeZone: '',
       creationTimestamp: 0,
       deletionTimestamp: 0,
     },
     stats: {
-      sectionsTotal: 0,
-      teamsTotal: 0,
-      studentsTotal: 0,
+      numOfSections: 0,
+      numOfTeams: 0,
+      numOfStudents: 0,
     },
   };
   instructors: Instructor[] = [];
-  sections: StudentListSectionData[] = [];
-  courseStudentListAsCsv: string = '';
+  students: StudentListRowModel[] = [];
 
-  loading: boolean = false;
-  isAjaxSuccess: boolean = true;
+  isLoadingCsv: boolean = false;
+  isStudentsLoading: boolean = false;
+  sectionsLoaded: number = 0;
+  hasLoadingStudentsFailed: boolean = false;
+  isDeleting: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router,
-              private clipboardService: ClipboardService,
-              private httpRequestService: HttpRequestService,
+  studentSortBy: SortBy = SortBy.NONE;
+  studentSortOrder: SortOrder = SortOrder.ASC;
+
+  constructor(private route: ActivatedRoute,
               private statusMessageService: StatusMessageService,
+              private progressBarService: ProgressBarService,
               private courseService: CourseService,
-              private ngbModal: NgbModal, private navigationService: NavigationService,
-              private studentService: StudentService) { }
+              private ngbModal: NgbModal,
+              private simpleModalService: SimpleModalService,
+              private studentService: StudentService,
+              private instructorService: InstructorService,
+              private tableComparatorService: TableComparatorService) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((queryParams: any) => {
@@ -94,10 +103,13 @@ export class InstructorCourseDetailsPageComponent implements OnInit {
    * Loads the name of the course
    */
   private loadCourseName(courseid: string): void {
-    this.courseService.getCourseAsInstructor(courseid).subscribe((course: Course) => {
-      this.courseDetails.course = course;
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
+    this.courseService.getCourseAsInstructor(courseid).subscribe({
+      next: (course: Course) => {
+        this.courseDetails.course = course;
+      },
+      error: (resp: ErrorMessageOutput) => {
+        this.statusMessageService.showErrorToast(resp.error.message);
+      },
     });
   }
 
@@ -105,81 +117,83 @@ export class InstructorCourseDetailsPageComponent implements OnInit {
    * Loads the instructors in the course
    */
   private loadInstructors(courseid: string): void {
-    const paramMap: any = { courseid, intent: Intent.FULL_DETAIL };
-    this.httpRequestService.get('/instructors', paramMap).subscribe((instructors: Instructors) => {
-      this.instructors = instructors.instructors;
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
+    this.instructorService.loadInstructors({ courseId: courseid, intent: Intent.FULL_DETAIL })
+    .subscribe({
+      next: (instructors: Instructors) => {
+        this.instructors = instructors.instructors;
+      },
+      error: (resp: ErrorMessageOutput) => {
+        this.statusMessageService.showErrorToast(resp.error.message);
+      },
     });
   }
 
   /**
    * Loads the students in the course
    */
-  private loadStudents(courseid: string): void {
-    this.studentService.getStudentsFromCourse(courseid).subscribe((students: Students) => {
-      const sections: StudentIndexedData = students.students.reduce((acc: StudentIndexedData, x: Student) => {
-        const term: string = x.sectionName;
-        (acc[term] = acc[term] || []).push(x);
-        return acc;
-      }, {});
+  loadStudents(courseid: string): void {
+    this.hasLoadingStudentsFailed = false;
+    this.isStudentsLoading = true;
+    this.studentService.getStudentsFromCourse({ courseId: courseid })
+    .subscribe({
+      next: (students: Students) => {
+        this.students = []; // Reset the list of students
+        this.sectionsLoaded = 0; // Reset sections loaded
+        const sections: StudentIndexedData = students.students.reduce((acc: StudentIndexedData, x: Student) => {
+          const term: string = x.sectionName;
+          (acc[term] = acc[term] || []).push(x);
+          return acc;
+        }, {});
+        const sectionLength: number = Object.keys(sections).length;
 
-      const teams: Set<string> = new Set();
-      students.students.forEach((student: Student) => teams.add(student.teamName));
+        this.instructorService.loadInstructorPrivilege({
+          courseId: courseid,
+        }).subscribe({
+          next: (instructorPrivilege: InstructorPrivilege) => {
+            const courseLevelPrivilege: InstructorPermissionSet = instructorPrivilege.privileges.courseLevel;
 
-      this.courseDetails.stats = {
-        sectionsTotal: Object.keys(sections).length,
-        teamsTotal: teams.size,
-        studentsTotal: students.students.length,
-      };
+            Object.keys(sections).forEach((sectionName: string) => {
+              const sectionLevelPrivilege: InstructorPermissionSet =
+                  instructorPrivilege.privileges.sectionLevel[sectionName] || courseLevelPrivilege;
 
-      Object.keys(sections).forEach((key: string) => {
-        const studentsInSection: Student[] = sections[key];
+              const studentsInSection: Student[] = sections[sectionName];
+              const studentModels: StudentListRowModel[] = studentsInSection.map((studentInSection: Student) => {
+                return {
+                  student: studentInSection,
+                  isAllowedToViewStudentInSection: sectionLevelPrivilege.canViewStudentInSections,
+                  isAllowedToModifyStudent: sectionLevelPrivilege.canModifyStudent,
+                };
+              });
 
-        const data: StudentListStudentData[] = [];
-        studentsInSection.forEach((student: Student) => {
-          const studentData: StudentListStudentData = {
-            name: student.name,
-            status: student.joinState,
-            email: student.email,
-            team: student.teamName,
-          };
-          data.push(studentData);
+              this.students.push(...studentModels);
+              this.students.sort(this.sortStudentBy(SortBy.NONE, SortOrder.ASC));
+
+              this.sectionsLoaded += 1;
+              if (this.sectionsLoaded === sectionLength) {
+                this.isStudentsLoading = false;
+              }
+            });
+          },
+          error: (resp: ErrorMessageOutput) => {
+            this.isStudentsLoading = false;
+            this.hasLoadingStudentsFailed = true;
+            this.statusMessageService.showErrorToast(resp.error.message);
+          },
         });
 
-        this.loadPrivilege(courseid, key, data);
-      });
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
+        if (!sectionLength) {
+          this.isStudentsLoading = false;
+        }
+
+        this.courseDetails.stats = this.courseService.calculateCourseStatistics(students.students);
+
+      },
+      error: (resp: ErrorMessageOutput) => {
+        this.isStudentsLoading = false;
+        this.hasLoadingStudentsFailed = true;
+        this.statusMessageService.showErrorToast(resp.error.message);
+      },
     });
-  }
-
-  /**
-   * Loads privilege of an instructor for a specified course and section.
-   */
-  private loadPrivilege(courseid: string, sectionName: string, students: StudentListStudentData[]): void {
-    this.httpRequestService.get('/instructor/privilege', {
-      courseid,
-      sectionname: sectionName,
-    }).subscribe((instructorPrivilege: InstructorPrivilege) => {
-      const sectionData: StudentListSectionData = {
-        sectionName,
-        students,
-        isAllowedToViewStudentInSection : instructorPrivilege.canViewStudentInSections,
-        isAllowedToModifyStudent : instructorPrivilege.canModifyStudent,
-      };
-
-      this.sections.push(sectionData);
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
-    });
-  }
-
-  /**
-   * Automatically copy the text content provided.
-   */
-  copyContent(text: string): void {
-    this.clipboardService.copyFromContent(text);
   }
 
   /**
@@ -189,110 +203,134 @@ export class InstructorCourseDetailsPageComponent implements OnInit {
     this.ngbModal.open(content);
   }
 
+  openRemindStudentModal(): void {
+    const modalContent: string = `Usually, there is no need to use this feature because
+      TEAMMATES sends an automatic invite to students at the opening time of each session.
+      Send a join request to all yet-to-join students in ${this.courseDetails.course.courseId} anyway?`;
+    this.simpleModalService.openConfirmationModal(
+        'Sending join requests?', SimpleModalType.INFO, modalContent).result.then(() => {
+          this.remindAllStudentsFromCourse(this.courseDetails.course.courseId);
+        }, () => {});
+  }
+
+  openDeleteAllStudentsConfirmationModal(): void {
+    const modalContent = `Are you sure you want to remove all students from the course 
+        ${this.courseDetails.course.courseId}? This will also delete their feedback responses and comments.`;
+    this.simpleModalService.openConfirmationModal(
+        'Delete all students?', SimpleModalType.DANGER, modalContent).result.then(() => {
+          this.deleteAllStudentsFromCourse(this.courseDetails.course.courseId);
+        }, () => {});
+  }
+
   /**
    * Delete all the students in a course.
    */
   deleteAllStudentsFromCourse(courseId: string): void {
-    const paramsMap: { [key: string]: string } = {
-      courseid: courseId,
-    };
-    this.httpRequestService.delete('/students', paramsMap)
-      .subscribe((resp: MessageOutput) => {
-        this.loadCourseDetails(courseId);
-        this.statusMessageService.showSuccessMessage(resp.message);
-      }, (resp: ErrorMessageOutput) => {
-        this.statusMessageService.showErrorMessage(resp.error.message);
-      });
+    this.isDeleting = true;
+
+    const totalNumberOfStudents = this.courseDetails.stats.numOfStudents;
+    const numOfStudentsToDeletePerRequest = 100;
+    const totalNumOfRequests = Math.ceil(totalNumberOfStudents / numOfStudentsToDeletePerRequest);
+    let numOfRequestsCompleted = 0;
+
+    let deleteAborted = false;
+    let hasFailedToDelete = false;
+    const modalContent = `Deleting all students from the course ${this.courseDetails.course.courseId}, 
+        this may take a while...`;
+    const loadingModal: NgbModalRef = this.simpleModalService.openLoadingModal(
+        'Delete Progress', SimpleModalType.LOAD, modalContent);
+
+    loadingModal.result.then(() => {
+      // Modal is closed
+      this.isDeleting = false;
+
+      if (numOfRequestsCompleted === totalNumOfRequests) {
+        this.statusMessageService.showSuccessToast('All the students have been removed from the course');
+      }
+
+      if (!hasFailedToDelete && numOfRequestsCompleted < totalNumOfRequests) {
+        deleteAborted = true;
+        this.statusMessageService.showWarningToast('Delete aborted. '
+            + 'Note that some students may not have been deleted.');
+      }
+    }, () => {});
+
+    generate({
+      initialState: 0,
+      condition: (x) => x < totalNumOfRequests,
+      iterate: (x) => x + 1,
+    }).pipe(
+        concatMap(() => this.studentService.batchDeleteStudentsFromCourse(
+            { courseId, limit: numOfStudentsToDeletePerRequest })),
+        takeWhile(() => !deleteAborted),
+        finalize(() => {
+          loadingModal.close();
+        }),
+    ).subscribe({
+      next: () => {
+        numOfRequestsCompleted += 1;
+        const percentageProgress = Math.round(100 * numOfRequestsCompleted / totalNumOfRequests);
+        this.progressBarService.updateProgress(percentageProgress);
+      },
+      complete: () => {
+        if (deleteAborted) {
+          this.loadStudents(courseId);
+          return;
+        }
+
+        // Reset list of students and course stats
+        this.students = [];
+        this.courseDetails.stats = {
+          numOfStudents: 0,
+          numOfSections: 0,
+          numOfTeams: 0,
+        };
+      },
+      error: (resp: ErrorMessageOutput) => {
+        hasFailedToDelete = true;
+        if (!deleteAborted) {
+          this.statusMessageService.showErrorToast(resp.error.message);
+        }
+      },
+    },
+    );
   }
 
   /**
    * Download all the students from a course.
    */
   downloadAllStudentsFromCourse(courseId: string): void {
+    this.isLoadingCsv = true;
     const filename: string = `${courseId.concat('_studentList')}.csv`;
     let blob: any;
 
-    // Calling REST API only the first time to load the downloadable data
-    if (this.loading) {
-      blob = new Blob([this.courseStudentListAsCsv], { type: 'text/csv' });
-      saveAs(blob, filename);
-    } else {
-
-      const paramsMap: { [key: string]: string } = {
-        courseid: courseId,
-      };
-      this.httpRequestService.get('/students/csv', paramsMap, 'text')
-        .subscribe((resp: string) => {
+    this.studentService.loadStudentListAsCsv({ courseId })
+      .pipe(finalize(() => {
+        this.isLoadingCsv = false;
+      }))
+      .subscribe({
+        next: (resp: string) => {
           blob = new Blob([resp], { type: 'text/csv' });
           saveAs(blob, filename);
-          this.courseStudentListAsCsv = resp;
-          this.loading = false;
-        }, (resp: ErrorMessageOutput) => {
-          this.statusMessageService.showErrorMessage(resp.error.message);
-        });
-    }
-  }
-
-  /**
-   * Load the student list in csv table format
-   */
-  loadStudentsListCsv(courseId: string): void {
-    this.loading = true;
-
-    // Calls the REST API once only when student list is not loaded
-    if (this.courseStudentListAsCsv !== '') {
-      this.loading = false;
-      return;
-    }
-
-    const paramsMap: { [key: string]: string } = {
-      courseid: courseId,
-    };
-    this.httpRequestService.get('/students/csv', paramsMap, 'text')
-      .subscribe((resp: string) => {
-        this.courseStudentListAsCsv = resp;
-      }, (resp: ErrorMessageOutput) => {
-        this.statusMessageService.showErrorMessage(resp.error.message);
-        this.isAjaxSuccess = false;
+        },
+        error: (resp: ErrorMessageOutput) => {
+          this.statusMessageService.showErrorToast(resp.error.message);
+        },
       });
-    this.loading = false;
   }
 
   /**
    * Remind all yet to join students in a course.
    */
   remindAllStudentsFromCourse(courseId: string): void {
-    this.courseService.remindUnregisteredStudentsForJoin(courseId).subscribe((resp: MessageOutput) => {
-      this.navigationService.navigateWithSuccessMessagePreservingParams(this.router,
-        '/web/instructor/courses/details', resp.message);
-    }, (resp: ErrorMessageOutput) => {
-      this.statusMessageService.showErrorMessage(resp.error.message);
+    this.courseService.remindUnregisteredStudentsForJoin(courseId).subscribe({
+      next: (resp: MessageOutput) => {
+        this.statusMessageService.showSuccessToast(resp.message);
+      },
+      error: (resp: ErrorMessageOutput) => {
+        this.statusMessageService.showErrorToast(resp.error.message);
+      },
     });
-  }
-
-  /**
-   * Converts a csv string to a html table string for displaying.
-   */
-  convertToHtmlTable(str: string): string {
-    let result: string = '<table class=\"table table-bordered table-striped table-sm\">';
-    let rowData: string[];
-    const lines: string[] = str.split(/\r?\n/);
-
-    lines.forEach(
-        (line: string) => {
-          rowData = this.getTableData(line);
-
-          if (rowData.filter((s: string) => s !== '').length === 0) {
-            return;
-          }
-          result = result.concat('<tr>');
-          for (const td of rowData) {
-            result = result.concat(`<td>${td}</td>`);
-          }
-          result = result.concat('</tr>');
-        },
-    );
-    return result.concat('</table>');
   }
 
   /**
@@ -328,5 +366,84 @@ export class InstructorCourseDetailsPageComponent implements OnInit {
     }
     output.push(buffer.trim());
     return output;
+  }
+
+  /**
+   * Removes the student from course and update the course statistics
+   */
+  removeStudentFromCourse(studentEmail: string): void {
+    this.courseService.removeStudentFromCourse(this.courseDetails.course.courseId, studentEmail).subscribe({
+      next: () => {
+        this.students =
+            this.students.filter((studentModel: StudentListRowModel) => studentModel.student.email !== studentEmail);
+
+        const students: Student[] = this.students.map((studentModel: StudentListRowModel) => studentModel.student);
+        this.courseDetails.stats = this.courseService.calculateCourseStatistics(students);
+
+        this.statusMessageService
+            .showSuccessToast(`Student is successfully deleted from course "${this.courseDetails.course.courseId}"`);
+      },
+      error: (resp: ErrorMessageOutput) => {
+        this.statusMessageService.showErrorToast(resp.error.message);
+      },
+    });
+  }
+
+  /**
+   * Sorts the student list.
+   */
+  sortStudentList(by: SortBy): void {
+    this.studentSortBy = by;
+    this.studentSortOrder =
+      this.studentSortOrder === SortOrder.DESC ? SortOrder.ASC : SortOrder.DESC;
+    this.students.sort(this.sortStudentBy(by, this.studentSortOrder));
+  }
+
+  /**
+   * Returns a function to determine the order of sort for students.
+   */
+  sortStudentBy(by: SortBy, order: SortOrder):
+    ((a: StudentListRowModel, b: StudentListRowModel) => number) {
+    const joinStatePipe: JoinStatePipe = new JoinStatePipe();
+    if (by === SortBy.NONE) {
+      // Default order: section name > team name > student name
+      return ((a: StudentListRowModel, b: StudentListRowModel): number => {
+        return this.tableComparatorService
+            .compare(SortBy.SECTION_NAME, order, a.student.sectionName, b.student.sectionName)
+          || this.tableComparatorService.compare(SortBy.TEAM_NAME, order, a.student.teamName, b.student.teamName)
+          || this.tableComparatorService.compare(SortBy.RESPONDENT_NAME, order, a.student.name, b.student.name);
+      });
+    }
+    return (a: StudentListRowModel, b: StudentListRowModel): number => {
+      let strA: string;
+      let strB: string;
+      switch (by) {
+        case SortBy.SECTION_NAME:
+          strA = a.student.sectionName;
+          strB = b.student.sectionName;
+          break;
+        case SortBy.RESPONDENT_NAME:
+          strA = a.student.name;
+          strB = b.student.name;
+          break;
+        case SortBy.TEAM_NAME:
+          strA = a.student.teamName;
+          strB = b.student.teamName;
+          break;
+        case SortBy.RESPONDENT_EMAIL:
+          strA = a.student.email;
+          strB = b.student.email;
+          break;
+        case SortBy.JOIN_STATUS:
+          strA = joinStatePipe.transform(a.student.joinState);
+          strB = joinStatePipe.transform(b.student.joinState);
+          break;
+        default:
+          strA = '';
+          strB = '';
+      }
+
+      return this.tableComparatorService.compare(by, order, strA, strB);
+    };
   }
 }

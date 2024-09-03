@@ -1,39 +1,57 @@
 <div class="modal-header text-white"
-     [ngClass]="{'bg-danger': failToSaveQuestions.length !== 0, 'bg-success': failToSaveQuestions.length === 0}">
+     [ngClass]="{'bg-danger': hasFailToSaveQuestions, 'bg-success': !hasFailToSaveQuestions}">
   <h5 class="modal-title">
-        <span *ngIf="failToSaveQuestions.length === 0">
-          <i class="fas fa-check-circle"></i> All responses submitted successfully!
-        </span>
-    <span *ngIf="failToSaveQuestions.length !== 0">
-          <i class="fas fa-exclamation-circle"></i> Some questions were not saved!
-        </span>
+    <span *ngIf="!hasFailToSaveQuestions && questions.length === 1">
+      <i class="fas fa-check-circle"></i> Response to question {{ questions[0].questionNumber }} submitted successfully!
+    </span>
+    <span *ngIf="!hasFailToSaveQuestions && questions.length > 1">
+      <i class="fas fa-check-circle"></i> Responses to all questions submitted successfully!
+    </span>
+    <span *ngIf="hasFailToSaveQuestions">
+      <i class="fas fa-exclamation-circle"></i> Some response submissions failed!
+    </span>
   </h5>
-  <button type="button" class="close" (click)="activeModal.dismiss()">
-    <i class="fas fa-times"></i>
-  </button>
+  <button type="button" class="btn-close" (click)="activeModal.dismiss()"></button>
 </div>
 <div class="modal-body">
-  <p *ngIf="notYetAnsweredQuestions.length !== 0">
-    <i class="fas fa-exclamation"></i> Note that some questions are yet to be answered.
-    They are: {{ notYetAnsweredQuestions }}.
+  <p id="not-answered-questions" *ngIf="notYetAnsweredQuestions.length !== 0">
+    <i class="fas fa-exclamation"></i> Note that some questions are yet to be fully answered.
+    They are: {{ notYetAnsweredQuestions.join(', ') }}.
   </p>
-  <p *ngIf="failToSaveQuestions.length !== 0" class="text-danger">
-    <i class="fas fa-exclamation"></i> Some answers to questions are not saved due to errors.
-    Those questions are: {{ failToSaveQuestions }}. Refreshing the page and submit again might solve the problem.
+  <div *ngIf="hasFailToSaveQuestions" class="text-danger" style="margin-bottom: 10px;">
+    <i class="fas fa-exclamation"></i> ERROR! The response submissions to the following questions failed.
+    <ul>
+      <li *ngFor="let question of failToSaveQuestions | keyvalue">
+        Question {{ question.key }}:  {{ question.value }}
+      </li>
+    </ul>
+  </div>
+  <p *ngIf="hasFailToSaveQuestions">
+    Please try to submit your responses again.
   </p>
-  <p *ngIf="failToSaveQuestions.length === 0">
-    All your responses have been successfully recorded! You may now leave this page.
+  <p *ngIf="!hasFailToSaveQuestions && questions.length === 1">
+    Your response for <b> question {{ questions[0].questionNumber }} </b> has been successfully recorded!
+  </p>
+  <p *ngIf="!hasFailToSaveQuestions && questions.length > 1">
+    All your responses have been successfully recorded!
   </p>
   <p>
     Note that you can change your responses and submit them again any time before the session closes.
   </p>
-  <div class="alert alert-danger" role="alert" *ngIf="hasSubmissionConfirmationError">
-    Your responses might be saved but we cannot confirm your submission. Please try again.
-  </div>
+  <p *ngIf="!hasFailToSaveQuestions">
+    <b>You are encouraged to download the proof of submission, which will also contain your latest responses.</b>
+  </p>
+  <span class="text-danger" *ngIf="!hasFailToSaveQuestions && questions.length === 1">
+      <i class="fas fa-exclamation"></i>
+      Submitting question {{ questions[0].questionNumber }} does not submit other questions (if any).
+  </span>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn"
+  <button type="button" class="btn modal-btn-ok btn-info"
           [ngClass]="
-                {'btn-danger': failToSaveQuestions.length !== 0, 'btn-success': failToSaveQuestions.length === 0}"
-          (click)="activeModal.close()">OK</button>
+                {'btn-danger': hasFailToSaveQuestions, 'btn-success': !hasFailToSaveQuestions}"
+          (click)="activeModal.close()">Don't download proof of submission</button>
+  <button type="button" class="btn btn-success"
+          (click)="downloadProofOfSubmission()"
+          [disabled]="isAllQuestionSavingFailed">Download proof of submission</button>
 </div>

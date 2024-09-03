@@ -1,13 +1,15 @@
 .card-plain {
-  background-color: #EAEFF5;
+  background-color: #eaeff5;
   background-image: none;
   border: 0;
   box-shadow: 0 0 0 0;
 }
 
 .close-header {
-  padding-top: .75rem;
-  padding-right: 1.25rem;
+  display: flex;
+  justify-content: right;
+  padding-top: 0.3rem;
+  padding-right: 0.3rem;
   margin-bottom: 0;
 }
 
@@ -16,7 +18,7 @@
 }
 
 .border-left-gray {
-  border-left: 1px solid #DDD;
+  border-left: 1px solid #ddd;
 }
 
 .margin-top-20px {
@@ -24,5 +26,44 @@
 }
 
 .session-form-buttons > button {
-  margin-left: 5px;
+  margin-left: var(--btn-margin);
+}
+
+.align-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.padding-left-7px {
+  padding-left: 7px;
+}
+
+.disabled-link {
+  cursor: not-allowed;
+  color: gray;
+}
+
+.create-new-dropdown-div {
+  display: flex;
+}
+
+.session-heading-text {
+  display: flex;
+
+  @media (width <= 768px) {
+    width: 120px;
+  }
+}
+
+.session-heading-text h5 {
+  margin: auto auto auto 0;
+
+  @media (width <= 576px) {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.invalid-field {
+  padding-top: 5px;
+  color: #b50000;
 }

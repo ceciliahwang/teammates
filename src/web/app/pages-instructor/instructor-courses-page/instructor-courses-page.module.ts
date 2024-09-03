@@ -1,41 +1,54 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AddCourseFormComponent } from './add-course-form/add-course-form.component';
-import {
-  CoursePermanentDeletionConfirmModalComponent,
-} from './course-permanent-deletion-confirm-modal/course-permanent-deletion-confirm-modal.component';
-import {
-  CourseSoftDeletionConfirmModalComponent,
-} from './course-soft-deletion-confirm-modal/course-soft-deletion-confirm-modal.component';
+import { RouterModule, Routes } from '@angular/router';
+import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { InstructorCoursesPageComponent } from './instructor-courses-page.component';
+import { AjaxLoadingModule } from '../../components/ajax-loading/ajax-loading.module';
+import { CopyCourseModalModule } from '../../components/copy-course-modal/copy-course-modal.module';
+import { CourseEditFormModule } from '../../components/course-edit-form/course-edit-form.module';
+import { LoadingRetryModule } from '../../components/loading-retry/loading-retry.module';
+import { LoadingSpinnerModule } from '../../components/loading-spinner/loading-spinner.module';
+import {
+  ModifiedTimestampModalModule,
+} from '../../components/modified-timestamps-modal/modified-timestamps-module.module';
+import { PanelChevronModule } from '../../components/panel-chevron/panel-chevron.module';
+import { ProgressBarModule } from '../../components/progress-bar/progress-bar.module';
+import { TeammatesRouterModule } from '../../components/teammates-router/teammates-router.module';
+
+const routes: Routes = [
+  {
+    path: '',
+    component: InstructorCoursesPageComponent,
+  },
+];
 
 /**
  * Module for instructor courses page.
  */
 @NgModule({
   declarations: [
-    AddCourseFormComponent,
     InstructorCoursesPageComponent,
-    CourseSoftDeletionConfirmModalComponent,
-    CoursePermanentDeletionConfirmModalComponent,
   ],
   exports: [
     InstructorCoursesPageComponent,
-    AddCourseFormComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule,
-    NgbModule,
-  ],
-  entryComponents: [
-    CourseSoftDeletionConfirmModalComponent,
-    CoursePermanentDeletionConfirmModalComponent,
+    RouterModule.forChild(routes),
+    NgbDropdownModule,
+    NgbTooltipModule,
+    LoadingSpinnerModule,
+    AjaxLoadingModule,
+    LoadingRetryModule,
+    PanelChevronModule,
+    TeammatesRouterModule,
+    CopyCourseModalModule,
+    ProgressBarModule,
+    CourseEditFormModule,
+    ModifiedTimestampModalModule,
   ],
 })
 export class InstructorCoursesPageModule { }
